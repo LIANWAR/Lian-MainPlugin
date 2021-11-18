@@ -1,22 +1,17 @@
 package com.underconnor.lian.kommands
 
-import com.underconnor.lian.plugin.LianPlugin
+import com.underconnor.lian.plugin.KommandInterface
 import io.github.monun.kommand.kommand
 import net.kyori.adventure.text.Component
 import org.bukkit.ChatColor
 import org.bukkit.command.CommandSender
-import org.bukkit.plugin.Plugin
 
-object debugKommand {
-    private fun getInstance(): Plugin {
-        return LianPlugin.instance
-    }
-
+object debugKommand: KommandInterface {
     private fun getPrefix(path:String, sender: CommandSender) {
-        val prefix = MainKommand.getInstance().config.getString(path)
+        val prefix = getInstance().config.getString(path)
         sender.sendMessage(Component.text("${ChatColor.GOLD}Debug |${ChatColor.WHITE} '${path}' 의 값은 '${prefix?.replace("&", "§")}' 입니다.")) } // 메시지
 
-    fun debugKommand() {
+    override fun kommand() {
         getInstance().kommand {
             register("debug") {
                 permission("lian.debug") // 임시 퍼미션

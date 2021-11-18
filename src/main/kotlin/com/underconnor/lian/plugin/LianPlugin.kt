@@ -25,6 +25,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.inventory.Recipe
 import org.bukkit.plugin.java.JavaPlugin
+import org.reflections.Reflections
 import java.io.File
 
 /***
@@ -44,8 +45,14 @@ class LianPlugin : JavaPlugin() {
         instance = this
         logger.info("${this.config.getString("admin_prefix")}")
         server.pluginManager.registerEvents(SampleEvent(), this)
-        MainKommand.MainKommand()
-        //debugKommand.debugKommand()
+
+        val reflections = Reflections("com.underconnor.lian.kommands")
+
+        reflections.getSubTypesOf(
+            KommandInterface::class.java
+        )?.forEach {
+            it.newInstance().kommand()
+        }
 
         // Recipe Remove 처리
         // 나중에 리스트로 한번에 처리할 예정

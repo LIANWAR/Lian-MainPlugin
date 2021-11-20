@@ -3,6 +3,7 @@ package com.underconnor.lian.Recipes
 import com.underconnor.lian.plugin.LianPlugin
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -43,8 +44,7 @@ object RecipeObject {
         val meta = item.itemMeta
         
         // 조합법 팁
-        // 이탈릭체 없애는법 아시는 분은 수정좀요
-        meta.displayName(text("Tip!", NamedTextColor.RED))
+        meta.displayName(text("Tip!", NamedTextColor.RED).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE))
         meta.lore(listOf(
             text("${ChatColor.RESET}황금사과 조합법 안내",NamedTextColor.GOLD),
             text("황금사과는 금 4개로 조합이 가능합니다."),
@@ -65,34 +65,34 @@ object RecipeObject {
 
     // 화살 간단 조합법 코드 (누가 최적화좀)
     fun potion_arrow(): ArrayList<Recipe>{
-        val potion_arrow_list:ArrayList<Recipe> = ArrayList()
+        val potionArrowList: ArrayList<Recipe> = arrayListOf()
         for (effect in PotionType.values()){
-            for (extended:Boolean in listOf(true,false)){
-                for (upgraded:Boolean in listOf(true,false)){
+            for (extended: Boolean in listOf(true,false)){
+                for (upgraded: Boolean in listOf(true,false)){
                     val key = NamespacedKey(getInstance(), "tipped_arrow_${effect}_${extended}_${upgraded}")
                     val item = ItemStack(Material.TIPPED_ARROW)
                     val meta = item.itemMeta as PotionMeta
 
                     if (!effect.isExtendable){ meta.basePotionData = PotionData(effect) }
-                    else if (!effect.isUpgradeable){ meta.basePotionData = PotionData(effect,extended,false) }
+                    else if (!effect.isUpgradeable){ meta.basePotionData = PotionData(effect, extended,false) }
                     else {
-                        if (upgraded) {meta.basePotionData = PotionData(effect,false,upgraded) }
-                        else{meta.basePotionData = PotionData(effect,extended,false)}
+                        if (upgraded) { meta.basePotionData = PotionData(effect,false, upgraded) }
+                        else { meta.basePotionData = PotionData(effect, extended,false) }
                     }
 
                     item.itemMeta = meta
 
-                    val splash_potion = ItemStack(Material.SPLASH_POTION)
-                    splash_potion.itemMeta = meta
+                    val splashPotion = ItemStack(Material.SPLASH_POTION)
+                    splashPotion.itemMeta = meta
 
                     val recipe = ShapedRecipe(key, item)
                     recipe.shape("AAA", "APA", "AAA")
                     recipe.setIngredient('A', Material.ARROW)
-                    recipe.setIngredient('P', splash_potion)
-                    potion_arrow_list.add(recipe)
+                    recipe.setIngredient('P', splashPotion)
+                    potionArrowList.add(recipe)
                 }
             }
         }
-        return potion_arrow_list
+        return potionArrowList
     }
 }

@@ -14,6 +14,7 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:1.17.1-R0.1-SNAPSHOT")
     compileOnly("io.github.monun:tap-api:4.1.10")
     compileOnly("io.github.monun:kommand-api:2.6.6")
+    implementation("org.reflections:reflections:0.10.1")
 }
 
 tasks {

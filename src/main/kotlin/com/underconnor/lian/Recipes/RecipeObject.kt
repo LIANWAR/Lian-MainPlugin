@@ -14,6 +14,7 @@ import org.bukkit.inventory.meta.PotionMeta
 import org.bukkit.plugin.Plugin
 import org.bukkit.potion.PotionData
 import org.bukkit.potion.PotionType
+import java.lang.reflect.Method
 
 /***
  * @author underconnor
@@ -42,7 +43,7 @@ object RecipeObject {
         val key = NamespacedKey(getInstance(), "original_golden_apple")
         val item = ItemStack(Material.PAPER)
         val meta = item.itemMeta
-        
+
         // 조합법 팁
         meta.displayName(text("Tip!", NamedTextColor.RED).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE))
         meta.lore(listOf(
@@ -94,5 +95,17 @@ object RecipeObject {
             }
         }
         return potionArrowList
+    }
+
+    fun getRecipes(): Array<Array<Any>> {
+        var ret: Array<Array<Any>> = arrayOf()
+
+        this.javaClass.declaredMethods.forEach {
+            if(it.genericReturnType.typeName.contains("Recipe", ignoreCase = true)) ret = ret.plusElement(arrayOf(it,
+                it.genericReturnType.typeName.contains("Array", ignoreCase = true)
+            ))
+        }
+
+        return ret
     }
 }

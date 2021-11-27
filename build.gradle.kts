@@ -2,11 +2,13 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.5.31"
+    id("com.github.johnrengelman.shadow")
 }
 
 repositories {
     mavenCentral()
     maven("https://papermc.io/repo/repository/maven-public/")
+    jcenter()
 }
 
 dependencies {
@@ -29,10 +31,15 @@ tasks {
         }
         filteringCharset = "UTF-8"
     }
-    register<Jar>("paperJar") {
+    register<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("paperJar") {
         archiveBaseName.set(archive)
         archiveClassifier.set("")
         archiveVersion.set("")
+
+        mergeServiceFiles()
+        manifest {
+            attributes(mapOf("Main-Class" to "com.underconnor.lian.plugin.LianPlugin"))
+        }
 
         from(sourceSets["main"].output)
 

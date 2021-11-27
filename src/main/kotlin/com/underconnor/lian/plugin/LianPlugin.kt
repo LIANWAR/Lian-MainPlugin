@@ -27,6 +27,7 @@ import org.bukkit.inventory.Recipe
 import org.bukkit.plugin.java.JavaPlugin
 import org.reflections.Reflections
 import java.io.File
+import java.lang.reflect.Method
 
 /***
  * @author underconnor
@@ -66,14 +67,19 @@ class LianPlugin : JavaPlugin() {
         }
         server.pluginManager.registerEvents(RecipeEvent(), this)
 
-        val golden_apple = RecipeObject.golden_apple()
-        val original_golden_apple = RecipeObject.original_golden_apple()
-        val tipped_arrow:ArrayList<Recipe> = RecipeObject.potion_arrow()
+        for(i in RecipeObject.getRecipes()){
+            if(i[1] as Boolean){
+                val j: Any = ((i[0] as Method).invoke(RecipeObject))
 
-        server.addRecipe(golden_apple)
-        server.addRecipe(original_golden_apple)
-        for (potion_arrow in tipped_arrow) {
-            server.addRecipe(potion_arrow)
+                if(j !is Array<*>) throw RuntimeException("레시피 등록 중 형변환에 실패했습니다.")
+
+                for(g in j){
+                    server.addRecipe(g as Recipe?)
+                }
+            }
+            else{
+                server.addRecipe(i[0] as Recipe?)
+            }
         }
     }
 }

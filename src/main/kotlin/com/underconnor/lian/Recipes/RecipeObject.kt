@@ -101,11 +101,14 @@ object RecipeObject {
         var ret: Array<Array<Any>> = arrayOf()
 
         this.javaClass.declaredMethods.forEach {
-            if(it.genericReturnType.typeName.contains("Recipe", ignoreCase = true)) ret = ret.plusElement(arrayOf(it,
-                it.genericReturnType.typeName.contains("Array", ignoreCase = true)
-            ))
+            if(it.genericReturnType.typeName.contains("Recipe", ignoreCase = true)) ret = ret.plusElement(
+                arrayOf(
+                    it,
+                    it.genericReturnType.typeName.contains("Array", ignoreCase = true)
+                )
+            )
         }
-
+        getInstance().logger.info(ret.toString())
         return ret
     }
 }

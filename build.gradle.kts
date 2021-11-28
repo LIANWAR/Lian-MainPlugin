@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.5.31"
-    id("com.github.johnrengelman.shadow")
+    id("com.github.johnrengelman.shadow") version "2.0.2"
 }
 
 repositories {
@@ -19,6 +19,9 @@ dependencies {
     implementation("org.reflections:reflections:0.10.1")
 }
 
+val shade = configurations.create("shade")
+shade.extendsFrom(configurations.implementation.get())
+
 tasks {
     val archive = project.properties["pluginName"].toString()
 
@@ -31,15 +34,19 @@ tasks {
         }
         filteringCharset = "UTF-8"
     }
-    register<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("paperJar") {
+    register<Jar>("paperJar") {
         archiveBaseName.set(archive)
         archiveClassifier.set("")
         archiveVersion.set("")
 
-        mergeServiceFiles()
-        manifest {
-            attributes(mapOf("Main-Class" to "com.underconnor.lian.plugin.LianPlugin"))
-        }
+        from(
+            shade.map {
+                if (it.isDirectory)
+                    it
+                else
+                    zipTree(it)
+            }
+        )
 
         from(sourceSets["main"].output)
 

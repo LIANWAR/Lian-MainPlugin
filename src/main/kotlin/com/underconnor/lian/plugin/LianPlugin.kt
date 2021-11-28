@@ -30,7 +30,7 @@ import java.io.File
 import java.lang.reflect.Method
 
 /***
- * @author underconnor
+ * @author underconnor, AlphaGot
  */
 
 class LianPlugin : JavaPlugin() {
@@ -51,8 +51,11 @@ class LianPlugin : JavaPlugin() {
 
         reflections.getSubTypesOf(
             KommandInterface::class.java
-        )?.forEach {
-            it.newInstance().kommand()
+        )?.forEach { clazz ->
+            logger.info(clazz.name)
+
+            clazz.getConstructor().trySetAccessible()
+            clazz.getDeclaredConstructor().newInstance().kommand()
         }
 
         // Recipe Remove 처리
@@ -69,16 +72,19 @@ class LianPlugin : JavaPlugin() {
 
         for(i in RecipeObject.getRecipes()){
             if(i[1] as Boolean){
-                val j: Any = ((i[0] as Method).invoke(RecipeObject))
+                val j: Any = (i[0] as Method).invoke(RecipeObject)
 
-                if(j !is Array<*>) throw RuntimeException("레시피 등록 중 형변환에 실패했습니다.")
+                if(j !is ArrayList<*>) { // 혹1시 모를 다른 타입 메서드 넘어오는 거 처리
+                    logger.info(j.javaClass.name)
+                    throw RuntimeException("레시피 등록 중 형변환에 실패했습니다.")
+                }
 
                 for(g in j){
                     server.addRecipe(g as Recipe?)
                 }
             }
             else{
-                server.addRecipe(i[0] as Recipe?)
+                server.addRecipe(((i[0] as Method).invoke(RecipeObject) as Recipe?))
             }
         }
     }

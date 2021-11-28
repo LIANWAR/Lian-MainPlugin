@@ -10,7 +10,7 @@ import org.bukkit.plugin.Plugin
  * @author underconnor, AlphaGot
  */
 
-object MainKommand: KommandInterface {
+class MainKommand: KommandInterface {
     override fun kommand() {
         getInstance().kommand {
             register("LianPlugin") {
@@ -18,4 +18,6 @@ object MainKommand: KommandInterface {
             }
         }
     }
+
+    init {}
 }

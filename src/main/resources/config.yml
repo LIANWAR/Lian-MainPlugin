@@ -1,8 +1,8 @@
 # Lian Plugin
-# '&'컬러코드 지원
+# '§'컬러코드 지원
 
 # 왜 있는진 모르지만 스크에 있길래 만든 칭호(?)
-admin_prefix : "&f[&6♠&f]"
-country_prefix : "&f[&b♦&f]"
-clan_prefix : "&f[&c♥&f]"
-user_prefix : "&f[&a♣&f]"
+admin_prefix : "§f[§6♠§f]"
+country_prefix : "§f[§b♦§f]"
+clan_prefix : "§f[§c♥§f]"
+user_prefix : "§f[§a♣§f]"

@@ -17,17 +17,21 @@
 package com.underconnor.lian.plugin
 
 import com.underconnor.lian.events.SampleEvent
-import com.underconnor.lian.kommands.MainKommand
 import com.underconnor.lian.Recipes.RecipeEvent
 import com.underconnor.lian.Recipes.RecipeObject
-import com.underconnor.lian.kommands.debugKommand
+import com.underconnor.lian.clan.Clan
+import com.underconnor.lian.common.LianPlayer
 import org.bukkit.Bukkit
 import org.bukkit.Material
+import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
 import org.bukkit.inventory.Recipe
 import org.bukkit.plugin.java.JavaPlugin
 import org.reflections.Reflections
 import java.io.File
 import java.lang.reflect.Method
+import java.util.*
+import kotlin.collections.ArrayList
 
 /***
  * @author underconnor, AlphaGot
@@ -41,6 +45,11 @@ class LianPlugin : JavaPlugin() {
     }
 
     private val configFile = File(dataFolder, "config.yml")
+    val onlinePlayers: ArrayList<LianPlayer> = arrayListOf()
+    var clans: ArrayList<Clan> = arrayListOf()
+
+    fun getPlayer(sender: CommandSender) = onlinePlayers.filter { it.uniqueId == (sender as Player).uniqueId }[0]
+    fun getPlayer(sender: Player) = onlinePlayers.filter { it.uniqueId == sender.uniqueId }[0]
 
     override fun onEnable() {
         instance = this

@@ -16,6 +16,8 @@
 
 package com.underconnor.lian.plugin
 
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.underconnor.lian.events.SampleEvent
 import com.underconnor.lian.Recipes.RecipeEvent
 import com.underconnor.lian.Recipes.RecipeObject
@@ -28,12 +30,13 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.Recipe
 import org.bukkit.plugin.java.JavaPlugin
 import org.reflections.Reflections
 import java.io.File
 import java.lang.reflect.Method
-import java.util.*
+import java.util.logging.Level
 import kotlin.collections.ArrayList
 
 /***
@@ -51,10 +54,14 @@ class LianPlugin : JavaPlugin(), Listener {
     val onlinePlayers: ArrayList<LianPlayer> = arrayListOf()
     var clans: ArrayList<Clan> = arrayListOf()
 
-    fun getPlayer(sender: CommandSender) = onlinePlayers.filter { it.uniqueId == (sender as Player).uniqueId }[0]
-    fun getPlayer(sender: Player) = onlinePlayers.filter { it.uniqueId == sender.uniqueId }[0]
+    lateinit var gson: Gson
+
+    fun getPlayer(sender: CommandSender) = onlinePlayers.filter { it.player.uniqueId == (sender as Player).uniqueId }[0]
+    fun getPlayer(sender: Player) = onlinePlayers.filter { it.player.uniqueId == sender.uniqueId }[0]
 
     override fun onEnable() {
+        gson = GsonBuilder().setPrettyPrinting().create()
+
         instance = this
         logger.info("${this.config.getString("admin_prefix")}")
         server.pluginManager.registerEvents(SampleEvent(), this)
@@ -101,10 +108,104 @@ class LianPlugin : JavaPlugin(), Listener {
         }
 
         server.pluginManager.registerEvents(this, this)
+
+        val testPluginDir = File("plugins/LianMain")
+        if(!testPluginDir.exists()){
+            testPluginDir.mkdir()
+        }
+
+        val clanDir = File("plugins/LianMain/clans")
+        if(!(clanDir.exists() && clanDir.isDirectory)){
+            logger.warning("클랜 저장 경로가 없거나 폴더가 아닙니다.")
+
+            if(!clanDir.isDirectory){
+                logger.log(Level.OFF, "클랜 저장 경로와 같은 이름의 파일이 있습니다.")
+                isEnabled = false
+            }
+            else {
+                clanDir.mkdir()
+            }
+        }
+        else {
+            clanDir.listFiles()?.forEach {
+                if(it.name.endsWith(".json")){
+                    clans.plusAssign(gson.fromJson(it.bufferedReader(), Clan::class.java))
+                }
+            }
+        }
+
+        val playerDir = File("plugins/LianMain/clans")
+        if(!(playerDir.exists() && playerDir.isDirectory)){
+            logger.warning("플레이어 저장 경로가 없거나 폴더가 아닙니다.")
+
+            if(!playerDir.isDirectory){
+                logger.log(Level.OFF, "플레이어 저장 경로와 같은 이름의 파일이 있습니다.")
+                isEnabled = false
+            }
+            else {
+                playerDir.mkdir()
+            }
+        }
+        else {
+            playerDir.listFiles()?.forEach {
+                if(it.name.endsWith(".json")){
+                    onlinePlayers.plusAssign(gson.fromJson(it.bufferedReader(), LianPlayer::class.java))
+                }
+            }
+        }
+    }
+
+    override fun onDisable() {
+        val clanDir = File("plugins/LianMain/clans")
+        if(!(clanDir.exists() && clanDir.isDirectory)){
+            logger.warning("클랜 저장 경로가 없거나 폴더가 아닙니다.")
+
+            if(!clanDir.isDirectory){
+                logger.log(Level.OFF, "클랜 저장 경로와 같은 이름의 파일이 있습니다.")
+                isEnabled = false
+            }
+            else {
+                clanDir.mkdir()
+            }
+        }
+        else {
+            clans.forEach {
+                File("plugins/LianMain/clans/${it.name}.json").writeText(
+                    gson.toJson(it, Clan::class.java)
+                )
+            }
+        }
+
+        val playerDir = File("plugins/LianMain/clans")
+        if(!(playerDir.exists() && playerDir.isDirectory)){
+            logger.warning("플레이어 저장 경로가 없거나 폴더가 아닙니다.")
+
+            if(!playerDir.isDirectory){
+                logger.log(Level.OFF, "플레이어 저장 경로와 같은 이름의 파일이 있습니다.")
+                isEnabled = false
+            }
+            else {
+                playerDir.mkdir()
+            }
+        }
+        else {
+            onlinePlayers.forEach {
+                File("plugins/LianMain/players/${it.player.uniqueId}.json").writeText(
+                    gson.toJson(it, LianPlayer::class.java)
+                )
+            }
+        }
     }
 
     @EventHandler
     fun onJoin(e: PlayerJoinEvent){
+        onlinePlayers.plusAssign(LianPlayer(e.player))
+        logger.info("joined")
+        logger.info(onlinePlayers.toString())
+    }
 
+    @EventHandler
+    fun onLeft(e: PlayerQuitEvent){
+        onlinePlayers.remove(onlinePlayers.filter { it.player.uniqueId == e.player.uniqueId }[0])
     }
 }

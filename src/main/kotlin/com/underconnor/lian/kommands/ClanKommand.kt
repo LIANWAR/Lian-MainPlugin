@@ -36,37 +36,47 @@ class ClanKommand: KommandInterface {
                     }
                 }
                 then("create") {
+                    executes { sender.sendMessage(clanText("클랜 이름을 입력해주세요.")) }
                     then("clanName" to string()) {
                         executes { kommandContext ->
-                            if (!((sender as Player).inventory.itemInMainHand.itemMeta.hasDisplayName()) || ((sender as Player).inventory.itemInMainHand.itemMeta.displayName != "${ChatColor.YELLOW}[클랜 창설권]")) {
+                            val hand = (sender as Player).inventory.itemInMainHand
+                            if(!hand.hasItemMeta()){
                                 sender.sendMessage(clanText("손에 클랜 창설권을 들어주세요."))
                             }
-                            else{
-                                val clanName: String by kommandContext
-
-                                var clanNameTemp = clanName
-
-                                clanNameTemp = clanNameTemp.replace("§", " ")
-                                clanNameTemp = clanNameTemp.replace("&", " ")
-                                clanNameTemp = clanNameTemp.replace("_", " ")
-                                if(getInstance().getPlayer(sender).clan != null){
-                                    sender.sendMessage(clanText("이미 클랜에 소속되어있습니다."))
+                            else if(!hand.itemMeta.hasDisplayName()) {
+                                sender.sendMessage(clanText("손에 클랜 창설권을 들어주세요."))
+                            }
+                            else {
+                                if (((sender as Player).inventory.itemInMainHand.itemMeta.displayName != "${ChatColor.YELLOW}[클랜 창설권]")) {
+                                    sender.sendMessage(clanText("손에 클랜 창설권을 들어주세요."))
                                 }
-                                else {
-                                    if(getInstance().clans.none { it.name == clanNameTemp }) {
-                                        val clan = Clan(name = clanNameTemp)
-                                        getInstance().onlinePlayers[getInstance().onlinePlayers.indexOf(getInstance().getPlayer(sender))].clan = clan
-                                        clan.owner = getInstance().onlinePlayers[getInstance().onlinePlayers.indexOf(getInstance().getPlayer(sender))]
-                                        clan.players = arrayListOf(clan.owner)
-                                        getInstance().clans = getInstance().clans.plus(clan) as ArrayList<Clan>
+                                else{
+                                    val clanName: String by kommandContext
 
-                                        getInstance().logger.info("${getInstance().onlinePlayers[getInstance().onlinePlayers.indexOf(getInstance().getPlayer(sender))].clan}")
-                                        getInstance().logger.info("$clan")
+                                    var clanNameTemp = clanName
 
-                                        getInstance().server.broadcast(clanText("${sender.name}님이 ${ChatColor.GREEN}${clan.name}${ChatColor.WHITE}클랜을 생성했습니다."))
+                                    clanNameTemp = clanNameTemp.replace("§", " ")
+                                    clanNameTemp = clanNameTemp.replace("&", " ")
+                                    clanNameTemp = clanNameTemp.replace("_", " ")
+                                    if(getInstance().getPlayer(sender).clan != null){
+                                        sender.sendMessage(clanText("이미 클랜에 소속되어있습니다."))
                                     }
                                     else {
-                                        sender.sendMessage(clanText("이미 같은 이름의 클랜이 있습니다."))
+                                        if(getInstance().clans.none { it.name == clanNameTemp }) {
+                                            val clan = Clan(name = clanNameTemp)
+                                            getInstance().onlinePlayers[getInstance().onlinePlayers.indexOf(getInstance().getPlayer(sender))].clan = clan
+                                            clan.owner = getInstance().onlinePlayers[getInstance().onlinePlayers.indexOf(getInstance().getPlayer(sender))]
+                                            clan.players = arrayListOf(clan.owner)
+                                            getInstance().clans = getInstance().clans.plus(clan) as ArrayList<Clan>
+
+                                            getInstance().logger.info("${getInstance().onlinePlayers[getInstance().onlinePlayers.indexOf(getInstance().getPlayer(sender))].clan}")
+                                            getInstance().logger.info("$clan")
+
+                                            getInstance().server.broadcast(clanText("${sender.name}님이 ${ChatColor.GREEN}${clan.name}${ChatColor.WHITE}클랜을 생성했습니다."))
+                                        }
+                                        else {
+                                            sender.sendMessage(clanText("이미 같은 이름의 클랜이 있습니다."))
+                                        }
                                     }
                                 }
                             }

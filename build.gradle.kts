@@ -17,6 +17,7 @@ dependencies {
     compileOnly("io.github.monun:tap-api:4.1.10")
     compileOnly("io.github.monun:kommand-api:2.6.6")
     implementation("org.reflections:reflections:0.10.1")
+    compileOnly("com.google.code.gson:gson:2.8.9")
 }
 
 val shade = configurations.create("shade")
@@ -35,6 +36,8 @@ tasks {
         filteringCharset = "UTF-8"
     }
     register<Jar>("paperJar") {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
         archiveBaseName.set(archive)
         archiveClassifier.set("")
         archiveVersion.set("")

@@ -2,8 +2,8 @@ package com.underconnor.lian.clan
 
 import com.underconnor.lian.common.LianPlayer
 
-data class Clan(
-    var owner: LianPlayer? = null,
-    var players: ArrayList<LianPlayer?> = arrayListOf(owner),
-    val name: String
-)
+class Clan(o: LianPlayer, n: String){
+    var owner: LianPlayer = o
+    var players: ArrayList<LianPlayer> = arrayListOf(owner)
+    val name: String = n
+}

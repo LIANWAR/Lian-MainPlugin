@@ -63,11 +63,9 @@ class ClanKommand: KommandInterface {
                                     }
                                     else {
                                         if(getInstance().clans.none { it.name == clanNameTemp }) {
-                                            val clan = Clan(name = clanNameTemp)
+                                            val clan = Clan(getInstance().onlinePlayers[getInstance().onlinePlayers.indexOf(getInstance().getPlayer(sender))], clanNameTemp)
                                             getInstance().onlinePlayers[getInstance().onlinePlayers.indexOf(getInstance().getPlayer(sender))].clan = clan
-                                            clan.owner = getInstance().onlinePlayers[getInstance().onlinePlayers.indexOf(getInstance().getPlayer(sender))]
-                                            clan.players = arrayListOf(clan.owner)
-                                            getInstance().clans = getInstance().clans.plus(clan) as ArrayList<Clan>
+                                            getInstance().clans.plusAssign(clan)
 
                                             getInstance().logger.info("${getInstance().onlinePlayers[getInstance().onlinePlayers.indexOf(getInstance().getPlayer(sender))].clan}")
                                             getInstance().logger.info("$clan")

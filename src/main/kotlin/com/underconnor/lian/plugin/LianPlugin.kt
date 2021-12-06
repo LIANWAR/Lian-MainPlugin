@@ -16,13 +16,13 @@
 
 package com.underconnor.lian.plugin
 
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.underconnor.lian.events.SampleEvent
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.underconnor.lian.Recipes.RecipeEvent
 import com.underconnor.lian.Recipes.RecipeObject
 import com.underconnor.lian.clan.Clan
 import com.underconnor.lian.common.LianPlayer
+import com.underconnor.lian.events.SampleEvent
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
@@ -37,7 +37,6 @@ import org.reflections.Reflections
 import java.io.File
 import java.lang.reflect.Method
 import java.util.logging.Level
-import kotlin.collections.ArrayList
 
 /***
  * @author underconnor, AlphaGot
@@ -54,13 +53,13 @@ class LianPlugin : JavaPlugin(), Listener {
     val onlinePlayers: ArrayList<LianPlayer> = arrayListOf()
     var clans: ArrayList<Clan> = arrayListOf()
 
-    lateinit var gson: Gson
+    lateinit var mapper: ObjectMapper
 
     fun getPlayer(sender: CommandSender) = onlinePlayers.filter { it.player.uniqueId == (sender as Player).uniqueId }[0]
     fun getPlayer(sender: Player) = onlinePlayers.filter { it.player.uniqueId == sender.uniqueId }[0]
 
     override fun onEnable() {
-        gson = GsonBuilder().setPrettyPrinting().create()
+        mapper = ObjectMapper().registerKotlinModule()
 
         instance = this
         logger.info("${this.config.getString("admin_prefix")}")
@@ -73,7 +72,7 @@ class LianPlugin : JavaPlugin(), Listener {
         )?.forEach { clazz ->
             logger.info(clazz.name)
 
-            clazz.getConstructor().trySetAccessible()
+            clazz.getDeclaredConstructor().trySetAccessible()
             clazz.getDeclaredConstructor().newInstance().kommand()
         }
 
@@ -129,7 +128,7 @@ class LianPlugin : JavaPlugin(), Listener {
         else {
             clanDir.listFiles()?.forEach {
                 if(it.name.endsWith(".json")){
-                    clans.plusAssign(gson.fromJson(it.bufferedReader(), Clan::class.java))
+                    clans.plusAssign(mapper.readValue(it, Clan::class.java))
                 }
             }
         }
@@ -149,7 +148,7 @@ class LianPlugin : JavaPlugin(), Listener {
         else {
             playerDir.listFiles()?.forEach {
                 if(it.name.endsWith(".json")){
-                    onlinePlayers.plusAssign(gson.fromJson(it.bufferedReader(), LianPlayer::class.java))
+                    onlinePlayers.plusAssign(mapper.readValue(it, LianPlayer::class.java))
                 }
             }
         }
@@ -170,8 +169,9 @@ class LianPlugin : JavaPlugin(), Listener {
         }
         else {
             clans.forEach {
-                File("plugins/LianMain/clans/${it.name}.json").writeText(
-                    gson.toJson(it, Clan::class.java)
+                mapper.writeValue(
+                    File("plugins/LianMain/clans/${it.name}.json"),
+                    it
                 )
             }
         }
@@ -190,8 +190,9 @@ class LianPlugin : JavaPlugin(), Listener {
         }
         else {
             onlinePlayers.forEach {
-                File("plugins/LianMain/players/${it.player.uniqueId}.json").writeText(
-                    gson.toJson(it, LianPlayer::class.java)
+                mapper.writeValue(
+                    File("plugins/LianMain/players/${it.player.uniqueId}.json"),
+                    it
                 )
             }
         }

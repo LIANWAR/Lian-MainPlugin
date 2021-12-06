@@ -17,7 +17,10 @@ dependencies {
     compileOnly("io.github.monun:tap-api:4.1.10")
     compileOnly("io.github.monun:kommand-api:2.6.6")
     implementation("org.reflections:reflections:0.10.1")
-    compileOnly("com.google.code.gson:gson:2.8.9")
+    api("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.+")
+    /*implementation("com.fasterxml.jackson.core:jackson-core:2.13.0")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.0")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.13.0")*/
 }
 
 val shade = configurations.create("shade")
@@ -35,7 +38,7 @@ tasks {
         }
         filteringCharset = "UTF-8"
     }
-    register<Jar>("paperJar") {
+    jar {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
         archiveBaseName.set(archive)

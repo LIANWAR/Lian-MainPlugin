@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 underconnor
+ * Copyright (c) 2021 underconnor, AlphaGot
  *
  *  Licensed under the General Public License, Version 3.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,14 +16,15 @@
 
 package com.underconnor.lian.plugin
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.underconnor.lian.Recipes.RecipeEvent
 import com.underconnor.lian.Recipes.RecipeObject
 import com.underconnor.lian.clan.Clan
 import com.underconnor.lian.common.LianPlayer
 import com.underconnor.lian.events.SampleEvent
+import io.papermc.paper.event.player.AsyncChatEvent
+import net.kyori.adventure.text.Component.text
 import org.bukkit.Bukkit
+import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -36,7 +37,9 @@ import org.bukkit.plugin.java.JavaPlugin
 import org.reflections.Reflections
 import java.io.File
 import java.lang.reflect.Method
+import java.util.*
 import java.util.logging.Level
+import kotlin.collections.ArrayList
 
 /***
  * @author underconnor, AlphaGot
@@ -52,15 +55,18 @@ class LianPlugin : JavaPlugin(), Listener {
     private val configFile = File(dataFolder, "config.yml")
     val onlinePlayers: ArrayList<LianPlayer> = arrayListOf()
     var clans: ArrayList<Clan> = arrayListOf()
-
-    lateinit var mapper: ObjectMapper
+    var invites: MutableMap<String, Clan> = mutableMapOf()
 
     fun getPlayer(sender: CommandSender) = onlinePlayers.filter { it.player.uniqueId == (sender as Player).uniqueId }[0]
     fun getPlayer(sender: Player) = onlinePlayers.filter { it.player.uniqueId == sender.uniqueId }[0]
 
-    override fun onEnable() {
-        mapper = ObjectMapper().registerKotlinModule()
+    fun getPlayerByFile(p: String  /* UUID */): LianPlayer {
+        val f = File("plugins/LianMain/players/${p}.txt").readText().split("\n")
+        onlinePlayers.plusAssign(LianPlayer(server.offlinePlayers.filter { it.uniqueId.toString() == p }[0]))
+        return LianPlayer(server.offlinePlayers.filter { it.uniqueId.toString() == p }[0])
+    }
 
+    override fun onEnable() {
         instance = this
         logger.info("${this.config.getString("admin_prefix")}")
         server.pluginManager.registerEvents(SampleEvent(), this)
@@ -113,6 +119,35 @@ class LianPlugin : JavaPlugin(), Listener {
             testPluginDir.mkdir()
         }
 
+        var playerDir = File("plugins/LianMain/clans")
+        if(!(playerDir.exists() && playerDir.isDirectory)){
+            logger.warning("플레이어 저장 경로가 없거나 폴더가 아닙니다.")
+
+            if(!playerDir.isDirectory){
+                logger.log(Level.OFF, "플레이어 저장 경로와 같은 이름의 파일이 있습니다.")
+                isEnabled = false
+            }
+            else {
+                playerDir.mkdir()
+            }
+        }
+        else {
+            playerDir.listFiles()?.forEach { file ->
+                if(file.name.endsWith(".txt")){
+                    if(onlinePlayers.none { it.player.uniqueId.toString() == file.readText().split("\n")[0] }){
+                        val f = file.readText().split("\n")
+                        val c = LianPlayer(server.getOfflinePlayer(UUID.fromString(f[0])))
+                        logger.info(clans.toString())
+                        c.clan = if (clans.any { it.owner.player.uniqueId.toString() == f[1] }) {
+                            clans.filter { it.owner.player.uniqueId == UUID.fromString(f[1]) }[0]
+                        }
+                        else null
+                        onlinePlayers.plusAssign(c)
+                    }
+                }
+            }
+        }
+
         val clanDir = File("plugins/LianMain/clans")
         if(!(clanDir.exists() && clanDir.isDirectory)){
             logger.warning("클랜 저장 경로가 없거나 폴더가 아닙니다.")
@@ -126,14 +161,24 @@ class LianPlugin : JavaPlugin(), Listener {
             }
         }
         else {
-            clanDir.listFiles()?.forEach {
-                if(it.name.endsWith(".json")){
-                    clans.plusAssign(mapper.readValue(it, Clan::class.java))
+            clanDir.listFiles()?.forEach { file ->
+                if(file.name.endsWith(".txt")){
+                    val c = file.readText().split("\n")
+
+                    logger.info(c.size.toString())
+                    clans.plusAssign(
+                        Clan(onlinePlayers.first {it.player.uniqueId.toString() == c[0].trim()},
+                            c.subList(2, c.size).map { el ->
+                                logger.info(el)
+                                onlinePlayers.first {it.player.uniqueId.toString() == el.trim()}
+                            } as ArrayList<LianPlayer>,
+                        n = c[1])
+                    )
                 }
             }
         }
 
-        val playerDir = File("plugins/LianMain/clans")
+        playerDir = File("plugins/LianMain/clans")
         if(!(playerDir.exists() && playerDir.isDirectory)){
             logger.warning("플레이어 저장 경로가 없거나 폴더가 아닙니다.")
 
@@ -146,9 +191,14 @@ class LianPlugin : JavaPlugin(), Listener {
             }
         }
         else {
-            playerDir.listFiles()?.forEach {
-                if(it.name.endsWith(".json")){
-                    onlinePlayers.plusAssign(mapper.readValue(it, LianPlayer::class.java))
+            playerDir.listFiles()?.forEach { file ->
+                if(file.name.endsWith(".txt")){
+                    if(onlinePlayers.any { it.player.uniqueId.toString() == file.readText().split("\n")[0] }){
+                        val f = file.readText().split("\n")
+                        if(f[1] != (onlinePlayers.first {it.player.uniqueId.toString() == f[0].trim()}.clan?.owner?.player?.uniqueId.toString())){
+                            onlinePlayers[onlinePlayers.indexOf(onlinePlayers.first { it.player.uniqueId.toString() == f[0].trim() })].clan = clans.first {it.owner.player.uniqueId.toString() == f[0].trim()}
+                        }
+                    }
                 }
             }
         }
@@ -169,10 +219,7 @@ class LianPlugin : JavaPlugin(), Listener {
         }
         else {
             clans.forEach {
-                mapper.writeValue(
-                    File("plugins/LianMain/clans/${it.name}.json"),
-                    it
-                )
+                File("plugins/LianMain/clans/${it.owner.player.uniqueId}.txt").writeText(it.toString())
             }
         }
 
@@ -190,23 +237,27 @@ class LianPlugin : JavaPlugin(), Listener {
         }
         else {
             onlinePlayers.forEach {
-                mapper.writeValue(
-                    File("plugins/LianMain/players/${it.player.uniqueId}.json"),
-                    it
-                )
+                File("plugins/LianMain/players/${it.player.uniqueId}.txt").writeText(it.toString())
             }
         }
     }
 
     @EventHandler
     fun onJoin(e: PlayerJoinEvent){
-        onlinePlayers.plusAssign(LianPlayer(e.player))
-        logger.info("joined")
-        logger.info(onlinePlayers.toString())
+        if(onlinePlayers.none { it.player.uniqueId == e.player.uniqueId }){
+            onlinePlayers.plusAssign(LianPlayer(e.player))
+        }
     }
 
     @EventHandler
-    fun onLeft(e: PlayerQuitEvent){
-        onlinePlayers.remove(onlinePlayers.filter { it.player.uniqueId == e.player.uniqueId }[0])
+    fun onChat(e: AsyncChatEvent){
+        if(getPlayer(e.player).clanChatMode && getPlayer(e.player).clan != null){
+            getPlayer(e.player).clan!!.players.forEach { lianPlayer ->
+                if(lianPlayer.player.isOnline){
+                    server.onlinePlayers.first { it.uniqueId == lianPlayer.player.uniqueId }.sendMessage(text("${ChatColor.AQUA}[클랜] ${ChatColor.LIGHT_PURPLE}${e.player.name}${ChatColor.RESET}: ").append(e.message()))
+                }
+            }
+            e.isCancelled = true
+        }
     }
 }

@@ -64,6 +64,28 @@ object RecipeObject {
         return recipe
     }
 
+    fun clan_ticket(): Recipe {
+        val key = NamespacedKey(getInstance(), "clan_ticket")
+        val item = ItemStack(Material.ENCHANTED_BOOK)
+        val meta = item.itemMeta
+
+        // 조합법 팁
+        meta.displayName(text("[클랜 창설권]", NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE))
+        meta.lore(listOf(
+            text("${ChatColor.RESET}클랜 창설권",NamedTextColor.GOLD)
+        ))
+
+        item.itemMeta = meta
+        val recipe = ShapedRecipe(key, item)
+
+        recipe.shape("SDS", "DBD", "SDS")
+        recipe.setIngredient('S', Material.STONE_SWORD)
+        recipe.setIngredient('D', Material.DIAMOND)
+        recipe.setIngredient('B', Material.BOOK)
+
+        return recipe
+    }
+
     // 화살 간단 조합법 코드 (누가 최적화좀)
     fun potion_arrow(): ArrayList<Recipe>{
         val potionArrowList: ArrayList<Recipe> = arrayListOf()

@@ -17,10 +17,6 @@ dependencies {
     compileOnly("io.github.monun:tap-api:4.1.10")
     compileOnly("io.github.monun:kommand-api:2.6.6")
     implementation("org.reflections:reflections:0.10.1")
-    api("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.+")
-    /*implementation("com.fasterxml.jackson.core:jackson-core:2.13.0")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.0")
-    implementation("com.fasterxml.jackson.core:jackson-annotations:2.13.0")*/
 }
 
 val shade = configurations.create("shade")
@@ -30,7 +26,7 @@ tasks {
     val archive = project.properties["pluginName"].toString()
 
     withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = JavaVersion.VERSION_16.toString()
+        kotlinOptions.jvmTarget = "16"
     }
     processResources {
         filesMatching("**/*.yml") {

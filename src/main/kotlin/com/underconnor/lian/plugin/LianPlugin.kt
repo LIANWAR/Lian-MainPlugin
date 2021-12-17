@@ -30,6 +30,10 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.block.BlockBreakEvent
+import org.bukkit.event.block.BlockMultiPlaceEvent
+import org.bukkit.event.block.BlockPlaceEvent
+import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.Recipe
@@ -56,6 +60,7 @@ class LianPlugin : JavaPlugin(), Listener {
     val onlinePlayers: ArrayList<LianPlayer> = arrayListOf()
     var clans: ArrayList<Clan> = arrayListOf()
     var invites: MutableMap<String, Clan> = mutableMapOf()
+    var invitesTaskId: MutableMap<String, Int> = mutableMapOf()
 
     fun getPlayer(sender: CommandSender) = onlinePlayers.filter { it.player.uniqueId == (sender as Player).uniqueId }[0]
     fun getPlayer(sender: Player) = onlinePlayers.filter { it.player.uniqueId == sender.uniqueId }[0]
@@ -138,10 +143,18 @@ class LianPlugin : JavaPlugin(), Listener {
                         val f = file.readText().split("\n")
                         val c = LianPlayer(server.getOfflinePlayer(UUID.fromString(f[0])))
                         logger.info(clans.toString())
+
                         c.clan = if (clans.any { it.owner.player.uniqueId.toString() == f[1] }) {
                             clans.filter { it.owner.player.uniqueId == UUID.fromString(f[1]) }[0]
                         }
                         else null
+
+                        c.ownedLands = listOf()
+                        f.subList(3, f.size).forEach {
+                            val s = it.split(" ")
+                            c.ownedLands = c.ownedLands.plusElement(Pair(s[0].toInt(), s[1].toInt()))
+                        }
+
                         onlinePlayers.plusAssign(c)
                     }
                 }
@@ -258,6 +271,56 @@ class LianPlugin : JavaPlugin(), Listener {
                 }
             }
             e.isCancelled = true
+        }
+    }
+
+    @EventHandler
+    fun onPlace(e: BlockPlaceEvent){
+        val cond = getPlayer(e.player).ownedLands.none {
+            Pair(e.block.chunk.x, e.block.chunk.z) == it
+        }
+
+        e.isCancelled = cond
+        if(!cond){
+            e.player.sendMessage("[${ChatColor.DARK_GREEN}!${ChatColor.RESET}] 땅 주인이 아닙니다.")
+        }
+    }
+
+    @EventHandler
+    fun onPlaceM(e: BlockMultiPlaceEvent){
+        val cond = getPlayer(e.player).ownedLands.none {
+            Pair(e.block.chunk.x, e.block.chunk.z) == it
+        }
+
+        e.isCancelled = cond
+        if(!cond){
+            e.player.sendMessage("[${ChatColor.DARK_GREEN}!${ChatColor.RESET}] 땅 주인이 아닙니다.")
+        }
+    }
+
+    @EventHandler
+    fun onBreak(e: BlockBreakEvent){
+        val cond = getPlayer(e.player).ownedLands.none {
+            Pair(e.block.chunk.x, e.block.chunk.z) == it
+        }
+
+        e.isCancelled = cond
+        if(!cond){
+            e.player.sendMessage("[${ChatColor.DARK_GREEN}!${ChatColor.RESET}] 땅 주인이 아닙니다.")
+        }
+    }
+
+    @EventHandler
+    fun onInteract(e: PlayerInteractEvent){
+        if (e.clickedBlock != null) {
+            val cond = getPlayer(e.player).ownedLands.none {
+                Pair(e.clickedBlock!!.chunk.x, e.clickedBlock!!.chunk.z) == it
+            }
+
+            e.isCancelled = cond
+            if(!cond){
+                e.player.sendMessage("[${ChatColor.DARK_GREEN}!${ChatColor.RESET}] 땅 주인이 아닙니다.")
+            }
         }
     }
 }

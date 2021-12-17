@@ -2,6 +2,7 @@ package com.underconnor.lian.kommands
 
 import com.underconnor.lian.clan.Clan
 import com.underconnor.lian.plugin.KommandInterface
+import io.github.monun.kommand.StringType
 import io.github.monun.kommand.getValue
 import io.github.monun.kommand.kommand
 import net.kyori.adventure.text.Component.text
@@ -45,16 +46,21 @@ class ClanKommand: KommandInterface {
                 }
                 then("create") {
                     executes { sender.sendMessage(clanText("클랜 이름을 입력해주세요.")) }
-                    then("clanName" to string()) {
+                    then("clanName" to string(StringType.GREEDY_PHRASE)) {
                         executes { kommandContext ->
                             val hand = (sender as Player).inventory.itemInMainHand
                             if(hand.type != Material.ENCHANTED_BOOK){
                                 sender.sendMessage(clanText("손에 클랜 창설권을 들어주세요."))
                             }
                             else {
-                                if (false) {
+                                if (
+                                    hand.displayName().children()[0] != text("클랜 창설권", NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE)
+                                    //false
+                                ) {
                                     sender.sendMessage(clanText("손에 클랜 창설권을 들어주세요."))
-                                    sender.sendMessage((sender as Player).inventory.itemInMainHand.displayName())
+                                    sender.sendMessage((sender as Player).inventory.itemInMainHand.displayName().toString())
+                                    sender.sendMessage(text("클랜 창설권", NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE).toString())
+                                    sender.sendMessage((hand.displayName() == text("클랜 창설권", NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE)).toString())
                                 }
                                 else{
                                     val clanName: String by kommandContext
@@ -79,6 +85,7 @@ class ClanKommand: KommandInterface {
                                             sender.sendMessage(clanText("이미 같은 이름의 클랜이 있습니다."))
                                         }
                                     }
+                                    hand.subtract(1)
                                 }
                             }
                         }
@@ -103,8 +110,8 @@ class ClanKommand: KommandInterface {
                     executes {
                         sender.sendMessage(clanText("누구를 초대할 지를 입력해주세요."))
                     }
-                    then("player" to string()){
-                        executes { kommandContext ->
+                    then("target" to player()){
+                        executes {
                             if (getInstance().getPlayer(sender).clan == null) {
                                 sender.sendMessage(clanText("클랜에 소속되어있지 않습니다!"))
                             }
@@ -113,8 +120,7 @@ class ClanKommand: KommandInterface {
                                     sender.sendMessage(clanText("클랜장만 초대할 수 있습니다."))
                                 } else {
                                     if(getInstance().getPlayer(sender).clan!!.players.size < 4){
-                                        val targetStr: String by kommandContext
-                                        val target = getInstance().server.onlinePlayers.first { it.name == targetStr }
+                                        val target: Player by it
 
                                         getInstance().invites[target.uniqueId.toString()] = getInstance().getPlayer(sender).clan!!
                                         sender.sendMessage(clanText("초대장을 보냈습니다."))
@@ -127,12 +133,13 @@ class ClanKommand: KommandInterface {
                                             clickComp.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/clan accept")
                                             p.sendMessage(clickComp)
 
-                                            getInstance().server.scheduler.scheduleSyncDelayedTask(getInstance(),
+                                            getInstance().invitesTaskId[target.uniqueId.toString()] = getInstance().server.scheduler.scheduleSyncDelayedTask(getInstance(),
                                                 {
                                                     getInstance().invites.remove(target.uniqueId.toString())
                                                     target.sendMessage(clanText("${sender.name}님에게서 온 클랜 초대가 만료되었습니다."))
                                                 },
-                                                600L)
+                                                600L
+                                            )
                                         }
                                     }
                                     else {
@@ -148,10 +155,16 @@ class ClanKommand: KommandInterface {
                         val p = getInstance().getPlayer(player)
                         if(getInstance().invites.containsKey(p.player.uniqueId.toString())){
                             if(getInstance().invites[p.player.uniqueId.toString()]!!.players.size < 4){
-                                getInstance().invites.remove(player.uniqueId.toString())
                                 p.clan = getInstance().invites[p.player.uniqueId.toString()]
                                 getInstance().onlinePlayers[getInstance().onlinePlayers.indexOf(getInstance().onlinePlayers.filter { it.player.uniqueId == p.player.uniqueId }[0])] = p
-                                getInstance().clans[getInstance().clans.indexOf(getInstance().invites[p.player.uniqueId.toString()]!!)].players.plusAssign(p)
+                                getInstance().clans[
+                                        getInstance().clans.indexOf(
+                                            getInstance().clans.filter {
+                                                val invClan = getInstance().invites[p.player.uniqueId.toString()]!!
+                                                invClan.owner.player.uniqueId == it.owner.player.uniqueId
+                                            }[0]
+                                        )
+                                ].players.plusAssign(p)
                                 getInstance().clans[getInstance().clans.indexOf(getInstance().invites[p.player.uniqueId.toString()]!!)].players.forEach { pl ->
                                     if(pl.player.isOnline){
                                         val p2 = getInstance().server.onlinePlayers.first { it.uniqueId == pl.player.uniqueId }
@@ -159,6 +172,8 @@ class ClanKommand: KommandInterface {
                                     }
                                 }
                                 player.sendMessage("${getInstance().clans[getInstance().clans.indexOf(getInstance().invites[p.player.uniqueId.toString()]!!)].name} 클랜에 가입했습니다.")
+                                getInstance().invites.remove(player.uniqueId.toString())
+                                getInstance().server.scheduler.cancelTask(getInstance().invitesTaskId[player.uniqueId.toString()]!!)
                             }
                             else {
                                 player.sendMessage("클랜 인원은 클랜장 포함 4명입니다.")
@@ -230,8 +245,8 @@ class ClanKommand: KommandInterface {
                         sender.sendMessage("누구를 추방할 지 입력해주세요.")
                     }
                     then("victim" to player()){
-                        executes { kommandContext ->
-                            val victim: Player by kommandContext
+                        executes {
+                            val victim: Player by it
 
                             if(getInstance().getPlayer(player).clan != null){
                                 if(getInstance().getPlayer(player).clan!!.owner.player.uniqueId == player.uniqueId){

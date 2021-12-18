@@ -10,7 +10,7 @@ class debugKommand: DebugKommandInterface {
     override fun kommand() {
         getInstance().kommand {
             register("debug") {
-                permission("lian.debug") // 임시 퍼미션
+                requires { player.isOp }
                 then("prefix") {
                     executes { sender.sendMessage(Component.text("대충 사용법 오류 메시지")) }
                     then("admin") { executes { getPrefix("admin_prefix", sender) } }

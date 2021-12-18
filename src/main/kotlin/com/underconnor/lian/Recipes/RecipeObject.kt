@@ -85,7 +85,7 @@ object RecipeObject {
 
     fun land_doc(): Recipe {
         val key = NamespacedKey(getInstance(), "land_document")
-        val item = ItemStack(Material.WRITTEN_BOOK)
+        val item = ItemStack(Material.ENCHANTED_BOOK)
         val meta = item.itemMeta
 
         // 조합법 팁

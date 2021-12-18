@@ -4,7 +4,7 @@ import com.underconnor.lian.common.LianPlayer
 import com.underconnor.lian.plugin.LianPlugin
 import org.bukkit.plugin.Plugin
 
-interface KommandInterface {
+interface KommandInterface: PrefixedTextInterface {
     fun getInstance(): LianPlugin = LianPlugin.instance
 
     fun kommand() {}

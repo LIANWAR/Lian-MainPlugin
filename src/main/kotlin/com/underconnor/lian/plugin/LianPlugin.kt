@@ -57,17 +57,17 @@ class LianPlugin : JavaPlugin(), Listener {
     }
 
     private val configFile = File(dataFolder, "config.yml")
-    val onlinePlayers: ArrayList<LianPlayer> = arrayListOf()
-    var clans: ArrayList<Clan> = arrayListOf()
+    val onlinePlayers: MutableMap<String, LianPlayer> = mutableMapOf()
+    var clans: MutableMap<String, Clan> = mutableMapOf()
     var invites: MutableMap<String, Clan> = mutableMapOf()
     var invitesTaskId: MutableMap<String, Int> = mutableMapOf()
 
-    fun getPlayer(sender: CommandSender) = onlinePlayers.filter { it.player.uniqueId == (sender as Player).uniqueId }[0]
-    fun getPlayer(sender: Player) = onlinePlayers.filter { it.player.uniqueId == sender.uniqueId }[0]
+    fun getPlayer(sender: CommandSender) = onlinePlayers[(sender as Player).uniqueId.toString()]!!
+    fun getPlayer(sender: Player) = onlinePlayers[(sender as Player).uniqueId.toString()]!!
 
     fun getPlayerByFile(p: String  /* UUID */): LianPlayer {
         val f = File("plugins/LianMain/players/${p}.txt").readText().split("\n")
-        onlinePlayers.plusAssign(LianPlayer(server.offlinePlayers.filter { it.uniqueId.toString() == p }[0]))
+        onlinePlayers[p] = LianPlayer(server.offlinePlayers.filter { it.uniqueId.toString() == p }[0])
         return LianPlayer(server.offlinePlayers.filter { it.uniqueId.toString() == p }[0])
     }
 
@@ -76,7 +76,7 @@ class LianPlugin : JavaPlugin(), Listener {
         logger.info("${this.config.getString("admin_prefix")}")
         server.pluginManager.registerEvents(SampleEvent(), this)
 
-        val reflections = Reflections("com.underconnor.lian.kommands")
+        var reflections = Reflections("com.underconnor.lian.kommands")
 
         reflections.getSubTypesOf(
             KommandInterface::class.java
@@ -85,6 +85,17 @@ class LianPlugin : JavaPlugin(), Listener {
 
             clazz.getDeclaredConstructor().trySetAccessible()
             clazz.getDeclaredConstructor().newInstance().kommand()
+        }
+
+        reflections = Reflections("com.underconnor.lian.handlers")
+
+        reflections.getSubTypesOf(
+            HandlerInterface::class.java
+        )?.forEach { clazz ->
+            logger.info(clazz.name)
+
+            clazz.getDeclaredConstructor().trySetAccessible()
+            server.pluginManager.registerEvents(clazz.getDeclaredConstructor().newInstance(), this)
         }
 
         // Recipe Remove 처리
@@ -139,13 +150,13 @@ class LianPlugin : JavaPlugin(), Listener {
         else {
             playerDir.listFiles()?.forEach { file ->
                 if(file.name.endsWith(".txt")){
-                    if(onlinePlayers.none { it.player.uniqueId.toString() == file.readText().split("\n")[0] }){
+                    if(onlinePlayers.none { it.value.player.uniqueId.toString() == file.readText().split("\n")[0] }){
                         val f = file.readText().split("\n")
                         val c = LianPlayer(server.getOfflinePlayer(UUID.fromString(f[0])))
                         logger.info(clans.toString())
 
-                        c.clan = if (clans.any { it.owner.player.uniqueId.toString() == f[1] }) {
-                            clans.filter { it.owner.player.uniqueId == UUID.fromString(f[1]) }[0]
+                        c.clan = if (clans.any { it.value.owner.player.uniqueId.toString() == f[1] }) {
+                            clans[f[1]]
                         }
                         else null
 
@@ -155,7 +166,7 @@ class LianPlugin : JavaPlugin(), Listener {
                             c.ownedLands = c.ownedLands.plusElement(Pair(s[0].toInt(), s[1].toInt()))
                         }
 
-                        onlinePlayers.plusAssign(c)
+                        onlinePlayers[c.player.uniqueId.toString()] = c
                     }
                 }
             }
@@ -179,13 +190,13 @@ class LianPlugin : JavaPlugin(), Listener {
                     val c = file.readText().split("\n")
 
                     logger.info(c.size.toString())
-                    clans.plusAssign(
-                        Clan(onlinePlayers.first {it.player.uniqueId.toString() == c[0].trim()},
-                            c.subList(2, c.size).map { el ->
-                                logger.info(el)
-                                onlinePlayers.first {it.player.uniqueId.toString() == el.trim()}
-                            } as ArrayList<LianPlayer>,
-                        n = c[1])
+                    clans[c[0].trim()] = Clan(
+                        onlinePlayers[c[0].trim()]!!,
+                        c.subList(2, c.size).map { el ->
+                            logger.info(el)
+                            onlinePlayers[el.trim()]!!
+                        } as MutableList<LianPlayer>,
+                        n = c[1]
                     )
                 }
             }
@@ -206,10 +217,10 @@ class LianPlugin : JavaPlugin(), Listener {
         else {
             playerDir.listFiles()?.forEach { file ->
                 if(file.name.endsWith(".txt")){
-                    if(onlinePlayers.any { it.player.uniqueId.toString() == file.readText().split("\n")[0] }){
+                    if(onlinePlayers.containsKey(file.readText().split("\n")[0].trim())){
                         val f = file.readText().split("\n")
-                        if(f[1] != (onlinePlayers.first {it.player.uniqueId.toString() == f[0].trim()}.clan?.owner?.player?.uniqueId.toString())){
-                            onlinePlayers[onlinePlayers.indexOf(onlinePlayers.first { it.player.uniqueId.toString() == f[0].trim() })].clan = clans.first {it.owner.player.uniqueId.toString() == f[0].trim()}
+                        if(f[1].trim() != (onlinePlayers[f[0].trim()]!!.clan?.owner?.player?.uniqueId.toString())){
+                            onlinePlayers[f[0].trim()]!!.clan = clans[f[1].trim()]
                         }
                     }
                 }
@@ -232,7 +243,7 @@ class LianPlugin : JavaPlugin(), Listener {
         }
         else {
             clans.forEach {
-                File("plugins/LianMain/clans/${it.owner.player.uniqueId}.txt").writeText(it.toString())
+                File("plugins/LianMain/clans/${it.value.owner.player.uniqueId}.txt").writeText(it.toString())
             }
         }
 
@@ -250,15 +261,15 @@ class LianPlugin : JavaPlugin(), Listener {
         }
         else {
             onlinePlayers.forEach {
-                File("plugins/LianMain/players/${it.player.uniqueId}.txt").writeText(it.toString())
+                File("plugins/LianMain/players/${it.value.player.uniqueId}.txt").writeText(it.value.toString())
             }
         }
     }
 
     @EventHandler
     fun onJoin(e: PlayerJoinEvent){
-        if(onlinePlayers.none { it.player.uniqueId == e.player.uniqueId }){
-            onlinePlayers.plusAssign(LianPlayer(e.player))
+        if(onlinePlayers.none { it.value.player.uniqueId == e.player.uniqueId }){
+            onlinePlayers[e.player.uniqueId.toString()] = LianPlayer(e.player)
         }
     }
 
@@ -271,56 +282,6 @@ class LianPlugin : JavaPlugin(), Listener {
                 }
             }
             e.isCancelled = true
-        }
-    }
-
-    @EventHandler
-    fun onPlace(e: BlockPlaceEvent){
-        val cond = getPlayer(e.player).ownedLands.none {
-            Pair(e.block.chunk.x, e.block.chunk.z) == it
-        }
-
-        e.isCancelled = cond
-        if(!cond){
-            e.player.sendMessage("[${ChatColor.DARK_GREEN}!${ChatColor.RESET}] 땅 주인이 아닙니다.")
-        }
-    }
-
-    @EventHandler
-    fun onPlaceM(e: BlockMultiPlaceEvent){
-        val cond = getPlayer(e.player).ownedLands.none {
-            Pair(e.block.chunk.x, e.block.chunk.z) == it
-        }
-
-        e.isCancelled = cond
-        if(!cond){
-            e.player.sendMessage("[${ChatColor.DARK_GREEN}!${ChatColor.RESET}] 땅 주인이 아닙니다.")
-        }
-    }
-
-    @EventHandler
-    fun onBreak(e: BlockBreakEvent){
-        val cond = getPlayer(e.player).ownedLands.none {
-            Pair(e.block.chunk.x, e.block.chunk.z) == it
-        }
-
-        e.isCancelled = cond
-        if(!cond){
-            e.player.sendMessage("[${ChatColor.DARK_GREEN}!${ChatColor.RESET}] 땅 주인이 아닙니다.")
-        }
-    }
-
-    @EventHandler
-    fun onInteract(e: PlayerInteractEvent){
-        if (e.clickedBlock != null) {
-            val cond = getPlayer(e.player).ownedLands.none {
-                Pair(e.clickedBlock!!.chunk.x, e.clickedBlock!!.chunk.z) == it
-            }
-
-            e.isCancelled = cond
-            if(!cond){
-                e.player.sendMessage("[${ChatColor.DARK_GREEN}!${ChatColor.RESET}] 땅 주인이 아닙니다.")
-            }
         }
     }
 }

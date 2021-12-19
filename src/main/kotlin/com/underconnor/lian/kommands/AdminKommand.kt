@@ -17,7 +17,7 @@ class AdminKommand: KommandInterface {
 
     override fun kommand() {
         getInstance().kommand {
-            register("resetLand") {
+            register("resetLandForce") {
                 executes {
                     sender.sendMessage(adminText("초기화할 플레이어를 입력해주세요."))
                 }
@@ -26,11 +26,12 @@ class AdminKommand: KommandInterface {
                         if(sender.isOp){
                             val player: Player by it
 
-                            if(getInstance().getPlayer(player).ownedLands.isEmpty()){
+                            if(getInstance().getPlayer(player).ownedLand == null){
                                 sender.sendMessage(adminText("해당 플레이어가 땅을 소유하고 있지 않습니다."))
                             }
                             else {
-                                getInstance().onlinePlayers[player.uniqueId.toString()]!!.ownedLands = listOf()
+                                getInstance().lands.remove(getInstance().onlinePlayers[player.uniqueId.toString()]!!.ownedLand!!.loc)
+                                getInstance().onlinePlayers[player.uniqueId.toString()]!!.ownedLand = null
                             }
                         }
                     }

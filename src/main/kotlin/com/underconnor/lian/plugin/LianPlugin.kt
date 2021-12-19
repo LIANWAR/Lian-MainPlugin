@@ -18,9 +18,11 @@ package com.underconnor.lian.plugin
 
 import com.underconnor.lian.Recipes.RecipeEvent
 import com.underconnor.lian.Recipes.RecipeObject
-import com.underconnor.lian.clan.Clan
+import com.underconnor.lian.common.Clan
+import com.underconnor.lian.common.Land
 import com.underconnor.lian.common.LianPlayer
 import com.underconnor.lian.events.SampleEvent
+import com.underconnor.lian.handlers.DataHandler
 import io.papermc.paper.event.player.AsyncChatEvent
 import net.kyori.adventure.text.Component.text
 import org.bukkit.Bukkit
@@ -30,19 +32,12 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.bukkit.event.block.BlockBreakEvent
-import org.bukkit.event.block.BlockMultiPlaceEvent
-import org.bukkit.event.block.BlockPlaceEvent
-import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
-import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.Recipe
 import org.bukkit.plugin.java.JavaPlugin
 import org.reflections.Reflections
 import java.io.File
 import java.lang.reflect.Method
-import java.util.*
-import java.util.logging.Level
 import kotlin.collections.ArrayList
 
 /***
@@ -56,6 +51,7 @@ class LianPlugin : JavaPlugin(), Listener {
             private set
     }
 
+    val lands: MutableMap<Pair<Int, Int>, Land> = mutableMapOf()
     private val configFile = File(dataFolder, "config.yml")
     val onlinePlayers: MutableMap<String, LianPlayer> = mutableMapOf()
     var clans: MutableMap<String, Clan> = mutableMapOf()
@@ -69,6 +65,16 @@ class LianPlugin : JavaPlugin(), Listener {
         val f = File("plugins/LianMain/players/${p}.txt").readText().split("\n")
         onlinePlayers[p] = LianPlayer(server.offlinePlayers.filter { it.uniqueId.toString() == p }[0])
         return LianPlayer(server.offlinePlayers.filter { it.uniqueId.toString() == p }[0])
+    }
+
+    fun getLand(p: Pair<Int, Int>): Land? {
+        val bArr = lands.filter {
+            arrayOf(it.key.first - 1, it.key.first, it.key.first + 1).contains(p.first) && arrayOf(it.key.second - 1, it.key.second, it.key.second + 1).contains(p.second)
+        }.map {
+            it.value
+        }
+
+        return if(bArr.isEmpty()) null else { bArr[0] }
     }
 
     override fun onEnable() {
@@ -130,140 +136,11 @@ class LianPlugin : JavaPlugin(), Listener {
 
         server.pluginManager.registerEvents(this, this)
 
-        val testPluginDir = File("plugins/LianMain")
-        if(!testPluginDir.exists()){
-            testPluginDir.mkdir()
-        }
-
-        var playerDir = File("plugins/LianMain/clans")
-        if(!(playerDir.exists() && playerDir.isDirectory)){
-            logger.warning("플레이어 저장 경로가 없거나 폴더가 아닙니다.")
-
-            if(!playerDir.isDirectory){
-                logger.log(Level.OFF, "플레이어 저장 경로와 같은 이름의 파일이 있습니다.")
-                isEnabled = false
-            }
-            else {
-                playerDir.mkdir()
-            }
-        }
-        else {
-            playerDir.listFiles()?.forEach { file ->
-                if(file.name.endsWith(".txt")){
-                    if(onlinePlayers.none { it.value.player.uniqueId.toString() == file.readText().split("\n")[0] }){
-                        val f = file.readText().split("\n")
-                        val c = LianPlayer(server.getOfflinePlayer(UUID.fromString(f[0])))
-                        logger.info(clans.toString())
-
-                        c.clan = if (clans.any { it.value.owner.player.uniqueId.toString() == f[1] }) {
-                            clans[f[1]]
-                        }
-                        else null
-
-                        c.ownedLands = listOf()
-                        f.subList(3, f.size).forEach {
-                            val s = it.split(" ")
-                            c.ownedLands = c.ownedLands.plusElement(Pair(s[0].toInt(), s[1].toInt()))
-                        }
-
-                        onlinePlayers[c.player.uniqueId.toString()] = c
-                    }
-                }
-            }
-        }
-
-        val clanDir = File("plugins/LianMain/clans")
-        if(!(clanDir.exists() && clanDir.isDirectory)){
-            logger.warning("클랜 저장 경로가 없거나 폴더가 아닙니다.")
-
-            if(!clanDir.isDirectory){
-                logger.log(Level.OFF, "클랜 저장 경로와 같은 이름의 파일이 있습니다.")
-                isEnabled = false
-            }
-            else {
-                clanDir.mkdir()
-            }
-        }
-        else {
-            clanDir.listFiles()?.forEach { file ->
-                if(file.name.endsWith(".txt")){
-                    val c = file.readText().split("\n")
-
-                    logger.info(c.size.toString())
-                    clans[c[0].trim()] = Clan(
-                        onlinePlayers[c[0].trim()]!!,
-                        c.subList(2, c.size).map { el ->
-                            logger.info(el)
-                            onlinePlayers[el.trim()]!!
-                        } as MutableList<LianPlayer>,
-                        n = c[1]
-                    )
-                }
-            }
-        }
-
-        playerDir = File("plugins/LianMain/clans")
-        if(!(playerDir.exists() && playerDir.isDirectory)){
-            logger.warning("플레이어 저장 경로가 없거나 폴더가 아닙니다.")
-
-            if(!playerDir.isDirectory){
-                logger.log(Level.OFF, "플레이어 저장 경로와 같은 이름의 파일이 있습니다.")
-                isEnabled = false
-            }
-            else {
-                playerDir.mkdir()
-            }
-        }
-        else {
-            playerDir.listFiles()?.forEach { file ->
-                if(file.name.endsWith(".txt")){
-                    if(onlinePlayers.containsKey(file.readText().split("\n")[0].trim())){
-                        val f = file.readText().split("\n")
-                        if(f[1].trim() != (onlinePlayers[f[0].trim()]!!.clan?.owner?.player?.uniqueId.toString())){
-                            onlinePlayers[f[0].trim()]!!.clan = clans[f[1].trim()]
-                        }
-                    }
-                }
-            }
-        }
+        DataHandler.loadFromFile()
     }
 
     override fun onDisable() {
-        val clanDir = File("plugins/LianMain/clans")
-        if(!(clanDir.exists() && clanDir.isDirectory)){
-            logger.warning("클랜 저장 경로가 없거나 폴더가 아닙니다.")
-
-            if(!clanDir.isDirectory){
-                logger.log(Level.OFF, "클랜 저장 경로와 같은 이름의 파일이 있습니다.")
-                isEnabled = false
-            }
-            else {
-                clanDir.mkdir()
-            }
-        }
-        else {
-            clans.forEach {
-                File("plugins/LianMain/clans/${it.value.owner.player.uniqueId}.txt").writeText(it.toString())
-            }
-        }
-
-        val playerDir = File("plugins/LianMain/clans")
-        if(!(playerDir.exists() && playerDir.isDirectory)){
-            logger.warning("플레이어 저장 경로가 없거나 폴더가 아닙니다.")
-
-            if(!playerDir.isDirectory){
-                logger.log(Level.OFF, "플레이어 저장 경로와 같은 이름의 파일이 있습니다.")
-                isEnabled = false
-            }
-            else {
-                playerDir.mkdir()
-            }
-        }
-        else {
-            onlinePlayers.forEach {
-                File("plugins/LianMain/players/${it.value.player.uniqueId}.txt").writeText(it.value.toString())
-            }
-        }
+        DataHandler.saveToFile()
     }
 
     @EventHandler

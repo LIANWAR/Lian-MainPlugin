@@ -1,26 +1,20 @@
 package com.underconnor.lian.kommands
 
-import com.underconnor.lian.clan.Clan
+import com.underconnor.lian.common.Clan
 import com.underconnor.lian.common.LianPlayer
 import com.underconnor.lian.plugin.KommandInterface
 import io.github.monun.kommand.StringType
 import io.github.monun.kommand.getValue
 import io.github.monun.kommand.kommand
 import net.kyori.adventure.text.Component.text
-import net.kyori.adventure.text.TextComponent
-import net.kyori.adventure.text.TranslatableComponent
-import net.kyori.adventure.text.event.HoverEventSource
 import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.ComponentBuilder
 import net.md_5.bungee.api.chat.HoverEvent
-import net.md_5.bungee.api.chat.hover.content.Content
 import org.bukkit.Material
 import org.bukkit.entity.Player
-import kotlin.reflect.KProperty
 
 /***
  * @author AlphaGot

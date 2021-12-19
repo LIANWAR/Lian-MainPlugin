@@ -26,11 +26,12 @@ object DataHandler {
         }
         else {
             getInstance().clans.forEach {
+                getInstance().logger.info(it.value.toString())
                 File("plugins/LianMain/clans/${it.value.owner.player.uniqueId}.txt").writeText(it.toString())
             }
         }
 
-        val playerDir = File("plugins/LianMain/clans")
+        val playerDir = File("plugins/LianMain/players")
         if(!(playerDir.exists() && playerDir.isDirectory)){
             logger.warning("플레이어 저장 경로가 없거나 폴더가 아닙니다.")
 
@@ -43,6 +44,7 @@ object DataHandler {
         }
         else {
             getInstance().onlinePlayers.forEach {
+                getInstance().logger.info(it.value.toString())
                 File("plugins/LianMain/players/${it.value.player.uniqueId}.txt").writeText(it.value.toString())
             }
         }
@@ -60,6 +62,7 @@ object DataHandler {
         }
         else {
             getInstance().lands.forEach {
+                getInstance().logger.info(it.value.toString())
                 File("plugins/LianMain/lands/${it.key}.txt").writeText(it.value.toString())
             }
         }
@@ -71,7 +74,7 @@ object DataHandler {
             testPluginDir.mkdir()
         }
 
-        var playerDir = File("plugins/LianMain/clans")
+        var playerDir = File("plugins/LianMain/players")
         if(!(playerDir.exists() && playerDir.isDirectory)){
             logger.warning("플레이어 저장 경로가 없거나 폴더가 아닙니다.")
 
@@ -87,8 +90,8 @@ object DataHandler {
                 if(file.name.endsWith(".txt")){
                     if(getInstance().onlinePlayers.none { it.value.player.uniqueId.toString() == file.readText().split("\n")[0] }){
                         val f = file.readText().split("\n")
-                        val c = LianPlayer(getInstance().server.getOfflinePlayer(UUID.fromString(f[0])))
-                        logger.info(getInstance().clans.toString())
+                        val c = LianPlayer(getInstance().server.getOfflinePlayer(UUID.fromString(f[0].split("=")[0])))
+                        logger.info(file.readText())
 
                         c.clan = if (getInstance().clans.any { it.value.owner.player.uniqueId.toString() == f[1] }) {
                             getInstance().clans[f[1]]
@@ -115,11 +118,12 @@ object DataHandler {
         else {
             clanDir.listFiles()?.forEach { file ->
                 if(file.name.endsWith(".txt")){
+                    logger.info(file.readText())
                     val c = file.readText().split("\n")
 
                     logger.info(c.size.toString())
-                    getInstance().clans[c[0].trim()] = Clan(
-                        getInstance().onlinePlayers[c[0].trim()]!!,
+                    getInstance().clans[c[0].split("=")[0].trim()] = Clan(
+                        getInstance().onlinePlayers[c[0].trim().split("=")[0]]!!,
                         c.subList(2, c.size).map { el ->
                             logger.info(el)
                             getInstance().onlinePlayers[el.trim()]!!
@@ -144,6 +148,7 @@ object DataHandler {
         else {
             landDir.listFiles()?.forEach { file ->
                 if(file.name.endsWith(".txt")){
+                    logger.info(file.readText())
                     val c = file.readText().split("\n")
 
                     logger.info(c.size.toString())
@@ -154,11 +159,12 @@ object DataHandler {
                         } as MutableList<LianPlayer>,
                         pos = Pair(c[0].split(" ")[0].toInt(), c[0].split(" ")[1].toInt())
                     )
+                    getInstance().onlinePlayers[c[1]]!!.ownedLand = getInstance().lands[Pair(c[0].split(" ")[0].toInt(), c[0].split(" ")[1].toInt())]!!
                 }
             }
         }
 
-        playerDir = File("plugins/LianMain/clans")
+        playerDir = File("plugins/LianMain/players")
         if(!(playerDir.exists() && playerDir.isDirectory)){
             logger.warning("플레이어 저장 경로가 없거나 폴더가 아닙니다.")
 
@@ -173,11 +179,10 @@ object DataHandler {
         else {
             playerDir.listFiles()?.forEach { file ->
                 if(file.name.endsWith(".txt")){
+                    logger.info("postprocessing" + file.readText())
                     if(getInstance().onlinePlayers.containsKey(file.readText().split("\n")[0].trim())){
                         val f = file.readText().split("\n")
-                        if(f[1].trim() != (getInstance().onlinePlayers[f[0].trim()]!!.clan?.owner?.player?.uniqueId.toString())){
-                            getInstance().onlinePlayers[f[0].trim()]!!.clan = getInstance().clans[f[1].trim()]
-                        }
+                        getInstance().onlinePlayers[f[0].trim()]!!.clan = getInstance().clans[f[1].trim()]
                     }
                 }
             }

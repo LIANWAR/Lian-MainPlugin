@@ -25,7 +25,7 @@ class LandKommand: KommandInterface {
                     executes {
                         val player = getInstance().getPlayer(sender)
 
-                        getInstance().lands.remove(getInstance().onlinePlayers[player.player.uniqueId.toString()]!!.ownedLand!!.loc)
+                        getInstance().lands.remove(getInstance().onlinePlayers[player.player.uniqueId.toString()]!!.ownedLand?.loc)
                         getInstance().onlinePlayers[player.player.uniqueId.toString()]!!.ownedLand = null
 
                         sender.sendMessage(countryText("땅을 초기화했습니다."))

@@ -32,7 +32,7 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
 
             if(!here.allows.contains(getInstance().getPlayer(e.player))){
                 e.isCancelled = true
-                e.player.sendMessage("[${ChatColor.DARK_GREEN}!${ChatColor.RESET}] 땅 주인이 아닙니다.")
+                e.player.sendMessage("[${ChatColor.DARK_GREEN}!${ChatColor.RESET}] 땅 주인이 아닙니다. (땅 주인: ${here.originalOwner.player.name})")
             }
         }
     }
@@ -50,7 +50,7 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
 
             if(!here.allows.contains(getInstance().getPlayer(e.player))){
                 e.isCancelled = true
-                e.player.sendMessage("[${ChatColor.DARK_GREEN}!${ChatColor.RESET}] 땅 주인이 아닙니다.")
+                e.player.sendMessage("[${ChatColor.DARK_GREEN}!${ChatColor.RESET}] 땅 주인이 아닙니다. (땅 주인: ${here.originalOwner.player.name})")
             }
         }
     }
@@ -62,7 +62,7 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
 
             if(!here!!.allows.contains(getInstance().getPlayer(e.player))){
                 e.isCancelled = true
-                e.player.sendMessage("[${ChatColor.DARK_GREEN}!${ChatColor.RESET}] 땅 주인이 아닙니다.")
+                e.player.sendMessage("[${ChatColor.DARK_GREEN}!${ChatColor.RESET}] 땅 주인이 아닙니다. (땅 주인: ${here.originalOwner.player.name})")
             }
         }
     }
@@ -73,7 +73,7 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
             if(e.item?.type == Material.ENCHANTED_BOOK && e.item?.hasItemMeta() == true){
                 if(e.item!!.itemMeta.hasDisplayName()){
                     if(e.item!!.itemMeta.displayName() == text("땅문서").color(NamedTextColor.AQUA).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE)){
-                        if(getInstance().getPlayer(e.player).ownedLand == null){
+                        if(getInstance().getPlayer(e.player).ownedLand == null && getInstance().getPlayer(e.player).clan != null){
                             var already = 0
                             var otherUser = 0
                             e.isCancelled = true
@@ -84,29 +84,37 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
                                         val here = getInstance().getLand(Pair(e.clickedBlock!!.chunk.x + nX, e.clickedBlock!!.chunk.z + nZ))
 
                                         if(!here!!.allows.contains(getInstance().getPlayer(e.player))){
-                                            otherUser++
+                                            e.player.sendMessage(countryText("다른 사람의 땅과 겹쳐서 클레임할 수 없습니다. (땅 주인: ${here.originalOwner})"))
+                                            return
                                         }
                                         else {
                                             already++
                                         }
                                     }
                                     else {
-                                        getInstance().lands[Pair(e.clickedBlock!!.chunk.x + nX, e.clickedBlock!!.chunk.z + nZ)] = Land(
+                                        getInstance().lands[Pair(e.clickedBlock!!.chunk.x, e.clickedBlock!!.chunk.z)] = Land(
                                             getInstance().getPlayer(e.player),
-                                            pos = Pair(e.clickedBlock!!.chunk.x + nX, e.clickedBlock!!.chunk.z + nZ)
+                                            pos = Pair(e.clickedBlock!!.chunk.x, e.clickedBlock!!.chunk.z)
                                         )
-                                        getInstance().onlinePlayers[e.player.uniqueId.toString()]!!.ownedLand = getInstance().lands[Pair(e.clickedBlock!!.chunk.x + nX, e.clickedBlock!!.chunk.z + nZ)]!!
+                                        getInstance().onlinePlayers[e.player.uniqueId.toString()]!!.ownedLand = getInstance().lands[Pair(e.clickedBlock!!.chunk.x, e.clickedBlock!!.chunk.z)]!!
                                     }
                                 }
                             }
 
                             e.player.sendMessage(countryText(
                                 """
-                                    청크 (${e.clickedBlock!!.chunk.x - 1}, ${e.clickedBlock!!.chunk.z - 1})부터 (${e.clickedBlock!!.chunk.x + 1}, ${e.clickedBlock!!.chunk.z + 1}) 범위의 9청크 중 이미 다른 사람이 소유한 $otherUser 청크를 제외하고 총 ${9 - otherUser} 청크를 클레임했습니다.
+                                    청크 (${e.clickedBlock!!.chunk.x - 1}, ${e.clickedBlock!!.chunk.z - 1})부터 (${e.clickedBlock!!.chunk.x + 1}, ${e.clickedBlock!!.chunk.z + 1}) 범위의 9청크를 클레임했습니다.
                                 """.trimIndent()))
+
+                            e.item!!.subtract(1)
                         }
                         else {
-                            e.player.sendMessage(countryText("땅을 이미 갖고 있습니다."))
+                            if(getInstance().getPlayer(e.player).clan == null){
+                                e.player.sendMessage(countryText("클랜에 가입되어있어야만 땅을 클레임할 수 있습니다."))
+                            }
+                            else {
+                                e.player.sendMessage(countryText("땅을 이미 갖고 있습니다."))
+                            }
                         }
                     }
                 }
@@ -123,7 +131,7 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
 
                     if(!here.allows.contains(getInstance().getPlayer(e.player))){
                         e.isCancelled = true
-                        e.player.sendMessage("[${ChatColor.DARK_GREEN}!${ChatColor.RESET}] 땅 주인이 아닙니다.")
+                        e.player.sendMessage("[${ChatColor.DARK_GREEN}!${ChatColor.RESET}] 땅 주인이 아닙니다. (땅 주인: ${here.originalOwner.player.name})")
                     }
                 }
             }

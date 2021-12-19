@@ -12,11 +12,6 @@ class LianPlayer(p: OfflinePlayer){
     //endregion
 
     override fun toString(): String {
-        return """
-            ${player.uniqueId}
-            ${clan?.owner?.player?.uniqueId}
-            $clanChatMode
-            $ownedLand
-        """.trimIndent()
+        return "${player.uniqueId.toString()}\n${clan?.owner?.player?.uniqueId}\n$clanChatMode\n$ownedLand".trim()
     }
 }

@@ -6,10 +6,6 @@ class Land(oo: LianPlayer, o: MutableList<LianPlayer> = mutableListOf(oo), pos: 
     val originalOwner = oo
 
     override fun toString(): String {
-        return """
-            ${loc.first} ${loc.second}
-            ${originalOwner.player.uniqueId}
-            ${allows.map { it.player.uniqueId }.joinToString("\n")}
-        """.trimIndent()
+        return "${loc.first} ${loc.second}\n${originalOwner.player.uniqueId}\n${allows.joinToString("\n") {it.player.uniqueId.toString()}}".trim()
     }
 }

@@ -46,11 +46,9 @@ class ClanKommand: KommandInterface {
                                 sender.sendMessage(clanText("손에 클랜 창설권을 들어주세요."))
                             }
                             else {
-                                getInstance().logger.info(hand.displayName().toString())
                                 if(hand.itemMeta.hasDisplayName()){
                                     if (hand.itemMeta.displayName() != text("클랜 창설권", NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE)) {
                                         sender.sendMessage(clanText("손에 클랜 창설권을 들어주세요."))
-                                        sender.sendMessage((hand.itemMeta.displayName()).toString())
                                     }
                                     else{
                                         val clanName: String by kommandContext
@@ -151,6 +149,16 @@ class ClanKommand: KommandInterface {
                             if(getInstance().invites[p.player.uniqueId.toString()]!!.players.size < 4){
                                 p.clan = getInstance().invites[p.player.uniqueId.toString()]
                                 getInstance().onlinePlayers[p.player.uniqueId.toString()] = p
+                                getInstance().invites[p.player.uniqueId.toString()]!!.players.forEach { player ->
+                                    if(player.ownedLand != null && !player.ownedLand!!.allows.contains(p)){
+                                        getInstance().lands[getInstance().onlinePlayers[player.player.uniqueId.toString()]!!.ownedLand!!.loc]!!.allows.plusAssign(p)
+                                        getInstance().onlinePlayers[player.player.uniqueId.toString()]!!.ownedLand = getInstance().lands[getInstance().onlinePlayers[player.player.uniqueId.toString()]!!.ownedLand!!.loc]!!
+                                    }
+                                    if(p.ownedLand != null && !p.ownedLand!!.allows.contains(player)){
+                                        getInstance().lands[getInstance().onlinePlayers[p.player.uniqueId.toString()]!!.ownedLand!!.loc]!!.allows.plusAssign(player)
+                                        getInstance().onlinePlayers[p.player.uniqueId.toString()]!!.ownedLand = getInstance().lands[getInstance().onlinePlayers[p.player.uniqueId.toString()]!!.ownedLand!!.loc]!!
+                                    }
+                                }
                                 getInstance().clans[getInstance().invites[p.player.uniqueId.toString()]!!.owner.player.uniqueId.toString()]!!.players =
                                     getInstance().clans[getInstance().invites[p.player.uniqueId.toString()]!!.owner.player.uniqueId.toString()]!!.players.plusElement(p) as MutableList<LianPlayer>
                                 getInstance().clans[getInstance().invites[p.player.uniqueId.toString()]!!.owner.player.uniqueId.toString()]!!.players.forEach { pl ->
@@ -189,6 +197,8 @@ class ClanKommand: KommandInterface {
                                 }
                                 getInstance().clans[getInstance().getPlayer(player).clan!!.owner.player.uniqueId.toString()]!!.players.remove(getInstance().getPlayer(player))
                                 player.sendMessage(clanText("클랜에서 나오셨습니다."))
+                                getInstance().lands.remove(getInstance().onlinePlayers[getInstance().getPlayer(player).clan!!.owner.player.uniqueId.toString()]!!.ownedLand?.loc)
+                                getInstance().onlinePlayers[getInstance().getPlayer(player).clan!!.owner.player.uniqueId.toString()]!!.ownedLand = null
                                 getInstance().onlinePlayers[getInstance().getPlayer(player).clan!!.owner.player.uniqueId.toString()]!!.clanChatMode = false
                             }
                         }
@@ -197,6 +207,8 @@ class ClanKommand: KommandInterface {
                         executes {
                             getInstance().clans.remove(getInstance().getPlayer(player).player.uniqueId.toString())
                             getInstance().getPlayer(player).clan!!.players.forEach { pl ->
+                                getInstance().lands.remove(pl.ownedLand?.loc)
+                                getInstance().onlinePlayers[pl.player.uniqueId.toString()]!!.ownedLand = null
                                 getInstance().onlinePlayers[pl.player.uniqueId.toString()]!!.clanChatMode = false
                                 getInstance().onlinePlayers[pl.player.uniqueId.toString()]!!.clan = null
                                 if(pl.player.isOnline){
@@ -246,6 +258,8 @@ class ClanKommand: KommandInterface {
                                     }.clanChatMode = false
 
                                     victim.sendMessage(clanText("클랜에서 추방되었습니다."))
+                                    getInstance().lands.remove(getInstance().getPlayer(victim).ownedLand?.loc)
+                                    getInstance().onlinePlayers[victim.uniqueId.toString()]!!.ownedLand = null
                                     getInstance().getPlayer(player).clan!!.players.forEach {pl ->
                                         if(pl.player.isOnline){
                                             (getInstance().server.onlinePlayers.first { it.uniqueId == pl.player.uniqueId }).sendMessage(clanText("${victim.name}님이 클랜에서 추방되셨습니다."))

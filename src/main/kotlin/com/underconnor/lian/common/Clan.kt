@@ -6,10 +6,6 @@ class Clan(o: LianPlayer, p: MutableList<LianPlayer> = mutableListOf(o), n: Stri
     val name: String = n
 
     override fun toString(): String {
-        return """
-            ${owner.player.uniqueId}
-            $name
-            ${players.joinToString("\n") { it.player.uniqueId.toString() }}
-        """.trimIndent()
+        return "${owner.player.uniqueId.toString()}\n${name}\n${players.joinToString("\n") { it.player.uniqueId.toString() }}\n".trim()
     }
 }

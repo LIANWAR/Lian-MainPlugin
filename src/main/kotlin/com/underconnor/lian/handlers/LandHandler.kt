@@ -30,7 +30,7 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
         if(bArr.isNotEmpty()){
             val here = bArr[0]
 
-            if(!here.allows.contains(getInstance().getPlayer(e.player))){
+            if(!here!!.allows.contains(getInstance().getPlayer(e.player)) && !e.player.isOp){
                 e.isCancelled = true
                 e.player.sendMessage("[${ChatColor.DARK_GREEN}!${ChatColor.RESET}] 땅 주인이 아닙니다. (땅 주인: ${here.originalOwner.player.name})")
             }
@@ -48,7 +48,7 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
         if(bArr.isNotEmpty()){
             val here = bArr[0]
 
-            if(!here.allows.contains(getInstance().getPlayer(e.player))){
+            if(!here!!.allows.contains(getInstance().getPlayer(e.player)) && !e.player.isOp){
                 e.isCancelled = true
                 e.player.sendMessage("[${ChatColor.DARK_GREEN}!${ChatColor.RESET}] 땅 주인이 아닙니다. (땅 주인: ${here.originalOwner.player.name})")
             }
@@ -60,7 +60,7 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
         if(getInstance().getLand(Pair(e.block.chunk.x, e.block.chunk.z)) != null){
             val here = getInstance().getLand(Pair(e.block.chunk.x, e.block.chunk.z))
 
-            if(!here!!.allows.contains(getInstance().getPlayer(e.player))){
+            if(!here!!.allows.contains(getInstance().getPlayer(e.player)) && !e.player.isOp){
                 e.isCancelled = true
                 e.player.sendMessage("[${ChatColor.DARK_GREEN}!${ChatColor.RESET}] 땅 주인이 아닙니다. (땅 주인: ${here.originalOwner.player.name})")
             }
@@ -129,7 +129,7 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
                 if(bArr.isNotEmpty()){
                     val here = bArr[0]
 
-                    if(!here.allows.contains(getInstance().getPlayer(e.player))){
+                    if(!here.allows.contains(getInstance().getPlayer(e.player)) && !e.player.isOp){
                         e.isCancelled = true
                         e.player.sendMessage("[${ChatColor.DARK_GREEN}!${ChatColor.RESET}] 땅 주인이 아닙니다. (땅 주인: ${here.originalOwner.player.name})")
                     }

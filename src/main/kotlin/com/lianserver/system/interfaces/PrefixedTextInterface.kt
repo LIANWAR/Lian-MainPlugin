@@ -1,5 +1,6 @@
-package com.underconnor.lian.plugin
+package com.lianserver.system.interfaces
 
+import com.lianserver.system.plugin.LianPlugin
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 

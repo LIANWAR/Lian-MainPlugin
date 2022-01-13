@@ -1,12 +1,9 @@
-package com.underconnor.lian.handlers
+package com.lianserver.system.handlers
 
-import com.underconnor.lian.common.Land
-import com.underconnor.lian.plugin.HandlerInterface
-import com.underconnor.lian.plugin.PrefixedTextInterface
-import net.kyori.adventure.text.Component
+import com.lianserver.system.common.Land
+import com.lianserver.system.interfaces.HandlerInterface
+import com.lianserver.system.interfaces.PrefixedTextInterface
 import net.kyori.adventure.text.Component.text
-import net.kyori.adventure.text.TextComponent
-import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.ChatColor

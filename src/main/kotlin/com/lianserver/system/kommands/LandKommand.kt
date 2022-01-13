@@ -1,14 +1,10 @@
-package com.underconnor.lian.kommands
+package com.lianserver.system.kommands
 
-import com.underconnor.lian.plugin.KommandInterface
-import com.underconnor.lian.plugin.LianPlugin
+import com.lianserver.system.interfaces.KommandInterface
 import io.github.monun.kommand.getValue
 import io.github.monun.kommand.kommand
-import net.kyori.adventure.text.Component.text
-import net.kyori.adventure.text.TextComponent
 import net.md_5.bungee.api.ChatColor
 import org.bukkit.entity.Player
-import org.bukkit.plugin.Plugin
 
 /***
  * @author AlphaGot

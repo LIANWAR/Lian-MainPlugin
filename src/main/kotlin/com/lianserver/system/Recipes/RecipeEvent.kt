@@ -1,6 +1,6 @@
-package com.underconnor.lian.Recipes
+package com.lianserver.system.Recipes
 
-import com.underconnor.lian.plugin.LianPlugin
+import com.lianserver.system.plugin.LianPlugin
 import org.bukkit.Material
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener

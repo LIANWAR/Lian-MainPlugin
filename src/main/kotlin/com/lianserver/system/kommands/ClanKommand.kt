@@ -1,8 +1,8 @@
-package com.underconnor.lian.kommands
+package com.lianserver.system.kommands
 
-import com.underconnor.lian.common.Clan
-import com.underconnor.lian.common.LianPlayer
-import com.underconnor.lian.plugin.KommandInterface
+import com.lianserver.system.common.Clan
+import com.lianserver.system.common.LianPlayer
+import com.lianserver.system.interfaces.KommandInterface
 import io.github.monun.kommand.StringType
 import io.github.monun.kommand.getValue
 import io.github.monun.kommand.kommand

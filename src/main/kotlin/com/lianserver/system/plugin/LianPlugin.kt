@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package com.underconnor.lian.plugin
+package com.lianserver.system.plugin
 
-import com.underconnor.lian.Recipes.RecipeEvent
-import com.underconnor.lian.Recipes.RecipeObject
-import com.underconnor.lian.common.Clan
-import com.underconnor.lian.common.Land
-import com.underconnor.lian.common.LianPlayer
-import com.underconnor.lian.events.SampleEvent
-import com.underconnor.lian.handlers.DataHandler
+import com.lianserver.system.Recipes.RecipeEvent
+import com.lianserver.system.Recipes.RecipeObject
+import com.lianserver.system.common.Clan
+import com.lianserver.system.common.Country
+import com.lianserver.system.common.Land
+import com.lianserver.system.common.LianPlayer
+import com.lianserver.system.handlers.DataHandler
+import com.lianserver.system.interfaces.HandlerInterface
+import com.lianserver.system.interfaces.KommandInterface
 import io.papermc.paper.event.player.AsyncChatEvent
 import net.kyori.adventure.text.Component.text
 import org.bukkit.Bukkit
@@ -54,9 +56,14 @@ class LianPlugin : JavaPlugin(), Listener {
     val lands: MutableMap<Pair<Int, Int>, Land> = mutableMapOf()
     private val configFile = File(dataFolder, "config.yml")
     val onlinePlayers: MutableMap<String, LianPlayer> = mutableMapOf()
+
     var clans: MutableMap<String, Clan> = mutableMapOf()
     var invites: MutableMap<String, Clan> = mutableMapOf()
     var invitesTaskId: MutableMap<String, Int> = mutableMapOf()
+
+    var countries: MutableMap<String, Country> = mutableMapOf()
+    var invitesCountry: MutableMap<String, Country> = mutableMapOf()
+    var invitesCountryTaskId: MutableMap<String, Int> = mutableMapOf()
 
     fun getPlayer(sender: CommandSender) = onlinePlayers[(sender as Player).uniqueId.toString()]!!
     fun getPlayer(sender: Player) = onlinePlayers[(sender as Player).uniqueId.toString()]!!
@@ -80,7 +87,6 @@ class LianPlugin : JavaPlugin(), Listener {
     override fun onEnable() {
         instance = this
         logger.info("${this.config.getString("admin_prefix")}")
-        server.pluginManager.registerEvents(SampleEvent(), this)
 
         var reflections = Reflections("com.underconnor.lian.kommands")
 
@@ -156,6 +162,14 @@ class LianPlugin : JavaPlugin(), Listener {
             getPlayer(e.player).clan!!.players.forEach { lianPlayer ->
                 if(lianPlayer.player.isOnline){
                     server.onlinePlayers.first { it.uniqueId == lianPlayer.player.uniqueId }.sendMessage(text("${ChatColor.AQUA}[클랜] ${ChatColor.LIGHT_PURPLE}${e.player.name}${ChatColor.RESET}: ").append(e.message()))
+                }
+            }
+            e.isCancelled = true
+        }
+        else if(getPlayer(e.player).clanChatMode && getPlayer(e.player).country != null){
+            getPlayer(e.player).country!!.players.forEach { lianPlayer ->
+                if(lianPlayer.player.isOnline){
+                    server.onlinePlayers.first { it.uniqueId == lianPlayer.player.uniqueId }.sendMessage(text("${ChatColor.GOLD}[국가] ${ChatColor.LIGHT_PURPLE}${e.player.name}${ChatColor.RESET}: ").append(e.message()))
                 }
             }
             e.isCancelled = true

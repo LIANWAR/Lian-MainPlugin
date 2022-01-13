@@ -1,4 +1,4 @@
-package com.underconnor.lian.common
+package com.lianserver.system.common
 
 class Land(oo: LianPlayer, o: MutableList<LianPlayer> = mutableListOf(oo), pos: Pair<Int, Int>) {
     val loc = pos

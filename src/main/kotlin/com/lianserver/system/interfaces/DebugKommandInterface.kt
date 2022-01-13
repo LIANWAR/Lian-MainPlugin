@@ -1,4 +1,4 @@
-package com.underconnor.lian.plugin
+package com.lianserver.system.interfaces
 
 import net.kyori.adventure.text.Component
 import org.bukkit.ChatColor

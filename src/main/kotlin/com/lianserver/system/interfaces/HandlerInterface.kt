@@ -1,5 +1,6 @@
-package com.underconnor.lian.plugin
+package com.lianserver.system.interfaces
 
+import com.lianserver.system.plugin.LianPlugin
 import org.bukkit.event.Listener
 
 interface HandlerInterface: Listener {

@@ -1,10 +1,8 @@
-package com.underconnor.lian.kommands
+package com.lianserver.system.kommands
 
-import com.underconnor.lian.plugin.DebugKommandInterface
+import com.lianserver.system.interfaces.DebugKommandInterface
 import io.github.monun.kommand.kommand
 import net.kyori.adventure.text.Component
-import org.bukkit.ChatColor
-import org.bukkit.command.CommandSender
 
 class debugKommand: DebugKommandInterface {
     override fun kommand() {

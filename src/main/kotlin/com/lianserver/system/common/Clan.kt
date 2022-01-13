@@ -1,4 +1,4 @@
-package com.underconnor.lian.common
+package com.lianserver.system.common
 
 class Clan(o: LianPlayer, p: MutableList<LianPlayer> = mutableListOf(o), n: String){
     var owner: LianPlayer = o

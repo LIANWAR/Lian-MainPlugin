@@ -1,6 +1,6 @@
-package com.underconnor.lian.Recipes
+package com.lianserver.system.Recipes
 
-import com.underconnor.lian.plugin.LianPlugin
+import com.lianserver.system.plugin.LianPlugin
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration

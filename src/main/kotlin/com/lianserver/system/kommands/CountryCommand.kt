@@ -103,16 +103,6 @@ class CountryCommand: KommandInterface {
                             if(getInstance().invitesCountry[p.player.uniqueId.toString()]!!.players.size < 4){
                                 p.country = getInstance().invitesCountry[p.player.uniqueId.toString()]
                                 getInstance().onlinePlayers[p.player.uniqueId.toString()] = p
-                                getInstance().invitesCountry[p.player.uniqueId.toString()]!!.players.forEach { player ->
-                                    if(player.ownedLand != null && !player.ownedLand!!.allows.contains(p)){
-                                        getInstance().lands[getInstance().onlinePlayers[player.player.uniqueId.toString()]!!.ownedLand!!.loc]!!.allows.plusAssign(p)
-                                        getInstance().onlinePlayers[player.player.uniqueId.toString()]!!.ownedLand = getInstance().lands[getInstance().onlinePlayers[player.player.uniqueId.toString()]!!.ownedLand!!.loc]!!
-                                    }
-                                    if(p.ownedLand != null && !p.ownedLand!!.allows.contains(player)){
-                                        getInstance().lands[getInstance().onlinePlayers[p.player.uniqueId.toString()]!!.ownedLand!!.loc]!!.allows.plusAssign(player)
-                                        getInstance().onlinePlayers[p.player.uniqueId.toString()]!!.ownedLand = getInstance().lands[getInstance().onlinePlayers[p.player.uniqueId.toString()]!!.ownedLand!!.loc]!!
-                                    }
-                                }
                                 getInstance().countries[getInstance().invitesCountry[p.player.uniqueId.toString()]!!.owner.player.uniqueId.toString()]!!.players =
                                     getInstance().countries[getInstance().invitesCountry[p.player.uniqueId.toString()]!!.owner.player.uniqueId.toString()]!!.players.plusElement(p) as MutableList<LianPlayer>
                                 getInstance().countries[getInstance().invitesCountry[p.player.uniqueId.toString()]!!.owner.player.uniqueId.toString()]!!.players.forEach { pl ->
@@ -151,8 +141,6 @@ class CountryCommand: KommandInterface {
                                 }
                                 getInstance().countries[getInstance().getPlayer(player).country!!.owner.player.uniqueId.toString()]!!.players.remove(getInstance().getPlayer(player))
                                 player.sendMessage(countryText("국가에서 나오셨습니다."))
-                                getInstance().lands.remove(getInstance().onlinePlayers[getInstance().getPlayer(player).country!!.owner.player.uniqueId.toString()]!!.ownedLand?.loc)
-                                getInstance().onlinePlayers[getInstance().getPlayer(player).country!!.owner.player.uniqueId.toString()]!!.ownedLand = null
                                 getInstance().onlinePlayers[getInstance().getPlayer(player).country!!.owner.player.uniqueId.toString()]!!.clanChatMode = false
                             }
                         }
@@ -161,8 +149,6 @@ class CountryCommand: KommandInterface {
                         executes {
                             getInstance().countries.remove(getInstance().getPlayer(player).player.uniqueId.toString())
                             getInstance().getPlayer(player).country!!.players.forEach { pl ->
-                                getInstance().lands.remove(pl.ownedLand?.loc)
-                                getInstance().onlinePlayers[pl.player.uniqueId.toString()]!!.ownedLand = null
                                 getInstance().onlinePlayers[pl.player.uniqueId.toString()]!!.clanChatMode = false
                                 getInstance().onlinePlayers[pl.player.uniqueId.toString()]!!.country = null
                                 if(pl.player.isOnline){
@@ -212,8 +198,6 @@ class CountryCommand: KommandInterface {
                                     }.clanChatMode = false
 
                                     victim.sendMessage(countryText("국가에서 추방되었습니다."))
-                                    getInstance().lands.remove(getInstance().getPlayer(victim).ownedLand?.loc)
-                                    getInstance().onlinePlayers[victim.uniqueId.toString()]!!.ownedLand = null
                                     getInstance().getPlayer(player).country!!.players.forEach {pl ->
                                         if(pl.player.isOnline){
                                             (getInstance().server.onlinePlayers.first { it.uniqueId == pl.player.uniqueId }).sendMessage(countryText("${victim.name}님이 국가에서 추방되셨습니다."))

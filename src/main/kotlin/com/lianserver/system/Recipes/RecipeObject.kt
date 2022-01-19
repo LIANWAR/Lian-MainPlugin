@@ -83,23 +83,22 @@ object RecipeObject {
         return recipe
     }
 
-    fun land_doc(): Recipe {
+    fun country_doc(): Recipe {
         val key = NamespacedKey(getInstance(), "land_document")
         val item = ItemStack(Material.ENCHANTED_BOOK)
         val meta = item.itemMeta
 
         // 조합법 팁
-        meta.displayName(text("땅문서", NamedTextColor.AQUA).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE))
+        meta.displayName(text("국가 창설권", NamedTextColor.AQUA).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE))
 
         item.itemMeta = meta
         val recipe = ShapedRecipe(key, item)
 
-        recipe.shape("SSS", "DBD", "RIR")
-        recipe.setIngredient('S', Material.DIRT)
+        recipe.shape("OEO", "DBD", "OEO")
+        recipe.setIngredient('O', Material.OBSIDIAN)
+        recipe.setIngredient('E', Material.END_CRYSTAL)
         recipe.setIngredient('D', Material.DIAMOND)
         recipe.setIngredient('B', Material.WRITABLE_BOOK)
-        recipe.setIngredient('R', Material.STONE)
-        recipe.setIngredient('I', Material.IRON_SHOVEL)
 
         return recipe
     }

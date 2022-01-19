@@ -22,13 +22,13 @@ class AdminKommand: KommandInterface {
                         if(sender.isOp){
                             val player: Player by it
 
-                            if(getInstance().getPlayer(player).ownedLand == null){
+                            /*if(getInstance().getPlayer(player).ownedLand == null){
                                 sender.sendMessage(adminText("해당 플레이어가 땅을 소유하고 있지 않습니다."))
                             }
                             else {
                                 getInstance().lands.remove(getInstance().onlinePlayers[player.uniqueId.toString()]!!.ownedLand!!.loc)
                                 getInstance().onlinePlayers[player.uniqueId.toString()]!!.ownedLand = null
-                            }
+                            }*/
                         }
                     }
                 }

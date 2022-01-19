@@ -20,7 +20,6 @@ import com.lianserver.system.Recipes.RecipeEvent
 import com.lianserver.system.Recipes.RecipeObject
 import com.lianserver.system.common.Clan
 import com.lianserver.system.common.Country
-import com.lianserver.system.common.Land
 import com.lianserver.system.common.LianPlayer
 import com.lianserver.system.handlers.DataHandler
 import com.lianserver.system.interfaces.HandlerInterface
@@ -53,7 +52,6 @@ class LianPlugin : JavaPlugin(), Listener {
             private set
     }
 
-    val lands: MutableMap<Pair<Int, Int>, Land> = mutableMapOf()
     private val configFile = File(dataFolder, "config.yml")
     val onlinePlayers: MutableMap<String, LianPlayer> = mutableMapOf()
 
@@ -68,20 +66,29 @@ class LianPlugin : JavaPlugin(), Listener {
     fun getPlayer(sender: CommandSender) = onlinePlayers[(sender as Player).uniqueId.toString()]!!
     fun getPlayer(sender: Player) = onlinePlayers[(sender as Player).uniqueId.toString()]!!
 
-    fun getPlayerByFile(p: String  /* UUID */): LianPlayer {
-        val f = File("plugins/LianMain/players/${p}.txt").readText().split("\n")
-        onlinePlayers[p] = LianPlayer(server.offlinePlayers.filter { it.uniqueId.toString() == p }[0])
-        return LianPlayer(server.offlinePlayers.filter { it.uniqueId.toString() == p }[0])
-    }
-
-    fun getLand(p: Pair<Int, Int>): Land? {
-        val bArr = lands.filter {
-            arrayOf(it.key.first - 1, it.key.first, it.key.first + 1).contains(p.first) && arrayOf(it.key.second - 1, it.key.second, it.key.second + 1).contains(p.second)
-        }.map {
-            it.value
+    fun getLandOwned(p: Pair<Int?, Int?>): Pair<Clan?, Country?>{
+        var ret: Pair<Clan?, Country?> = Pair(null, null)
+        clans.forEach {
+            for (x in -1..1){
+                for (z in -1..1){
+                    if(it.value.land == Pair<Int, Int>(p.first?.plus(x) ?: 2147483647, p.second?.plus(z) ?: 2147483647)){
+                        ret = Pair(it.value, null)
+                        return ret
+                    }
+                }
+            }
         }
-
-        return if(bArr.isEmpty()) null else { bArr[0] }
+        countries.forEach {
+            for (x in -1..1){
+                for (z in -1..1){
+                    if(it.value.land == Pair<Int, Int>(p.first?.plus(x) ?: 2147483647, p.second?.plus(z) ?: 2147483647)){
+                        ret = Pair(null, it.value)
+                        return ret
+                    }
+                }
+            }
+        }
+        return ret
     }
 
     override fun onEnable() {

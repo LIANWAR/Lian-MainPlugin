@@ -2,7 +2,6 @@ package com.lianserver.system.handlers
 
 import com.lianserver.system.common.Clan
 import com.lianserver.system.common.Country
-import com.lianserver.system.common.Land
 import com.lianserver.system.common.LianPlayer
 import com.lianserver.system.plugin.LianPlugin
 import java.io.File
@@ -39,15 +38,6 @@ object DataHandler {
         getInstance().onlinePlayers.forEach {
             getInstance().logger.info(it.value.toString())
             File("plugins/LianMain/players/${it.value.player.uniqueId}.txt").writeText(it.value.toString())
-        }
-
-        val landDir = File("plugins/LianMain/lands")
-
-        landDir.deleteRecursively()
-        landDir.mkdir()
-        getInstance().lands.forEach {
-            getInstance().logger.info(it.value.toString())
-            File("plugins/LianMain/lands/${it.key}.txt").writeText(it.value.toString())
         }
     }
     
@@ -106,8 +96,13 @@ object DataHandler {
 
                     logger.info(c.size.toString())
                     getInstance().clans[c[0].split("=")[0].trim()] = Clan(
-                        getInstance().onlinePlayers[c[0].trim().split("=")[0]]!!,
-                        c.subList(2, c.size).map { el ->
+                        o = getInstance().onlinePlayers[c[0].trim().split("=")[0]]!!,
+                        l = if (c[1] != "null"){
+                            Pair<Int, Int>(c[1].split(", ")[0].toInt(), c[1].split(", ")[1].toInt())
+                        } else {
+                               null
+                        },
+                        p = c.subList(3, c.size).map { el ->
                             logger.info(el)
                             getInstance().onlinePlayers[el.trim()]!!
                         } as MutableList<LianPlayer>,
@@ -137,43 +132,18 @@ object DataHandler {
                     logger.info(c.size.toString())
                     getInstance().countries[c[0].split("=")[0].trim()] = Country(
                         getInstance().onlinePlayers[c[0].trim().split("=")[0]]!!,
-                        c.subList(3, c.size).map { el ->
+                        l = if (c[1] != "null"){
+                            Pair<Int, Int>(c[1].split(", ")[0].toInt(), c[1].split(", ")[1].toInt())
+                        } else {
+                            null
+                        },
+                        c.subList(4, c.size).map { el ->
                             logger.info(el)
                             getInstance().onlinePlayers[el.trim()]!!
                         } as MutableList<LianPlayer>,
-                        n = c[1],
-                        d = c[2].toInt()
+                        n = c[2],
+                        d = c[3].toInt()
                     )
-                }
-            }
-        }
-
-        val landDir = File("plugins/LianMain/lands")
-        if(!(landDir.exists() && landDir.isDirectory)){
-            logger.warning("땅 저장 경로가 없거나 폴더가 아닙니다.")
-
-            if(!landDir.isDirectory){
-                logger.log(Level.OFF, "땅 저장 경로와 같은 이름의 파일이 있습니다.")
-            }
-            else {
-                landDir.mkdir()
-            }
-        }
-        else {
-            landDir.listFiles()?.forEach { file ->
-                if(file.name.endsWith(".txt")){
-                    logger.info(file.readText())
-                    val c = file.readText().split("\n")
-
-                    logger.info(c.size.toString())
-                    getInstance().lands[Pair(c[0].split(" ")[0].toInt(), c[0].split(" ")[1].toInt())] = Land(
-                        oo = getInstance().onlinePlayers[c[1]]!!,
-                        o = c.subList(2, c.size).map {
-                            getInstance().onlinePlayers[it]!!
-                        } as MutableList<LianPlayer>,
-                        pos = Pair(c[0].split(" ")[0].toInt(), c[0].split(" ")[1].toInt())
-                    )
-                    getInstance().onlinePlayers[c[1]]!!.ownedLand = getInstance().lands[Pair(c[0].split(" ")[0].toInt(), c[0].split(" ")[1].toInt())]!!
                 }
             }
         }

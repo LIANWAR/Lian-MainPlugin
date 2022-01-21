@@ -23,10 +23,12 @@ import org.bukkit.event.player.PlayerInteractEvent
 
 class WarHandler: HandlerInterface, PrefixedTextInterface {
     @EventHandler
-    fun onHit(e: EntityDamageByEntityEvent){
-        if(e.damager is Player && e.entity is ArmorStand){
-            if(e.entity.scoreboardTags.contains("lian_flag")){
-                val fw = e.entity.world.spawnEntity(e.entity.location.add(0.0, 0.2, 0.0), EntityType.FIREWORK) as Firework
+    fun onHit(e: PlayerInteractAtEntityEvent){
+		getInstance().logger.info("asdf")
+        if(e.rightClicked is ArmorStand){
+			getInstance().logger.info(e.rightClicked.toString())
+            if(e.rightClicked.scoreboardTags.contains("lian_flag")){
+                val fw = e.rightClicked.world.spawnEntity(e.rightClicked.location.add(0.0, 0.2, 0.0), EntityType.FIREWORK) as Firework
 
                 val meta = fw.fireworkMeta
                 meta.power = 2
@@ -36,7 +38,7 @@ class WarHandler: HandlerInterface, PrefixedTextInterface {
 
                 fw.fireworkMeta = meta
                 fw.detonate()
-                (e.entity as ArmorStand).damage(Double.MAX_VALUE)
+                (e.rightClicked as ArmorStand).damage(Double.MAX_VALUE)
             }
         }
     }

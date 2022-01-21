@@ -72,7 +72,7 @@ class CountryCommand: KommandInterface {
                                         sender.sendMessage(countryText("초대장을 보냈습니다."))
                                         if(getInstance().getPlayer(target).player.isOnline){
                                             val p = getInstance().server.onlinePlayers.first { it.uniqueId == getInstance().getPlayer(target).player.uniqueId }
-                                            p.sendMessage(countryText("${sender.name}님이 국가 초대장을 보냈습니다. (${getInstance().getPlayer(sender).country!!.name} 클랜)"))
+                                            p.sendMessage(countryText("${sender.name}님이 국가 초대장을 보냈습니다. (${getInstance().getPlayer(sender).country!!.name} 국가)"))
                                             val clickComp = net.md_5.bungee.api.chat.TextComponent("[ 수락 ]")
                                             clickComp.color = ChatColor.GREEN
                                             clickComp.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentBuilder("국가 수락하기").create())

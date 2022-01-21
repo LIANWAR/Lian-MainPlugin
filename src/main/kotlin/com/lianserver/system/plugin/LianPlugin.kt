@@ -106,7 +106,7 @@ class LianPlugin : JavaPlugin(), Listener {
             clazz.getDeclaredConstructor().newInstance().kommand()
         }
 
-        reflections = Reflections("com.underconnor.lian.handlers")
+        reflections = Reflections("com.lianserver.system.handlers")
 
         reflections.getSubTypesOf(
             HandlerInterface::class.java
@@ -165,6 +165,11 @@ class LianPlugin : JavaPlugin(), Listener {
 
     @EventHandler
     fun onChat(e: AsyncChatEvent){
+        if(e.player.isOp){
+            e.message(text("${ChatColor.DARK_GREEN}[관리자] ${ChatColor.RED}${e.player.name}${ChatColor.RESET}: ").append(e.message()))
+            e.isCancelled = true
+        }
+
         if(getPlayer(e.player).clanChatMode && getPlayer(e.player).clan != null){
             getPlayer(e.player).clan!!.players.forEach { lianPlayer ->
                 if(lianPlayer.player.isOnline){
@@ -172,6 +177,7 @@ class LianPlugin : JavaPlugin(), Listener {
                 }
             }
             e.isCancelled = true
+            return
         }
         else if(getPlayer(e.player).clanChatMode && getPlayer(e.player).country != null){
             getPlayer(e.player).country!!.players.forEach { lianPlayer ->
@@ -180,6 +186,7 @@ class LianPlugin : JavaPlugin(), Listener {
                 }
             }
             e.isCancelled = true
+            return
         }
     }
 }

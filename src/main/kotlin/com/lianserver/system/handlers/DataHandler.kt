@@ -3,8 +3,10 @@ package com.lianserver.system.handlers
 import com.lianserver.system.common.Clan
 import com.lianserver.system.common.Country
 import com.lianserver.system.common.LianPlayer
+import com.lianserver.system.common.War
 import com.lianserver.system.plugin.LianPlugin
 import java.io.File
+import java.time.LocalDateTime
 import java.util.*
 import java.util.logging.Level
 
@@ -39,6 +41,15 @@ object DataHandler {
             getInstance().logger.info(it.value.toString())
             File("plugins/LianMain/players/${it.value.player.uniqueId}.txt").writeText(it.value.toString())
         }
+
+        val war = File("plugins/LianMain/wars")
+        war.deleteRecursively()
+
+        war.mkdir()
+        getInstance().wars.forEach {
+            getInstance().logger.info(it.toString())
+            File("plugins/LianMain/wars/${it.countries.first.owner.player.uniqueId}.txt").writeText(it.toString())
+        }
     }
     
     fun loadFromFile(){
@@ -71,6 +82,11 @@ object DataHandler {
                         }
                         else null
 
+                        c.country = if (getInstance().countries.any { it.value.owner.player.uniqueId.toString() == f[2] }) {
+                            getInstance().countries[f[2]]
+                        }
+                        else null
+
                         getInstance().onlinePlayers[c.player.uniqueId.toString()] = c
                     }
                 }
@@ -92,13 +108,14 @@ object DataHandler {
             clanDir.listFiles()?.forEach { file ->
                 if(file.name.endsWith(".txt")){
                     logger.info(file.readText())
-                    val c = file.readText().split("\n")
+                    val c = file.readText().split("\n").toMutableList()
 
                     logger.info(c.size.toString())
                     getInstance().clans[c[0].split("=")[0].trim()] = Clan(
                         o = getInstance().onlinePlayers[c[0].trim().split("=")[0]]!!,
                         l = if (c[1] != "null"){
-                            Pair<Int, Int>(c[1].split(", ")[0].toInt(), c[1].split(", ")[1].toInt())
+                            c[1] = c[1].replace("(", "").replace(")", "")
+                            Pair(c[1].split(", ")[0].toInt(), c[1].split(", ")[1].toInt())
                         } else {
                                null
                         },
@@ -127,22 +144,24 @@ object DataHandler {
             countryDir.listFiles()?.forEach { file ->
                 if(file.name.endsWith(".txt")){
                     logger.info(file.readText())
-                    val c = file.readText().split("\n")
+                    val c = file.readText().split("\n").toMutableList()
 
                     logger.info(c.size.toString())
                     getInstance().countries[c[0].split("=")[0].trim()] = Country(
                         getInstance().onlinePlayers[c[0].trim().split("=")[0]]!!,
-                        l = if (c[1] != "null"){
-                            Pair<Int, Int>(c[1].split(", ")[0].toInt(), c[1].split(", ")[1].toInt())
+                        land = if (c[1] != "null"){
+                            c[1] = c[1].replace("(", "").replace(")", "")
+                            Pair(c[1].split(", ")[0].toInt(), c[1].split(", ")[1].toInt())
                         } else {
                             null
                         },
-                        c.subList(4, c.size).map { el ->
+                        players = c.subList(5, c.size).map { el ->
                             logger.info(el)
                             getInstance().onlinePlayers[el.trim()]!!
                         } as MutableList<LianPlayer>,
-                        n = c[2],
-                        d = c[3].toInt()
+                        name = c[2],
+                        warDeclarationDenyCount = c[3].toInt(),
+                        lastWarDeclaratedTime = Date(c[4].toLong())
                     )
                 }
             }
@@ -177,6 +196,32 @@ object DataHandler {
                             }
                         }
                     }
+                }
+            }
+        }
+        
+        val warDir = File("plugins/LianMain/wars")
+        if(!(warDir.exists() && warDir.isDirectory)){
+            logger.warning("전쟁 저장 경로가 없거나 폴더가 아닙니다.")
+
+            if(!warDir.isDirectory){
+                logger.log(Level.OFF, "전쟁 저장 경로와 같은 이름의 파일이 있습니다.")
+            }
+            else {
+                warDir.mkdir()
+            }
+        }
+        else {
+            warDir.listFiles()?.forEach { file ->
+                if(file.name.endsWith(".txt")){
+                    val c = file.readText().split("\n")
+                    
+                    getInstance().wars.add(
+                        War(
+                            Date(c[0].toLong()),
+                            Pair(getInstance().countries[c[1].split(" ")[0]]!!, getInstance().countries[c[1].split(" ")[1]]!!)
+                        )
+                    )
                 }
             }
         }

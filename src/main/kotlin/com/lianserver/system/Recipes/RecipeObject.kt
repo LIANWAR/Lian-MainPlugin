@@ -118,7 +118,7 @@ object RecipeObject {
         recipe.shape("OEO", "DBD", "OEO")
         recipe.setIngredient('O', Material.OBSIDIAN)
         recipe.setIngredient('E', Material.END_CRYSTAL)
-        recipe.setIngredient('D', Material.DIAMOND)
+        recipe.setIngredient('D', Material.DIAMOND_SWORD)
         recipe.setIngredient('B', Material.WRITABLE_BOOK)
 
         return recipe

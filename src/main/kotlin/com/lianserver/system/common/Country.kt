@@ -1,13 +1,9 @@
 package com.lianserver.system.common
 
-class Country(o: LianPlayer, l: Pair<Int, Int>?, p: MutableList<LianPlayer> = mutableListOf(o), n: String, d: Int = 0){
-    var owner: LianPlayer = o
-    var players: MutableList<LianPlayer> = p
-    var land: Pair<Int, Int>? = l
-    val name: String = n
-    var warDeclarationDenyCount: Int = d
+import java.util.*
 
+data class Country(val owner: LianPlayer, var land: Pair<Int, Int>?, var players: MutableList<LianPlayer> = mutableListOf(owner), val name: String, var warDeclarationDenyCount: Int = 0, var lastWarDeclaratedTime: Date = Date(0L)){
     override fun toString(): String {
-        return "${owner.player.uniqueId.toString()}\n${land}\n${name}\n${warDeclarationDenyCount}\n${players.joinToString("\n") { it.player.uniqueId.toString() }}\n".trim()
+        return "${owner.player.uniqueId}\n${land}\n${name}\n${warDeclarationDenyCount}\n${lastWarDeclaratedTime.time}\n${players.joinToString("\n") { it.player.uniqueId.toString() }}".trim()
     }
 }

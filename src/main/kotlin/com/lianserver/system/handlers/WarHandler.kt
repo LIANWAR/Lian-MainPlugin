@@ -24,21 +24,72 @@ import org.bukkit.event.player.PlayerInteractEvent
 class WarHandler: HandlerInterface, PrefixedTextInterface {
     @EventHandler
     fun onHit(e: PlayerInteractAtEntityEvent){
-		getInstance().logger.info("asdf")
         if(e.rightClicked is ArmorStand){
-			getInstance().logger.info(e.rightClicked.toString())
             if(e.rightClicked.scoreboardTags.contains("lian_flag")){
-                val fw = e.rightClicked.world.spawnEntity(e.rightClicked.location.add(0.0, 0.2, 0.0), EntityType.FIREWORK) as Firework
+                if(getInstance().getPlayer(e.player).country != null){
+                    if(arrayOf(
+                            Pair(getInstance().getPlayer(e.player).country!!, getInstance().countries[e.rightClicked.scoreboardTags.elementAt(1)]!!),
+                            Pair(getInstance().countries[e.rightClicked.scoreboardTags.elementAt(1)]!!, getInstance().getPlayer(e.player).country!!)
+                            ).contains(getInstance().getWar(getInstance().getPlayer(e.player).country!!.owner.player.uniqueId.toString())?.countries)){
+                        val fw = e.rightClicked.world.spawnEntity(e.rightClicked.location.add(0.0, 0.2, 0.0), EntityType.FIREWORK) as Firework
 
-                val meta = fw.fireworkMeta
-                meta.power = 2
-                meta.addEffect(
-                    FireworkEffect.builder().withColor(Color.RED, Color.YELLOW, Color.GREEN, Color.BLUE).flicker(true).build()
-                )
+                        val meta = fw.fireworkMeta
+                        meta.power = 2
+                        meta.addEffect(
+                            FireworkEffect.builder().withColor(Color.RED, Color.YELLOW, Color.GREEN, Color.BLUE).flicker(true).with(FireworkEffect.Type.BALL_LARGE).build()
+                        )
 
-                fw.fireworkMeta = meta
-                fw.detonate()
-                (e.rightClicked as ArmorStand).damage(Double.MAX_VALUE)
+                        fw.fireworkMeta = meta
+                        fw.detonate()
+                        (e.rightClicked as ArmorStand).remove()
+                        
+                        val w = getInstance().getWar(getInstance().getPlayer(e.player).country!!.owner.player.uniqueId.toString())
+                        val t = e.rightClicked.scoreboardTags.elementAt(1)
+                        
+                        if(w == null){
+                            return
+                        }
+                        
+                        if(w.countries.first.owner.player.uniqueId.toString() == t){
+                            w.countries.first.players.forEach { 
+                                if(it.player.isOnline){
+                                    val i = it
+                                    
+                                    getInstance().server.onlinePlayers.first { it.uniqueId == i.player.uniqueId }.sendTitle("${ChatColor.RED}전쟁 패배", "${ChatColor.DARK_GRAY}국가가 결국 멸망했습니다.", 25, 75, 20)
+                                }
+                            }
+
+                            w.countries.second.players.forEach {
+                                if(it.player.isOnline){
+                                    val i = it
+
+                                    getInstance().server.onlinePlayers.first { it.uniqueId == i.player.uniqueId }.sendTitle("${ChatColor.AQUA}전쟁 승리", "${ChatColor.DARK_GRAY}국가가 또 하나의 승리를 이루어냈습니다.", 25, 75, 20)
+                                }
+                            }
+
+                            getInstance().countries.remove(w.countries.first.owner.player.uniqueId.toString())
+                        }
+                        else {
+                            w.countries.second.players.forEach {
+                                if(it.player.isOnline){
+                                    val i = it
+
+                                    getInstance().server.onlinePlayers.first { it.uniqueId == i.player.uniqueId }.sendTitle("${ChatColor.RED}전쟁 패배", "${ChatColor.DARK_GRAY}국가가 결국 멸망했습니다.", 25, 75, 20)
+                                }
+                            }
+
+                            w.countries.first.players.forEach {
+                                if(it.player.isOnline){
+                                    val i = it
+
+                                    getInstance().server.onlinePlayers.first { it.uniqueId == i.player.uniqueId }.sendTitle("${ChatColor.AQUA}전쟁 승리", "${ChatColor.DARK_GRAY}국가가 또 하나의 승리를 이루어냈습니다.", 25, 75, 20)
+                                }
+                            }
+
+                            getInstance().countries.remove(w.countries.second.owner.player.uniqueId.toString())
+                        }
+                    }
+                }
             }
         }
     }

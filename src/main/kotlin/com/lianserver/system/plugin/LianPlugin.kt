@@ -21,6 +21,7 @@ import com.lianserver.system.Recipes.RecipeObject
 import com.lianserver.system.common.Clan
 import com.lianserver.system.common.Country
 import com.lianserver.system.common.LianPlayer
+import com.lianserver.system.common.War
 import com.lianserver.system.handlers.DataHandler
 import com.lianserver.system.interfaces.HandlerInterface
 import com.lianserver.system.interfaces.KommandInterface
@@ -63,8 +64,24 @@ class LianPlugin : JavaPlugin(), Listener {
     var invitesCountry: MutableMap<String, Country> = mutableMapOf()
     var invitesCountryTaskId: MutableMap<String, Int> = mutableMapOf()
 
+    var wars: MutableList<War> = mutableListOf()
+    var warDecl: MutableMap<String, Country> = mutableMapOf()
+    var warDeclTaskId: MutableMap<String, Int> = mutableMapOf()
+
     fun getPlayer(sender: CommandSender) = onlinePlayers[(sender as Player).uniqueId.toString()]!!
     fun getPlayer(sender: Player) = onlinePlayers[(sender as Player).uniqueId.toString()]!!
+    fun getWar(c: String /* Clan Owner UUID */): War? {
+        var ret: War? = null
+        wars.forEach {
+            ret = if(it.countries.first.owner.player.uniqueId.toString() == c || it.countries.second.owner.player.uniqueId.toString() == c) {
+                it
+            }
+            else {
+                null
+            }
+        }
+        return ret
+    }
 
     fun getLandOwned(p: Pair<Int?, Int?>): Pair<Clan?, Country?>{
         var ret: Pair<Clan?, Country?> = Pair(null, null)
@@ -95,7 +112,7 @@ class LianPlugin : JavaPlugin(), Listener {
         instance = this
         logger.info("${this.config.getString("admin_prefix")}")
 
-        var reflections = Reflections("com.underconnor.lian.kommands")
+        var reflections = Reflections("com.lianserver.system.kommands")
 
         reflections.getSubTypesOf(
             KommandInterface::class.java
@@ -165,11 +182,6 @@ class LianPlugin : JavaPlugin(), Listener {
 
     @EventHandler
     fun onChat(e: AsyncChatEvent){
-        if(e.player.isOp){
-            e.message(text("${ChatColor.DARK_GREEN}[관리자] ${ChatColor.RED}${e.player.name}${ChatColor.RESET}: ").append(e.message()))
-            e.isCancelled = true
-        }
-
         if(getPlayer(e.player).clanChatMode && getPlayer(e.player).clan != null){
             getPlayer(e.player).clan!!.players.forEach { lianPlayer ->
                 if(lianPlayer.player.isOnline){
@@ -182,11 +194,27 @@ class LianPlugin : JavaPlugin(), Listener {
         else if(getPlayer(e.player).clanChatMode && getPlayer(e.player).country != null){
             getPlayer(e.player).country!!.players.forEach { lianPlayer ->
                 if(lianPlayer.player.isOnline){
-                    server.onlinePlayers.first { it.uniqueId == lianPlayer.player.uniqueId }.sendMessage(text("${ChatColor.GOLD}[국가] ${ChatColor.LIGHT_PURPLE}${e.player.name}${ChatColor.RESET}: ").append(e.message()))
+                    server.onlinePlayers.first { it.uniqueId == lianPlayer.player.uniqueId }.sendMessage(text("${ChatColor.GOLD}[국가]").append(
+                        text(" ${ChatColor.LIGHT_PURPLE}${e.player.name}${ChatColor.RESET}: ")
+                    ).append(
+                        e.message()
+                    ))
                 }
             }
             e.isCancelled = true
             return
+        }
+        else {
+            server.onlinePlayers.forEach {
+                if(e.player.isOp){
+                    it.sendMessage(text("${ChatColor.DARK_GREEN}[관리자] ${ChatColor.RED}${e.player.name}${ChatColor.RESET}: ").append(e.message()))
+                    e.isCancelled = true
+                }
+                else {
+                    it.sendMessage(e.player.displayName().append(text(": ")).append(e.message()))
+                    e.isCancelled = true
+                }
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.lianserver.system.kommands
 
 import com.lianserver.system.common.Clan
+import com.lianserver.system.common.Country
 import com.lianserver.system.common.LianPlayer
 import com.lianserver.system.interfaces.KommandInterface
 import io.github.monun.kommand.StringType
@@ -258,6 +259,53 @@ class ClanKommand: KommandInterface {
                                 }
                                 else{
                                     sender.sendMessage(clanText("클랜장만 추방할 수 있습니다."))
+                                }
+                            }
+                        }
+                    }
+                }
+                then("upgrade"){
+                    executes {
+                        if(getInstance().getPlayer(sender).clan == null){
+                            sender.sendMessage(clanText("클랜이 없습니다."))
+                        }
+                        else if(getInstance().getPlayer(sender).clan!!.owner.player.uniqueId != getInstance().getPlayer(sender).player.uniqueId){
+                            sender.sendMessage(clanText("클랜장이 아닙니다."))
+                        }
+                        else {
+                            val hand = (sender as Player).inventory.itemInMainHand
+                            if(hand.type != Material.ENCHANTED_BOOK){
+                                sender.sendMessage(clanText("손에 국가 창설권을 들어주세요."))
+                            }
+                            else {
+                                if(hand.itemMeta.hasDisplayName()){
+                                    if (hand.itemMeta.displayName() != text("국가 창설권", NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE)) {
+                                        sender.sendMessage(clanText("손에 국가 창설권을 들어주세요."))
+                                    }
+                                    else{
+                                        if(getInstance().getPlayer(sender).clan!!.land == null){
+                                            sender.sendMessage(clanText("클랜의 땅이 있어야 합니다."))
+                                        }
+                                        else {
+                                            val country = Country(getInstance().getPlayer(sender), getInstance().getPlayer(sender).clan!!.land, getInstance().getPlayer(sender).clan!!.players, getInstance().getPlayer(sender).clan!!.name, 0)
+                                            getInstance().onlinePlayers[(sender as Player).uniqueId.toString()]!!.clan = null
+                                            getInstance().onlinePlayers[(sender as Player).uniqueId.toString()]!!.country = country
+                                            getInstance().countries[(sender as Player).uniqueId.toString()] = country
+
+                                            country.players.forEach {
+                                                getInstance().onlinePlayers[it.player.uniqueId.toString()]!!.clan = null
+                                                getInstance().onlinePlayers[it.player.uniqueId.toString()]!!.country = country
+                                            }
+
+                                            getInstance().clans.remove((sender as Player).uniqueId.toString())
+
+                                            getInstance().server.broadcast(countryText("${sender.name}님이 ${ChatColor.GOLD}${country.name}${ChatColor.WHITE} 국가를 생성했습니다."))
+                                            hand.subtract(1)
+                                        }
+                                    }
+                                }
+                                else{
+                                    sender.sendMessage(clanText("손에 국가 창설권을 들어주세요."))
                                 }
                             }
                         }

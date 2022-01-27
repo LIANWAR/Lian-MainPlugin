@@ -2,6 +2,7 @@ package com.lianserver.system.kommands
 
 import com.lianserver.system.common.Country
 import com.lianserver.system.common.LianPlayer
+import com.lianserver.system.common.War
 import com.lianserver.system.interfaces.KommandInterface
 import io.github.monun.kommand.StringType
 import io.github.monun.kommand.getValue
@@ -13,8 +14,16 @@ import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.ComponentBuilder
 import net.md_5.bungee.api.chat.HoverEvent
+import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.temporal.TemporalAdjuster
+import java.util.*
+import kotlin.math.sign
 
 /***
  * @author AlphaGot
@@ -33,7 +42,8 @@ class CountryCommand: KommandInterface {
                                     "    ${countryTextS("${ChatColor.WHITE}/country invite <플레이어>")}\n" +
                                     "    ${countryTextS("${ChatColor.WHITE}/country chat")}\n" +
                                     "    ${countryTextS("${ChatColor.WHITE}/country leave")}\n" +
-                                    "    ${countryTextS("${ChatColor.WHITE}/country kick <플레이어>")}\n"
+                                    "    ${countryTextS("${ChatColor.WHITE}/country kick <플레이어>")}\n" +
+                                    "    ${countryTextS("${ChatColor.WHITE}/country wardecl <클랜 이름>")}\n"
                         )
                     }
                 }
@@ -182,7 +192,7 @@ class CountryCommand: KommandInterface {
                 }
                 then("kick"){
                     executes {
-                        sender.sendMessage("누구를 추방할 지 입력해주세요.")
+                        sender.sendMessage(countryText("누구를 추방할 지 입력해주세요."))
                     }
                     then("victim" to player()){
                         executes {
@@ -212,6 +222,152 @@ class CountryCommand: KommandInterface {
                                 }
                                 else{
                                     sender.sendMessage(countryText("수령만 추방할 수 있습니다."))
+                                }
+                            }
+                        }
+                    }
+                }
+                then("wardecl"){
+                    executes {
+                        sender.sendMessage(countryText("선전 포고할 국가의 이름을 입력해주세요."))
+                    }
+                    then("victim" to string(StringType.GREEDY_PHRASE)){
+                        executes {
+                            val victim: String by it
+
+                            var found: Country? = null
+                            getInstance().countries.forEach {
+                                if(it.value.name == victim){
+                                    found = it.value
+                                }
+                            }
+
+                            if(found == null){
+                                sender.sendMessage(countryText("해당하는 국가가 없습니다."))
+                            }
+                            else {
+                                if(getInstance().getPlayer(sender).country == null){
+                                    sender.sendMessage(countryText("소속된 국가가 없습니다."))
+                                }
+                                else {
+                                    if(getInstance().getPlayer(sender).country!!.owner.player.uniqueId != (sender as Player).uniqueId){
+                                        sender.sendMessage(countryText("수령만 선전포고할 수 있습니다."))
+                                    }
+                                    else {
+                                        if(getInstance().getWar(getInstance().getPlayer(sender).country!!.owner.player.uniqueId.toString()) != null){
+                                            sender.sendMessage(countryText("이미 전쟁 중입니다."))
+                                        }
+                                        else {
+                                            val wt = getInstance().getPlayer(sender).country!!.lastWarDeclaratedTime
+                                            val now = Date()
+                                            val ct = Date(now.time - wt.time)
+
+                                            if(ct.time < 43200000){
+                                                getInstance().logger.info(ct.toString())
+                                                getInstance().logger.info((now.time - wt.time).toString())
+                                                getInstance().logger.info((now.time).toString())
+                                                getInstance().logger.info((wt.time).toString())
+                                                sender.sendMessage(countryText("선전포고까지 남은 시간: ${SimpleDateFormat("H시간 m분 s초").format(ct)}"))
+                                            }
+                                            else {
+                                                if(getInstance().getWar(found!!.owner.player.uniqueId.toString()) != null){
+                                                    sender.sendMessage(countryText("상대국이 이미 전쟁 중입니다."))
+                                                }
+                                                else {
+                                                    if(!found!!.owner.player.isOnline){
+                                                        sender.sendMessage(countryText("상대국의 수령이 접속 중이지 않습니다."))
+                                                    }
+                                                    else {
+                                                        if(found!!.warDeclarationDenyCount == 3){
+                                                            getInstance().wars.add(War(Date(), Pair(getInstance().getPlayer(sender).country!!, found!!)))
+                                                            getInstance().server.broadcast(countryText("${getInstance().getPlayer(sender).country!!.name} 국가와 ${found!!.name} 국가간의 전쟁이 시작되었습니다!"))
+                                                            getInstance().getPlayer(sender).country!!.players.forEach {
+                                                                if(it.player.isOnline){
+                                                                    val i = it
+                                                                    getInstance().server.onlinePlayers.first { it.uniqueId == i.player.uniqueId }.sendTitle("${ChatColor.RED}${ChatColor.BOLD}전쟁 시작", "", 15, 50, 25)
+                                                                }
+                                                            }
+                                                            found!!.players.forEach {
+                                                                if(it.player.isOnline){
+                                                                    val i = it
+                                                                    getInstance().server.onlinePlayers.first { it.uniqueId == i.player.uniqueId }.sendTitle("${ChatColor.RED}${ChatColor.BOLD}전쟁 시작", "", 15, 50, 25)
+                                                                }
+                                                            }
+                                                        }
+                                                        else {
+                                                            getInstance().warDecl[found!!.owner.player.uniqueId.toString()] = getInstance().getPlayer(sender).country!!
+                                                            sender.sendMessage(countryText("선전포고 입장을 보냈습니다."))
+
+                                                            getInstance().countries[getInstance().getPlayer(sender).player.uniqueId.toString()]!!.lastWarDeclaratedTime = Date()
+
+                                                            val target = found!!.owner.player
+
+                                                            if(found!!.owner.player.isOnline){
+                                                                val p = getInstance().server.onlinePlayers.first { it.uniqueId == found!!.owner.player.uniqueId }
+                                                                p.sendMessage(countryText("${getInstance().getPlayer(sender).country!!.name} 국가가 선전포고했습니다. 60초 후 자동으로 거절됩니다."))
+                                                                val clickComp = net.md_5.bungee.api.chat.TextComponent("[ 전쟁 시작 ]")
+                                                                clickComp.color = ChatColor.RED
+                                                                clickComp.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentBuilder("전쟁 시작하기").create())
+                                                                clickComp.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/country waraccept")
+                                                                p.sendMessage(clickComp)
+
+                                                                getInstance().warDeclTaskId[target.uniqueId.toString()] = getInstance().server.scheduler.scheduleSyncDelayedTask(getInstance(),
+                                                                    {
+                                                                        getInstance().warDecl.remove(target.uniqueId.toString())
+                                                                        getInstance().server.onlinePlayers.first{target.uniqueId == it.uniqueId}.sendMessage(countryText("${getInstance().getPlayer(sender).country!!.name} 국가의 선전포고를 무시했습니다."))
+                                                                        getInstance().countries[target.uniqueId.toString()]!!.warDeclarationDenyCount += 1
+                                                                    },
+                                                                    1200L
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                then("waraccept"){
+                    executes {
+                        val p = getInstance().getPlayer(sender)
+                        if(p.country == null){
+                            sender.sendMessage(countryText("소속된 국가가 없습니다."))
+                        }
+                        else {
+                            if(getInstance().warDecl[p.country!!.owner.player.uniqueId.toString()] == null){
+                                sender.sendMessage(countryText("대기 중인 선전포고가 없습니다."))
+                            }
+                            else {
+                                if(getInstance().getWar(p.country!!.owner.player.uniqueId.toString()) != null) {
+                                    sender.sendMessage(countryText("이미 다른 국가와 전쟁 중입니다."))
+                                }
+                                else {
+                                    if(p.country!!.owner.player.uniqueId != p.player.uniqueId){
+                                        sender.sendMessage(countryText("수령만 선전포고에 응할 수 있습니다."))
+                                    }
+                                    else {
+                                        val found = getInstance().warDecl[p.country!!.owner.player.uniqueId.toString()]!!
+
+                                        getInstance().wars.add(War(Date(), Pair(getInstance().getPlayer(sender).country!!, found)))
+                                        getInstance().server.broadcast(countryText("${getInstance().getPlayer(sender).country!!.name} 국가와 ${found.name} 국가간의 전쟁이 시작되었습니다!"))
+                                        getInstance().getPlayer(sender).country!!.players.forEach {
+                                            if(it.player.isOnline){
+                                                val i = it
+                                                getInstance().server.onlinePlayers.first { it.uniqueId == i.player.uniqueId }.sendTitle("${ChatColor.RED}${ChatColor.BOLD}전쟁 시작", "", 15, 50, 25)
+                                            }
+                                        }
+
+                                        found.players.forEach {
+                                            if(it.player.isOnline){
+                                                val i = it
+                                                getInstance().server.onlinePlayers.first { it.uniqueId == i.player.uniqueId }.sendTitle("${ChatColor.RED}${ChatColor.BOLD}전쟁 시작", "", 15, 50, 25)
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }

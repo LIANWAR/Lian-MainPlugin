@@ -6,6 +6,7 @@ import com.lianserver.system.common.LianPlayer
 import com.lianserver.system.common.War
 import com.lianserver.system.plugin.LianPlugin
 import java.io.File
+import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.util.*
 import java.util.logging.Level
@@ -15,8 +16,10 @@ object DataHandler {
     private val logger = getInstance().logger
     
     fun saveToFile(){
+        val d: String = SimpleDateFormat("yyyyMMddhhmmss").format(Date())
+
         val clanDir = File("plugins/LianMain/clans")
-        clanDir.deleteRecursively()
+        clanDir.renameTo(File("plugins/LianMain/backups/${d}/clans"))
 
         clanDir.mkdir()
         getInstance().clans.forEach {
@@ -25,7 +28,7 @@ object DataHandler {
         }
 
         val countryDir = File("plugins/LianMain/countries")
-        countryDir.deleteRecursively()
+        countryDir.renameTo(File("plugins/LianMain/backups/${d}/countries"))
 
         countryDir.mkdir()
         getInstance().countries.forEach {
@@ -34,7 +37,7 @@ object DataHandler {
         }
 
         val playerDir = File("plugins/LianMain/players")
-        playerDir.deleteRecursively()
+        playerDir.renameTo(File("plugins/LianMain/backups/${d}/players"))
 
         playerDir.mkdir()
         getInstance().onlinePlayers.forEach {
@@ -43,7 +46,7 @@ object DataHandler {
         }
 
         val war = File("plugins/LianMain/wars")
-        war.deleteRecursively()
+        war.renameTo(File("plugins/LianMain/backups/${d}/wars"))
 
         war.mkdir()
         getInstance().wars.forEach {

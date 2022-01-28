@@ -7,29 +7,19 @@ import com.lianserver.system.interfaces.KommandInterface
 import io.github.monun.kommand.StringType
 import io.github.monun.kommand.getValue
 import io.github.monun.kommand.kommand
-import net.kyori.adventure.text.Component.text
-import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.text.format.TextDecoration
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.ComponentBuilder
 import net.md_5.bungee.api.chat.HoverEvent
-import org.bukkit.Location
-import org.bukkit.Material
-import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.time.temporal.TemporalAdjuster
 import java.util.*
-import kotlin.math.sign
 
 /***
  * @author AlphaGot
  */
 
-class CountryCommand: KommandInterface {
+class CountryKommand: KommandInterface {
     override fun kommand() {
         getInstance().kommand {
             register("country") {
@@ -351,6 +341,13 @@ class CountryCommand: KommandInterface {
                                     }
                                     else {
                                         val found = getInstance().warDecl[p.country!!.owner.player.uniqueId.toString()]!!
+
+                                        getInstance().getFlagArmorStand(getInstance().getPlayer(sender).country!!.owner.player.uniqueId.toString())?.isGlowing = true
+                                        getInstance().getFlagArmorStand(found.owner.player.uniqueId.toString())?.isGlowing = true
+
+                                        getInstance().warDecl.remove(p.country!!.owner.player.uniqueId.toString())
+                                        getInstance().server.scheduler.cancelTask(getInstance().warDeclTaskId[p.country!!.owner.player.uniqueId.toString()]!!)
+                                        getInstance().warDeclTaskId.remove(p.country!!.owner.player.uniqueId.toString())
 
                                         getInstance().wars.add(War(Date(), Pair(getInstance().getPlayer(sender).country!!, found)))
                                         getInstance().server.broadcast(countryText("${getInstance().getPlayer(sender).country!!.name} 국가와 ${found.name} 국가간의 전쟁이 시작되었습니다!"))

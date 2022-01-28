@@ -55,7 +55,7 @@ class WarHandler: HandlerInterface, PrefixedTextInterface {
                                 if(it.player.isOnline){
                                     val i = it
                                     
-                                    getInstance().server.onlinePlayers.first { it.uniqueId == i.player.uniqueId }.sendTitle("${ChatColor.RED}전쟁 패배", "${ChatColor.DARK_GRAY}국가가 결국 멸망했습니다.", 25, 75, 20)
+                                    getInstance().server.onlinePlayers.first { it.uniqueId == i.player.uniqueId }.sendTitle("${ChatColor.RED}전쟁 패배", "${ChatColor.DARK_GRAY}우리의 땅을 잃었습니다.", 25, 75, 20)
                                 }
                             }
 
@@ -67,14 +67,14 @@ class WarHandler: HandlerInterface, PrefixedTextInterface {
                                 }
                             }
 
-                            getInstance().countries.remove(w.countries.first.owner.player.uniqueId.toString())
+                            getInstance().countries[w.countries.first.owner.player.uniqueId.toString()]!!.land = null
                         }
                         else {
                             w.countries.second.players.forEach {
                                 if(it.player.isOnline){
                                     val i = it
 
-                                    getInstance().server.onlinePlayers.first { it.uniqueId == i.player.uniqueId }.sendTitle("${ChatColor.RED}전쟁 패배", "${ChatColor.DARK_GRAY}국가가 결국 멸망했습니다.", 25, 75, 20)
+                                    getInstance().server.onlinePlayers.first { it.uniqueId == i.player.uniqueId }.sendTitle("${ChatColor.RED}전쟁 패배", "${ChatColor.DARK_GRAY}우리의 땅을 잃었습니다.", 25, 75, 20)
                                 }
                             }
 
@@ -86,7 +86,7 @@ class WarHandler: HandlerInterface, PrefixedTextInterface {
                                 }
                             }
 
-                            getInstance().countries.remove(w.countries.second.owner.player.uniqueId.toString())
+                            getInstance().countries[w.countries.second.owner.player.uniqueId.toString()]!!.land = null
                         }
                     }
                 }

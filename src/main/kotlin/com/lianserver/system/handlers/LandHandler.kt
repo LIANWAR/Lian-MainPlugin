@@ -176,10 +176,10 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
                                         armorStand.customName(text("깃발").color(TextColor.color(255, 128, 128)))
 
                                         armorStand.isPersistent = true
-                                        armorStand.isGlowing = true
                                         armorStand.invisible = true
                                         armorStand.isCustomNameVisible = true
                                         armorStand.isInvulnerable = true
+                                        armorStand.setAI(false)
 
                                         armorStand.equipment.helmet = ItemStack(Material.REPEATING_COMMAND_BLOCK)
 
@@ -215,7 +215,6 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
                                         armorStand.customName(text("깃발").color(TextColor.color(255, 128, 128)))
 
                                         armorStand.isPersistent = true
-                                        armorStand.isGlowing = true
                                         armorStand.invisible = true
                                         armorStand.isCustomNameVisible = true
                                         armorStand.isInvulnerable = true

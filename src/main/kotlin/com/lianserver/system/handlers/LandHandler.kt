@@ -147,7 +147,7 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
                 if(e.item!!.hasItemMeta()){
                     if(e.item!!.itemMeta.displayName() == text("땅문서").color(NamedTextColor.AQUA).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE)){
                         var cond = true
-                        val tT: MutableList<Pair<Clan?, Country?>> = mutableListOf()
+                        var tT: MutableList<Pair<Clan?, Country?>> = mutableListOf()
                         for(nX in -1..1){
                             for(nZ in -1..1){
                                 cond = cond && (getInstance().getLandOwned(Pair(e.clickedBlock!!.chunk.x + nX, e.clickedBlock!!.chunk.z + nZ)) == Pair<Clan?, Country?>(null, null))
@@ -239,6 +239,8 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
                         }
                         else {
                             e.player.sendMessage(clanText("소유하려는 땅 및 그 주변이 다음 클랜 또는 국가의 땅입니다."))
+
+                            tT = tT.distinct() as MutableList<Pair<Clan?, Country?>>
                             tT.forEach {
                                 if(it.first != null){
                                     e.player.sendMessage(clanText(" - ${it.first!!.name} 클랜"))

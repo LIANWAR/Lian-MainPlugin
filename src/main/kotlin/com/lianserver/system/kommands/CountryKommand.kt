@@ -100,20 +100,25 @@ class CountryKommand: KommandInterface {
                     executes {
                         val p = getInstance().getPlayer(player)
                         if(getInstance().invitesCountry.containsKey(p.player.uniqueId.toString())){
-                            if(getInstance().invitesCountry[p.player.uniqueId.toString()]!!.players.size < 4){
-                                p.country = getInstance().invitesCountry[p.player.uniqueId.toString()]
-                                getInstance().onlinePlayers[p.player.uniqueId.toString()] = p
-                                getInstance().countries[getInstance().invitesCountry[p.player.uniqueId.toString()]!!.owner.player.uniqueId.toString()]!!.players =
-                                    getInstance().countries[getInstance().invitesCountry[p.player.uniqueId.toString()]!!.owner.player.uniqueId.toString()]!!.players.plusElement(p) as MutableList<LianPlayer>
-                                getInstance().countries[getInstance().invitesCountry[p.player.uniqueId.toString()]!!.owner.player.uniqueId.toString()]!!.players.forEach { pl ->
-                                    if(pl.player.isOnline){
-                                        val p2 = getInstance().server.onlinePlayers.first { it.uniqueId == pl.player.uniqueId }
-                                        p2.sendMessage("${p.player.name}님이 국가에 가입했습니다. 환영 인사 한 번씩 해주세요!")
+                            if(getInstance().invitesCountry[p.player.uniqueId.toString()]!!.players.size < 8){
+                                if(p.country == null && p.clan == null){
+                                    p.country = getInstance().invitesCountry[p.player.uniqueId.toString()]
+                                    getInstance().onlinePlayers[p.player.uniqueId.toString()] = p
+                                    getInstance().countries[getInstance().invitesCountry[p.player.uniqueId.toString()]!!.owner.player.uniqueId.toString()]!!.players =
+                                        getInstance().countries[getInstance().invitesCountry[p.player.uniqueId.toString()]!!.owner.player.uniqueId.toString()]!!.players.plusElement(p) as MutableList<LianPlayer>
+                                    getInstance().countries[getInstance().invitesCountry[p.player.uniqueId.toString()]!!.owner.player.uniqueId.toString()]!!.players.forEach { pl ->
+                                        if(pl.player.isOnline){
+                                            val p2 = getInstance().server.onlinePlayers.first { it.uniqueId == pl.player.uniqueId }
+                                            p2.sendMessage("${p.player.name}님이 국가에 가입했습니다. 환영 인사 한 번씩 해주세요!")
+                                        }
                                     }
+                                    player.sendMessage("${getInstance().countries[getInstance().invitesCountry[p.player.uniqueId.toString()]!!.owner.player.uniqueId.toString()]!!.name} 국가에 가입했습니다.")
+                                    getInstance().invitesCountry.remove(player.uniqueId.toString())
+                                    getInstance().server.scheduler.cancelTask(getInstance().invitesCountryTaskId[player.uniqueId.toString()]!!)
                                 }
-                                player.sendMessage("${getInstance().countries[getInstance().invitesCountry[p.player.uniqueId.toString()]!!.owner.player.uniqueId.toString()]!!.name} 국가에 가입했습니다.")
-                                getInstance().invitesCountry.remove(player.uniqueId.toString())
-                                getInstance().server.scheduler.cancelTask(getInstance().invitesCountryTaskId[player.uniqueId.toString()]!!)
+                                else {
+                                    sender.sendMessage(countryText("이미 다른 클랜/국가에 속해있습니다."))
+                                }
                             }
                             else {
                                 player.sendMessage("국가 인원은 수령 포함 8명입니다.")
@@ -145,14 +150,21 @@ class CountryKommand: KommandInterface {
                             }
                         }
                     }
-                    then("deleteclan"){
+                    then("delete"){
                         executes {
-                            getInstance().countries.remove(getInstance().getPlayer(player).player.uniqueId.toString())
-                            getInstance().getPlayer(player).country!!.players.forEach { pl ->
-                                getInstance().onlinePlayers[pl.player.uniqueId.toString()]!!.clanChatMode = false
-                                getInstance().onlinePlayers[pl.player.uniqueId.toString()]!!.country = null
-                                if(pl.player.isOnline){
-                                    (getInstance().server.onlinePlayers.first { it.uniqueId == pl.player.uniqueId }).sendMessage(countryText("국가가 해체되었습니다."))
+                            if(getInstance().getPlayer(sender).country != null){
+                                if(getInstance().getPlayer(sender).country!!.owner.player.uniqueId.toString() == (sender as Player).uniqueId.toString()){
+                                    getInstance().countries.remove(getInstance().getPlayer(player).player.uniqueId.toString())
+                                    getInstance().getPlayer(player).country!!.players.forEach { pl ->
+                                        getInstance().onlinePlayers[pl.player.uniqueId.toString()]!!.clanChatMode = false
+                                        getInstance().onlinePlayers[pl.player.uniqueId.toString()]!!.country = null
+                                        if(pl.player.isOnline){
+                                            (getInstance().server.onlinePlayers.first { it.uniqueId == pl.player.uniqueId }).sendMessage(countryText("국가가 해체되었습니다."))
+                                        }
+                                    }
+                                }
+                                else {
+                                    sender.sendMessage(countryText("수령이 아닙니다."))
                                 }
                             }
                         }

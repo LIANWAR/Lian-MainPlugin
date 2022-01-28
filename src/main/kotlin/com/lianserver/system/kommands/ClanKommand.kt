@@ -62,11 +62,15 @@ class ClanKommand: KommandInterface {
                                         if(getInstance().getPlayer(sender).clan != null){
                                             sender.sendMessage(clanText("이미 클랜에 소속되어있습니다."))
                                         }
+                                        else if(getInstance().getPlayer(sender).country != null){
+                                            sender.sendMessage(clanText("이미 국가에 소속되어있습니다."))
+                                        }
                                         else {
                                             if(getInstance().clans.none { it.value.name == clanNameTemp }) {
                                                 val clan = Clan(getInstance().onlinePlayers[(sender as Player).uniqueId.toString()]!!, null, n = clanNameTemp)
                                                 getInstance().onlinePlayers[(sender as Player).uniqueId.toString()]!!.clan = clan
                                                 getInstance().clans[(sender as Player).uniqueId.toString()] = clan
+                                                hand.subtract(1)
 
                                                 getInstance().server.broadcast(clanText("${sender.name}님이 ${ChatColor.GREEN}${clan.name}${ChatColor.WHITE}클랜을 생성했습니다."))
                                             }
@@ -74,7 +78,6 @@ class ClanKommand: KommandInterface {
                                                 sender.sendMessage(clanText("이미 같은 이름의 클랜이 있습니다."))
                                             }
                                         }
-                                        hand.subtract(1)
                                     }
                                 }
                                 else{
@@ -148,19 +151,24 @@ class ClanKommand: KommandInterface {
                         val p = getInstance().getPlayer(player)
                         if(getInstance().invites.containsKey(p.player.uniqueId.toString())){
                             if(getInstance().invites[p.player.uniqueId.toString()]!!.players.size < 4){
-                                p.clan = getInstance().invites[p.player.uniqueId.toString()]
-                                getInstance().onlinePlayers[p.player.uniqueId.toString()] = p
-                                getInstance().clans[getInstance().invites[p.player.uniqueId.toString()]!!.owner.player.uniqueId.toString()]!!.players =
-                                    getInstance().clans[getInstance().invites[p.player.uniqueId.toString()]!!.owner.player.uniqueId.toString()]!!.players.plusElement(p) as MutableList<LianPlayer>
-                                getInstance().clans[getInstance().invites[p.player.uniqueId.toString()]!!.owner.player.uniqueId.toString()]!!.players.forEach { pl ->
-                                    if(pl.player.isOnline){
-                                        val p2 = getInstance().server.onlinePlayers.first { it.uniqueId == pl.player.uniqueId }
-                                        p2.sendMessage("${p.player.name}님이 클랜에 가입했습니다. 환영 인사 한 번씩 해주세요!")
+                                if(p.clan == null && p.country == null){
+                                    p.clan = getInstance().invites[p.player.uniqueId.toString()]
+                                    getInstance().onlinePlayers[p.player.uniqueId.toString()] = p
+                                    getInstance().clans[getInstance().invites[p.player.uniqueId.toString()]!!.owner.player.uniqueId.toString()]!!.players =
+                                        getInstance().clans[getInstance().invites[p.player.uniqueId.toString()]!!.owner.player.uniqueId.toString()]!!.players.plusElement(p) as MutableList<LianPlayer>
+                                    getInstance().clans[getInstance().invites[p.player.uniqueId.toString()]!!.owner.player.uniqueId.toString()]!!.players.forEach { pl ->
+                                        if(pl.player.isOnline){
+                                            val p2 = getInstance().server.onlinePlayers.first { it.uniqueId == pl.player.uniqueId }
+                                            p2.sendMessage("${p.player.name}님이 클랜에 가입했습니다. 환영 인사 한 번씩 해주세요!")
+                                        }
                                     }
+                                    player.sendMessage("${getInstance().clans[getInstance().invites[p.player.uniqueId.toString()]!!.owner.player.uniqueId.toString()]!!.name} 클랜에 가입했습니다.")
+                                    getInstance().invites.remove(player.uniqueId.toString())
+                                    getInstance().server.scheduler.cancelTask(getInstance().invitesTaskId[player.uniqueId.toString()]!!)
                                 }
-                                player.sendMessage("${getInstance().clans[getInstance().invites[p.player.uniqueId.toString()]!!.owner.player.uniqueId.toString()]!!.name} 클랜에 가입했습니다.")
-                                getInstance().invites.remove(player.uniqueId.toString())
-                                getInstance().server.scheduler.cancelTask(getInstance().invitesTaskId[player.uniqueId.toString()]!!)
+                                else {
+                                    sender.sendMessage(clanText("이미 다른 클랜/국가에 속해있습니다."))
+                                }
                             }
                             else {
                                 player.sendMessage("클랜 인원은 클랜장 포함 4명입니다.")
@@ -192,15 +200,25 @@ class ClanKommand: KommandInterface {
                             }
                         }
                     }
-                    then("deleteclan"){
+                    then("delete"){
                         executes {
-                            getInstance().clans.remove(getInstance().getPlayer(player).player.uniqueId.toString())
-                            getInstance().getPlayer(player).clan!!.players.forEach { pl ->
-                                getInstance().onlinePlayers[pl.player.uniqueId.toString()]!!.clanChatMode = false
-                                getInstance().onlinePlayers[pl.player.uniqueId.toString()]!!.clan = null
-                                if(pl.player.isOnline){
-                                    (getInstance().server.onlinePlayers.first { it.uniqueId == pl.player.uniqueId }).sendMessage(clanText("클랜이 해체되었습니다."))
+                            if(getInstance().getPlayer(sender).clan != null){
+                                if(getInstance().getPlayer(sender).clan!!.owner.player.uniqueId.toString() == (sender as Player).uniqueId.toString()){
+                                    getInstance().clans.remove(getInstance().getPlayer(player).player.uniqueId.toString())
+                                    getInstance().getPlayer(player).clan!!.players.forEach { pl ->
+                                        getInstance().onlinePlayers[pl.player.uniqueId.toString()]!!.clanChatMode = false
+                                        getInstance().onlinePlayers[pl.player.uniqueId.toString()]!!.clan = null
+                                        if(pl.player.isOnline){
+                                            (getInstance().server.onlinePlayers.first { it.uniqueId == pl.player.uniqueId }).sendMessage(clanText("클랜이 해체되었습니다."))
+                                        }
+                                    }
                                 }
+                                else {
+                                    sender.sendMessage(clanText("클랜장이 아닙니다."))
+                                }
+                            }
+                            else {
+                                sender.sendMessage(clanText("클랜에 소속되어있지 않습니다!"))
                             }
                         }
                     }

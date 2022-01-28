@@ -2,6 +2,7 @@ package com.lianserver.system.handlers
 
 import com.lianserver.system.interfaces.HandlerInterface
 import com.lianserver.system.interfaces.PrefixedTextInterface
+import io.papermc.paper.event.entity.EntityMoveEvent
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -14,6 +15,7 @@ import org.bukkit.entity.EntityType
 import org.bukkit.entity.Firework
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockMultiPlaceEvent
 import org.bukkit.event.block.BlockPlaceEvent
@@ -68,6 +70,7 @@ class WarHandler: HandlerInterface, PrefixedTextInterface {
                             }
 
                             getInstance().countries[w.countries.first.owner.player.uniqueId.toString()]!!.land = null
+                            getInstance().getFlagArmorStand(w.countries.second.owner.player.uniqueId.toString())?.isGlowing = false
                         }
                         else {
                             w.countries.second.players.forEach {
@@ -87,9 +90,19 @@ class WarHandler: HandlerInterface, PrefixedTextInterface {
                             }
 
                             getInstance().countries[w.countries.second.owner.player.uniqueId.toString()]!!.land = null
+                            getInstance().getFlagArmorStand(w.countries.first.owner.player.uniqueId.toString())?.isGlowing = false
                         }
                     }
                 }
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    fun onFlagMove(e: EntityMoveEvent){
+        if(e.entityType == EntityType.ARMOR_STAND){
+            if(e.entity.scoreboardTags.contains("lian_flag")){
+                e.isCancelled = true
             }
         }
     }

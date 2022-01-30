@@ -16,7 +16,9 @@ object DataHandler {
     private val logger = getInstance().logger
     
     fun saveToFile(){
-        val d: String = SimpleDateFormat("yyyyMMddhhmmss").format(Date())
+        val d: String = SimpleDateFormat("yyyyMMddHHmmss").format(Date())
+        File("plugins/LianMain/backups").mkdir()
+        File("plugins/LianMain/backups/${d}").mkdir()
 
         val clanDir = File("plugins/LianMain/clans")
         clanDir.renameTo(File("plugins/LianMain/backups/${d}/clans"))

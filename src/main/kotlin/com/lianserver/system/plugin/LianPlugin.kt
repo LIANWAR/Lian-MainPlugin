@@ -41,7 +41,7 @@ import org.bukkit.plugin.java.JavaPlugin
 import org.reflections.Reflections
 import java.io.File
 import java.lang.reflect.Method
-import kotlin.collections.ArrayList
+
 
 /***
  * @author underconnor, AlphaGot

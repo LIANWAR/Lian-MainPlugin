@@ -27,12 +27,13 @@ class WarHandler: HandlerInterface, PrefixedTextInterface {
     @EventHandler
     fun onHit(e: PlayerInteractAtEntityEvent){
         if(e.rightClicked is ArmorStand){
-            if(e.rightClicked.scoreboardTags.contains("lian_flag")){
+            if(e.rightClicked.scoreboardTags.contains("#lian_flag")){
                 if(getInstance().getPlayer(e.player).country != null){
+                    val tag = e.rightClicked.scoreboardTags.sorted()
                     if(arrayOf(
-                            Pair(getInstance().getPlayer(e.player).country!!, getInstance().countries[e.rightClicked.scoreboardTags.elementAt(1)]!!),
-                            Pair(getInstance().countries[e.rightClicked.scoreboardTags.elementAt(1)]!!, getInstance().getPlayer(e.player).country!!)
-                            ).contains(getInstance().getWar(getInstance().getPlayer(e.player).country!!.owner.player.uniqueId.toString())?.countries)){
+                            Pair(getInstance().getPlayer(e.player).country!!, getInstance().countries[tag[1]]!!),
+                            Pair(getInstance().countries[tag[1]]!!, getInstance().getPlayer(e.player).country!!)
+                        ).contains(getInstance().getWar(getInstance().getPlayer(e.player).country!!.owner.player.uniqueId.toString())?.countries)){
                         val fw = e.rightClicked.world.spawnEntity(e.rightClicked.location.add(0.0, 0.2, 0.0), EntityType.FIREWORK) as Firework
 
                         val meta = fw.fireworkMeta
@@ -101,7 +102,7 @@ class WarHandler: HandlerInterface, PrefixedTextInterface {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     fun onFlagMove(e: EntityMoveEvent){
         if(e.entityType == EntityType.ARMOR_STAND){
-            if(e.entity.scoreboardTags.contains("lian_flag")){
+            if(e.entity.scoreboardTags.contains("#lian_flag")){
                 e.isCancelled = true
             }
         }

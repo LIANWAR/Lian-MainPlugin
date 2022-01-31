@@ -26,14 +26,16 @@ class CountryKommand: KommandInterface {
                 then("help"){
                     executes {
                         sender.sendMessage(
-                                    "${ChatColor.RED}-${ChatColor.WHITE}-${ChatColor.RED}-${ChatColor.WHITE}-${ChatColor.RED}-${ChatColor.WHITE}-${ChatColor.RED}-${ChatColor.WHITE}-${ChatColor.RED}-${ChatColor.WHITE}- 클랜 도움말 ${ChatColor.WHITE}-${ChatColor.RED}-${ChatColor.WHITE}-${ChatColor.RED}-${ChatColor.WHITE}-${ChatColor.RED}-${ChatColor.WHITE}-${ChatColor.RED}-${ChatColor.WHITE}-${ChatColor.RED}-\n" +
+                                    "${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}- 클랜 도움말 ${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-\n" +
                                     "    ${countryTextS("${ChatColor.WHITE}/country info")}\n" +
-                                    "    ${countryTextS("${ChatColor.WHITE}/country create <클랜 이름>")}\n" +
                                     "    ${countryTextS("${ChatColor.WHITE}/country invite <플레이어>")}\n" +
+                                    "    ${countryTextS("${ChatColor.WHITE}/country accept")}\n" +
+                                    "    ${countryTextS("${ChatColor.WHITE}/country all")}\n" +
                                     "    ${countryTextS("${ChatColor.WHITE}/country chat")}\n" +
                                     "    ${countryTextS("${ChatColor.WHITE}/country leave")}\n" +
                                     "    ${countryTextS("${ChatColor.WHITE}/country kick <플레이어>")}\n" +
-                                    "    ${countryTextS("${ChatColor.WHITE}/country wardecl <클랜 이름>")}\n"
+                                    "    ${countryTextS("${ChatColor.WHITE}/country wardecl <클랜 이름>")}\n" +
+                                    "    ${countryTextS("${ChatColor.WHITE}/country waraccept")}\n"
                         )
                     }
                 }
@@ -68,24 +70,29 @@ class CountryKommand: KommandInterface {
                                     if(getInstance().getPlayer(sender).country!!.players.size < 8){
                                         val target: Player by it
 
-                                        getInstance().invitesCountry[target.uniqueId.toString()] = getInstance().getPlayer(sender).country!!
-                                        sender.sendMessage(countryText("초대장을 보냈습니다."))
-                                        if(getInstance().getPlayer(target).player.isOnline){
-                                            val p = getInstance().server.onlinePlayers.first { it.uniqueId == getInstance().getPlayer(target).player.uniqueId }
-                                            p.sendMessage(countryText("${sender.name}님이 국가 초대장을 보냈습니다. (${getInstance().getPlayer(sender).country!!.name} 국가)"))
-                                            val clickComp = net.md_5.bungee.api.chat.TextComponent("[ 수락 ]")
-                                            clickComp.color = ChatColor.GREEN
-                                            clickComp.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentBuilder("국가 수락하기").create())
-                                            clickComp.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/country accept")
-                                            p.sendMessage(clickComp)
+                                        if(getInstance().onlinePlayers.containsKey(target.uniqueId.toString())){
+                                            getInstance().invitesCountry[target.uniqueId.toString()] = getInstance().getPlayer(sender).country!!
+                                            sender.sendMessage(countryText("초대장을 보냈습니다."))
+                                            if(getInstance().getPlayer(target).player.isOnline){
+                                                val p = getInstance().server.onlinePlayers.first { it.uniqueId == getInstance().getPlayer(target).player.uniqueId }
+                                                p.sendMessage(countryText("${sender.name}님이 국가 초대장을 보냈습니다. (${getInstance().getPlayer(sender).country!!.name} 국가)"))
+                                                val clickComp = net.md_5.bungee.api.chat.TextComponent("[ 수락 ]")
+                                                clickComp.color = ChatColor.GREEN
+                                                clickComp.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentBuilder("국가 수락하기").create())
+                                                clickComp.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/country accept")
+                                                p.sendMessage(clickComp)
 
-                                            getInstance().invitesCountryTaskId[target.uniqueId.toString()] = getInstance().server.scheduler.scheduleSyncDelayedTask(getInstance(),
-                                                {
-                                                    getInstance().invitesCountry.remove(target.uniqueId.toString())
-                                                    target.sendMessage(countryText("${sender.name}님에게서 온 국가 초대가 만료되었습니다."))
-                                                },
-                                                600L
-                                            )
+                                                getInstance().invitesCountryTaskId[target.uniqueId.toString()] = getInstance().server.scheduler.scheduleSyncDelayedTask(getInstance(),
+                                                    {
+                                                        getInstance().invitesCountry.remove(target.uniqueId.toString())
+                                                        target.sendMessage(countryText("${sender.name}님에게서 온 국가 초대가 만료되었습니다."))
+                                                    },
+                                                    600L
+                                                )
+                                            }
+                                        }
+                                        else {
+                                            sender.sendMessage(countryText("해당하는 이름의 플레이어가 없습니다."))
                                         }
                                     }
                                     else {
@@ -115,6 +122,7 @@ class CountryKommand: KommandInterface {
                                     player.sendMessage("${getInstance().countries[getInstance().invitesCountry[p.player.uniqueId.toString()]!!.owner.player.uniqueId.toString()]!!.name} 국가에 가입했습니다.")
                                     getInstance().invitesCountry.remove(player.uniqueId.toString())
                                     getInstance().server.scheduler.cancelTask(getInstance().invitesCountryTaskId[player.uniqueId.toString()]!!)
+                                    getInstance().invitesCountryTaskId.remove(player.uniqueId.toString())
                                 }
                                 else {
                                     sender.sendMessage(countryText("이미 다른 클랜/국가에 속해있습니다."))
@@ -201,29 +209,34 @@ class CountryKommand: KommandInterface {
                             val victim: Player by it
 
                             if(getInstance().getPlayer(player).country != null){
-                                if(getInstance().getPlayer(player).country!!.owner.player.uniqueId == player.uniqueId){
-                                    getInstance().getPlayer(player).country!!.players.first {
-                                        it.player.uniqueId == victim.uniqueId
-                                    }.country = null
-                                    getInstance().getPlayer(player).country!!.players.first {
-                                        it.player.uniqueId == victim.uniqueId
-                                    }.clanChatMode = false
+                                if(getInstance().onlinePlayers.containsKey(victim.uniqueId.toString())){
+                                    if(getInstance().getPlayer(player).country!!.owner.player.uniqueId == player.uniqueId){
+                                        getInstance().getPlayer(player).country!!.players.first {
+                                            it.player.uniqueId == victim.uniqueId
+                                        }.country = null
+                                        getInstance().getPlayer(player).country!!.players.first {
+                                            it.player.uniqueId == victim.uniqueId
+                                        }.clanChatMode = false
 
-                                    victim.sendMessage(countryText("국가에서 추방되었습니다."))
-                                    getInstance().getPlayer(player).country!!.players.forEach {pl ->
-                                        if(pl.player.isOnline){
-                                            (getInstance().server.onlinePlayers.first { it.uniqueId == pl.player.uniqueId }).sendMessage(countryText("${victim.name}님이 국가에서 추방되셨습니다."))
+                                        victim.sendMessage(countryText("국가에서 추방되었습니다."))
+                                        getInstance().getPlayer(player).country!!.players.forEach {pl ->
+                                            if(pl.player.isOnline){
+                                                (getInstance().server.onlinePlayers.first { it.uniqueId == pl.player.uniqueId }).sendMessage(countryText("${victim.name}님이 국가에서 추방되셨습니다."))
+                                            }
                                         }
-                                    }
-                                    getInstance().getPlayer(player).country!!.players.remove(getInstance().getPlayer(player).country!!.players.first {
-                                        it.player.uniqueId == victim.uniqueId
-                                    })
-                                    getInstance().countries[player.uniqueId.toString()] = getInstance().getPlayer(player).country!!
+                                        getInstance().getPlayer(player).country!!.players.remove(getInstance().getPlayer(player).country!!.players.first {
+                                            it.player.uniqueId == victim.uniqueId
+                                        })
+                                        getInstance().countries[player.uniqueId.toString()] = getInstance().getPlayer(player).country!!
 
-                                    player.sendMessage(countryText("${victim.name}님을 국가에서 추방했습니다."))
+                                        player.sendMessage(countryText("${victim.name}님을 국가에서 추방했습니다."))
+                                    }
+                                    else{
+                                        sender.sendMessage(countryText("수령만 추방할 수 있습니다."))
+                                    }
                                 }
-                                else{
-                                    sender.sendMessage(countryText("수령만 추방할 수 있습니다."))
+                                else {
+                                    sender.sendMessage(countryText("해당하는 이름의 플레이어가 없습니다."))
                                 }
                             }
                         }
@@ -286,13 +299,13 @@ class CountryKommand: KommandInterface {
                                                             getInstance().getPlayer(sender).country!!.players.forEach {
                                                                 if(it.player.isOnline){
                                                                     val i = it
-                                                                    getInstance().server.onlinePlayers.first { it.uniqueId == i.player.uniqueId }.sendTitle("${ChatColor.RED}${ChatColor.BOLD}전쟁 시작", "", 15, 50, 25)
+                                                                    getInstance().server.onlinePlayers.first { it.uniqueId == i.player.uniqueId }.sendTitle("${ChatColor.AQUA}${ChatColor.BOLD}전쟁 시작", "", 15, 50, 25)
                                                                 }
                                                             }
                                                             found!!.players.forEach {
                                                                 if(it.player.isOnline){
                                                                     val i = it
-                                                                    getInstance().server.onlinePlayers.first { it.uniqueId == i.player.uniqueId }.sendTitle("${ChatColor.RED}${ChatColor.BOLD}전쟁 시작", "", 15, 50, 25)
+                                                                    getInstance().server.onlinePlayers.first { it.uniqueId == i.player.uniqueId }.sendTitle("${ChatColor.AQUA}${ChatColor.BOLD}전쟁 시작", "", 15, 50, 25)
                                                                 }
                                                             }
                                                         }
@@ -308,7 +321,7 @@ class CountryKommand: KommandInterface {
                                                                 val p = getInstance().server.onlinePlayers.first { it.uniqueId == found!!.owner.player.uniqueId }
                                                                 p.sendMessage(countryText("${getInstance().getPlayer(sender).country!!.name} 국가가 선전포고했습니다. 60초 후 자동으로 거절됩니다."))
                                                                 val clickComp = net.md_5.bungee.api.chat.TextComponent("[ 전쟁 시작 ]")
-                                                                clickComp.color = ChatColor.RED
+                                                                clickComp.color = ChatColor.AQUA
                                                                 clickComp.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentBuilder("전쟁 시작하기").create())
                                                                 clickComp.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/country waraccept")
                                                                 p.sendMessage(clickComp)
@@ -366,14 +379,14 @@ class CountryKommand: KommandInterface {
                                         getInstance().getPlayer(sender).country!!.players.forEach {
                                             if(it.player.isOnline){
                                                 val i = it
-                                                getInstance().server.onlinePlayers.first { it.uniqueId == i.player.uniqueId }.sendTitle("${ChatColor.RED}${ChatColor.BOLD}전쟁 시작", "", 15, 50, 25)
+                                                getInstance().server.onlinePlayers.first { it.uniqueId == i.player.uniqueId }.sendTitle("${ChatColor.AQUA}${ChatColor.BOLD}전쟁 시작", "", 15, 50, 25)
                                             }
                                         }
 
                                         found.players.forEach {
                                             if(it.player.isOnline){
                                                 val i = it
-                                                getInstance().server.onlinePlayers.first { it.uniqueId == i.player.uniqueId }.sendTitle("${ChatColor.RED}${ChatColor.BOLD}전쟁 시작", "", 15, 50, 25)
+                                                getInstance().server.onlinePlayers.first { it.uniqueId == i.player.uniqueId }.sendTitle("${ChatColor.AQUA}${ChatColor.BOLD}전쟁 시작", "", 15, 50, 25)
                                             }
                                         }
                                     }

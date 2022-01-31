@@ -32,6 +32,7 @@ class ClanKommand: KommandInterface {
                                     "    ${clanTextS("${ChatColor.WHITE}/clan info")}\n" +
                                     "    ${clanTextS("${ChatColor.WHITE}/clan create <클랜 이름>")}\n" +
                                     "    ${clanTextS("${ChatColor.WHITE}/clan invite <플레이어>")}\n" +
+                                    "    ${clanTextS("${ChatColor.WHITE}/clan all")}\n" +
                                     "    ${clanTextS("${ChatColor.WHITE}/clan chat")}\n" +
                                     "    ${clanTextS("${ChatColor.WHITE}/clan leave")}\n" +
                                     "    ${clanTextS("${ChatColor.WHITE}/clan kick <플레이어>")}\n"
@@ -118,24 +119,26 @@ class ClanKommand: KommandInterface {
                                     if(getInstance().getPlayer(sender).clan!!.players.size < 4){
                                         val target: Player by it
 
-                                        getInstance().invites[target.uniqueId.toString()] = getInstance().getPlayer(sender).clan!!
-                                        sender.sendMessage(clanText("초대장을 보냈습니다."))
-                                        if(getInstance().getPlayer(target).player.isOnline){
-                                            val p = getInstance().server.onlinePlayers.first { it.uniqueId == getInstance().getPlayer(target).player.uniqueId }
-                                            p.sendMessage(clanText("${sender.name}님이 클랜 초대장을 보냈습니다. (${getInstance().getPlayer(sender).clan!!.name} 클랜)"))
-                                            val clickComp = net.md_5.bungee.api.chat.TextComponent("[ 수락 ]")
-                                            clickComp.color = ChatColor.GREEN
-                                            clickComp.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentBuilder("클랜 수락하기").create())
-                                            clickComp.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/clan accept")
-                                            p.sendMessage(clickComp)
+                                        if(getInstance().onlinePlayers.containsKey(target.uniqueId.toString())){
+                                            getInstance().invites[target.uniqueId.toString()] = getInstance().getPlayer(sender).clan!!
+                                            sender.sendMessage(clanText("초대장을 보냈습니다."))
+                                            if(getInstance().getPlayer(target).player.isOnline){
+                                                val p = getInstance().server.onlinePlayers.first { it.uniqueId == getInstance().getPlayer(target).player.uniqueId }
+                                                p.sendMessage(clanText("${sender.name}님이 클랜 초대장을 보냈습니다. (${getInstance().getPlayer(sender).clan!!.name} 클랜)"))
+                                                val clickComp = net.md_5.bungee.api.chat.TextComponent("[ 수락 ]")
+                                                clickComp.color = ChatColor.GREEN
+                                                clickComp.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentBuilder("클랜 수락하기").create())
+                                                clickComp.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/clan accept")
+                                                p.sendMessage(clickComp)
 
-                                            getInstance().invitesTaskId[target.uniqueId.toString()] = getInstance().server.scheduler.scheduleSyncDelayedTask(getInstance(),
-                                                {
-                                                    getInstance().invites.remove(target.uniqueId.toString())
-                                                    target.sendMessage(clanText("${sender.name}님에게서 온 클랜 초대가 만료되었습니다."))
-                                                },
-                                                600L
-                                            )
+                                                getInstance().invitesTaskId[target.uniqueId.toString()] = getInstance().server.scheduler.scheduleSyncDelayedTask(getInstance(),
+                                                    {
+                                                        getInstance().invites.remove(target.uniqueId.toString())
+                                                        target.sendMessage(clanText("${sender.name}님에게서 온 클랜 초대가 만료되었습니다."))
+                                                    },
+                                                    600L
+                                                )
+                                            }
                                         }
                                     }
                                     else {
@@ -165,17 +168,18 @@ class ClanKommand: KommandInterface {
                                     player.sendMessage("${getInstance().clans[getInstance().invites[p.player.uniqueId.toString()]!!.owner.player.uniqueId.toString()]!!.name} 클랜에 가입했습니다.")
                                     getInstance().invites.remove(player.uniqueId.toString())
                                     getInstance().server.scheduler.cancelTask(getInstance().invitesTaskId[player.uniqueId.toString()]!!)
+                                    getInstance().invitesTaskId.remove(player.uniqueId.toString())
                                 }
                                 else {
                                     sender.sendMessage(clanText("이미 다른 클랜/국가에 속해있습니다."))
                                 }
                             }
                             else {
-                                player.sendMessage("클랜 인원은 클랜장 포함 4명입니다.")
+                                player.sendMessage(clanText("클랜 인원은 클랜장 포함 4명입니다."))
                             }
                         }
                         else {
-                            player.sendMessage("대기 중인 초대가 없습니다.")
+                            player.sendMessage(clanText("대기 중인 초대가 없습니다."))
                         }
                     }
                 }
@@ -253,32 +257,34 @@ class ClanKommand: KommandInterface {
                         executes {
                             val victim: Player by it
 
-                            if(getInstance().getPlayer(player).clan != null){
-                                if(getInstance().getPlayer(player).clan!!.owner.player.uniqueId == player.uniqueId){
-                                    getInstance().getPlayer(player).clan!!.players.first {
-                                        it.player.uniqueId == victim.uniqueId
-                                    }.clan = null
-                                    getInstance().getPlayer(player).clan!!.players.first {
-                                        it.player.uniqueId == victim.uniqueId
-                                    }.clanChatMode = false
+                            if(getInstance().onlinePlayers.containsKey(victim.uniqueId.toString())){
+								if(getInstance().getPlayer(player).clan != null){
+									if(getInstance().getPlayer(player).clan!!.owner.player.uniqueId == player.uniqueId){
+										getInstance().getPlayer(player).clan!!.players.first {
+											it.player.uniqueId == victim.uniqueId
+										}.clan = null
+										getInstance().getPlayer(player).clan!!.players.first {
+											it.player.uniqueId == victim.uniqueId
+										}.clanChatMode = false
 
-                                    victim.sendMessage(clanText("클랜에서 추방되었습니다."))
-                                    getInstance().getPlayer(player).clan!!.players.forEach {pl ->
-                                        if(pl.player.isOnline){
-                                            (getInstance().server.onlinePlayers.first { it.uniqueId == pl.player.uniqueId }).sendMessage(clanText("${victim.name}님이 클랜에서 추방되셨습니다."))
-                                        }
-                                    }
-                                    getInstance().getPlayer(player).clan!!.players.remove(getInstance().getPlayer(player).clan!!.players.first {
-                                        it.player.uniqueId == victim.uniqueId
-                                    })
-                                    getInstance().clans[player.uniqueId.toString()] = getInstance().getPlayer(player).clan!!
-
-                                    player.sendMessage(clanText("${victim.name}님을 클랜에서 추방했습니다."))
-                                }
-                                else{
-                                    sender.sendMessage(clanText("클랜장만 추방할 수 있습니다."))
-                                }
-                            }
+										victim.sendMessage(clanText("클랜에서 추방되었습니다."))
+										getInstance().getPlayer(player).clan!!.players.forEach {pl ->
+											if(pl.player.isOnline){
+												(getInstance().server.onlinePlayers.first { it.uniqueId == pl.player.uniqueId }).sendMessage(clanText("${victim.name}님이 클랜에서 추방되셨습니다."))
+											}
+										}
+										getInstance().getPlayer(player).clan!!.players.remove(getInstance().getPlayer(player).clan!!.players.first {
+											it.player.uniqueId == victim.uniqueId
+										})
+										getInstance().clans[player.uniqueId.toString()] = getInstance().getPlayer(player).clan!!
+	
+										player.sendMessage(clanText("${victim.name}님을 클랜에서 추방했습니다."))
+									}
+									else{
+										sender.sendMessage(clanText("클랜장만 추방할 수 있습니다."))
+									}
+								}
+							}
                         }
                     }
                 }

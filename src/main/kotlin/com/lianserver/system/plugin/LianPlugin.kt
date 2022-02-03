@@ -201,7 +201,7 @@ class LianPlugin : JavaPlugin(), Listener {
         server.onlinePlayers.forEach {
             if(e.message.contains(it.name)){
                 e.message.replace("@${it.name}", "${ChatColor.BLUE}@${it.name}${ChatColor.RESET}")
-                it.sendMessage("${e.player.name}님이 당신을 ${SimpleDateFormat("h시 m분").format(Date())}에 멘션했습니다.")
+                it.sendMessage("${e.player.name}님이 당신을 ${SimpleDateFormat("h시 m분").format(Date())}에 언급했습니다.")
                 it.playSound(Sound.sound(Key.key("minecraft", "entity.experience_orb.pickup"), Sound.Source.PLAYER, 1f, 1.625f))
             }
         }
@@ -234,11 +234,11 @@ class LianPlugin : JavaPlugin(), Listener {
         else {
             server.onlinePlayers.forEach {
                 if(e.player.isOp){
-                    it.sendMessage(text("${ChatColor.DARK_GREEN}[관리자] ${ChatColor.RED}${e.player.name}${ChatColor.RESET}: ").append(e.message()))
+                    it.sendMessage(text("[${SimpleDateFormat("hh:mm:ss").format(Date())}] ").append(text("${ChatColor.DARK_GREEN}[관리자] ${ChatColor.RED}${e.player.name}${ChatColor.RESET}: ")).append(e.message()))
                     e.isCancelled = true
                 }
                 else {
-                    it.sendMessage(e.player.displayName().append(text(": ")).append(e.message()))
+                    it.sendMessage(text("[${SimpleDateFormat("hh:mm:ss").format(Date())}] ").append(e.player.displayName()).append(text(": ")).append(e.message()))
                     e.isCancelled = true
                 }
             }

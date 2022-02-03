@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 underconnor, AlphaGot
+ * Copyright (c) 2022 underconnor, AlphaGot
  *
  *  Licensed under the General Public License, Version 3.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -26,7 +26,11 @@ import com.lianserver.system.handlers.DataHandler
 import com.lianserver.system.interfaces.HandlerInterface
 import com.lianserver.system.interfaces.KommandInterface
 import io.papermc.paper.event.player.AsyncChatEvent
+import net.kyori.adventure.key.Key
+import net.kyori.adventure.sound.Sound
 import net.kyori.adventure.text.Component.text
+import net.kyori.adventure.text.TextReplacementConfig
+import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.Material
@@ -34,13 +38,18 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
+import org.bukkit.event.player.AsyncPlayerChatEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.inventory.Recipe
 import org.bukkit.plugin.java.JavaPlugin
 import org.reflections.Reflections
 import java.io.File
 import java.lang.reflect.Method
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 /***
@@ -70,7 +79,7 @@ class LianPlugin : JavaPlugin(), Listener {
     var warDeclTaskId: MutableMap<String, Int> = mutableMapOf()
 
     fun getPlayer(sender: CommandSender) = onlinePlayers[(sender as Player).uniqueId.toString()]!!
-    fun getPlayer(sender: Player) = onlinePlayers[(sender as Player).uniqueId.toString()]!!
+    fun getPlayer(sender: Player) = onlinePlayers[sender.uniqueId.toString()]!!
     fun getWar(c: String /* Clan Owner UUID */): War? {
         var ret: War? = null
         wars.forEach {
@@ -111,7 +120,7 @@ class LianPlugin : JavaPlugin(), Listener {
 
     fun getFlagArmorStand(u: String): ArmorStand? {
         return server.getWorld("world")!!.entities.filter {
-            it.scoreboardTags.contains("lian_flag")
+            it.scoreboardTags.contains("#lian_flag")
         }.first { it.scoreboardTags.contains(u) } as? ArmorStand
     }
 
@@ -187,6 +196,17 @@ class LianPlugin : JavaPlugin(), Listener {
         }
     }
 
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onMention(e: AsyncPlayerChatEvent){
+        server.onlinePlayers.forEach {
+            if(e.message.contains(it.name)){
+                e.message.replace("@${it.name}", "${ChatColor.BLUE}@${it.name}${ChatColor.RESET}")
+                it.sendMessage("${e.player.name}님이 당신을 ${SimpleDateFormat("h시 m분").format(Date())}에 멘션했습니다.")
+                it.playSound(Sound.sound(Key.key("minecraft", "entity.experience_orb.pickup"), Sound.Source.PLAYER, 1f, 1.625f))
+            }
+        }
+    }
+
     @EventHandler
     fun onChat(e: AsyncChatEvent){
         if(getPlayer(e.player).clanChatMode && getPlayer(e.player).clan != null){
@@ -224,4 +244,6 @@ class LianPlugin : JavaPlugin(), Listener {
             }
         }
     }
+
+
 }

@@ -276,7 +276,7 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
 
                                             val armorStand = e.player.world.spawnEntity(Location(e.player.world, (e.clickedBlock!!.chunk.x * 16.0) + (7.0 * locMulX), e.clickedBlock!!.y.toDouble(), (e.clickedBlock!!.chunk.z * 16.0) + (7.0 * locMulZ)), EntityType.ARMOR_STAND) as ArmorStand
 
-                                            armorStand.addScoreboardTag("lian_flag")
+                                            armorStand.addScoreboardTag("#lian_flag")
                                             armorStand.addScoreboardTag(getInstance().getPlayer(e.player).country!!.owner.player.uniqueId.toString())
 
                                             armorStand.customName(text("깃발").color(TextColor.color(255, 128, 128)))
@@ -285,6 +285,7 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
                                             armorStand.invisible = true
                                             armorStand.isCustomNameVisible = true
                                             armorStand.isInvulnerable = true
+                                            armorStand.setAI(false)
 
                                             armorStand.equipment.helmet = ItemStack(Material.REPEATING_COMMAND_BLOCK)
 
@@ -292,7 +293,9 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
                                                 armorStand.setDisabledSlots(it)
                                             }
 
-                                            armorStand.headPose.x = 180.0
+                                            var hP = armorStand.headPose
+                                            hP = hP.setX(Math.toRadians(180.0))
+                                            armorStand.headPose = hP
 
                                             getInstance().countries[e.player.uniqueId.toString()]!!.land = Pair(e.clickedBlock!!.chunk.x, e.clickedBlock!!.chunk.z)
                                             e.player.sendMessage(countryText("국가의 땅을 설정했습니다."))

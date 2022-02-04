@@ -194,6 +194,10 @@ class LianPlugin : JavaPlugin(), Listener {
         if(onlinePlayers.none { it.value.player.uniqueId == e.player.uniqueId }){
             onlinePlayers[e.player.uniqueId.toString()] = LianPlayer(e.player)
         }
+
+        if(onlinePlayers[e.player.uniqueId.toString()]!!.prefix != "**null**"){
+            e.player.displayName(text(onlinePlayers[e.player.uniqueId.toString()]!!.prefix).append(text(" ")).append(e.player.name()))
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -201,7 +205,7 @@ class LianPlugin : JavaPlugin(), Listener {
         server.onlinePlayers.forEach {
             if(e.message.contains(it.name)){
                 e.message.replace("@${it.name}", "${ChatColor.BLUE}@${it.name}${ChatColor.RESET}")
-                it.sendMessage("${e.player.name}님이 당신을 ${SimpleDateFormat("h시 m분").format(Date())}에 언급했습니다.")
+                it.sendMessage(e.player.displayName().append(text("님이 당신을 ${SimpleDateFormat("h시 m분").format(Date())}에 언급했습니다.")))
                 it.playSound(Sound.sound(Key.key("minecraft", "entity.experience_orb.pickup"), Sound.Source.PLAYER, 1f, 1.625f))
             }
         }
@@ -212,7 +216,7 @@ class LianPlugin : JavaPlugin(), Listener {
         if(getPlayer(e.player).clanChatMode && getPlayer(e.player).clan != null){
             getPlayer(e.player).clan!!.players.forEach { lianPlayer ->
                 if(lianPlayer.player.isOnline){
-                    server.onlinePlayers.first { it.uniqueId == lianPlayer.player.uniqueId }.sendMessage(text("${ChatColor.AQUA}[클랜] ${ChatColor.LIGHT_PURPLE}${e.player.name}${ChatColor.RESET}: ").append(e.message()))
+                    server.onlinePlayers.first { it.uniqueId == lianPlayer.player.uniqueId }.sendMessage(text("${ChatColor.AQUA}[클랜] ${ChatColor.LIGHT_PURPLE}").append(e.player.displayName()).append(text("${ChatColor.RESET}: ")).append(e.message()))
                 }
             }
             e.isCancelled = true
@@ -222,7 +226,7 @@ class LianPlugin : JavaPlugin(), Listener {
             getPlayer(e.player).country!!.players.forEach { lianPlayer ->
                 if(lianPlayer.player.isOnline){
                     server.onlinePlayers.first { it.uniqueId == lianPlayer.player.uniqueId }.sendMessage(text("${ChatColor.GOLD}[국가]").append(
-                        text(" ${ChatColor.LIGHT_PURPLE}${e.player.name}${ChatColor.RESET}: ")
+                        text(" ${ChatColor.LIGHT_PURPLE}").append(e.player.displayName()).append(text("${ChatColor.RESET}: "))
                     ).append(
                         e.message()
                     ))
@@ -234,7 +238,7 @@ class LianPlugin : JavaPlugin(), Listener {
         else {
             server.onlinePlayers.forEach {
                 if(e.player.isOp){
-                    it.sendMessage(text("[${SimpleDateFormat("hh:mm:ss").format(Date())}] ").append(text("${ChatColor.DARK_GREEN}[관리자] ${ChatColor.RED}${e.player.name}${ChatColor.RESET}: ")).append(e.message()))
+                    it.sendMessage(text("[${SimpleDateFormat("hh:mm:ss").format(Date())}] ").append(text("${ChatColor.DARK_GREEN}[관리자] ${ChatColor.RED}").append(e.player.displayName()).append(text("${ChatColor.RESET}: "))).append(e.message()))
                     e.isCancelled = true
                 }
                 else {

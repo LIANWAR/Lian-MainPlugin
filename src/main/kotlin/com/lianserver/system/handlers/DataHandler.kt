@@ -92,6 +92,8 @@ object DataHandler {
                         }
                         else null
 
+                        c.prefix = f[3]
+
                         getInstance().onlinePlayers[c.player.uniqueId.toString()] = c
                     }
                 }
@@ -199,6 +201,10 @@ object DataHandler {
                                 getInstance().onlinePlayers[f[0].trim()]!!.clan = getInstance().clans[f[1].trim()]
                                 getInstance().onlinePlayers[f[0].trim()]!!.country = null
                             }
+                        }
+                        else {
+                            getInstance().onlinePlayers[f[0].trim()]!!.clan = getInstance().clans[f[1].trim()]
+                            getInstance().onlinePlayers[f[0].trim()]!!.country = null
                         }
                     }
                 }

@@ -26,7 +26,7 @@ class CountryKommand: KommandInterface {
                 then("help"){
                     executes {
                         sender.sendMessage(
-                                    "${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}- 클랜 도움말 ${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-\n" +
+                                    "${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}- 국가 도움말 ${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-\n" +
                                     "    ${countryTextS("${ChatColor.WHITE}/country info")}\n" +
                                     "    ${countryTextS("${ChatColor.WHITE}/country invite <플레이어>")}\n" +
                                     "    ${countryTextS("${ChatColor.WHITE}/country accept")}\n" +
@@ -34,7 +34,7 @@ class CountryKommand: KommandInterface {
                                     "    ${countryTextS("${ChatColor.WHITE}/country chat")}\n" +
                                     "    ${countryTextS("${ChatColor.WHITE}/country leave")}\n" +
                                     "    ${countryTextS("${ChatColor.WHITE}/country kick <플레이어>")}\n" +
-                                    "    ${countryTextS("${ChatColor.WHITE}/country wardecl <클랜 이름>")}\n" +
+                                    "    ${countryTextS("${ChatColor.WHITE}/country wardecl <국가 이름>")}\n" +
                                     "    ${countryTextS("${ChatColor.WHITE}/country waraccept")}\n"
                         )
                     }

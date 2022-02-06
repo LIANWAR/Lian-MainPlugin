@@ -33,6 +33,20 @@ class PrefixKommand: KommandInterface {
                         }
                     }
                 }
+                then("reset") {
+                    executes { sender.sendMessage(text("플레이어와 칭호 인자가 필요합니다.")) }
+                    then("p" to player()) {
+                        executes {
+                            val p: Player by it
+
+                            p.displayName(p.name())
+
+                            getInstance().onlinePlayers[p.uniqueId.toString()]!!.prefix = "**null**"
+
+                            sender.sendMessage("칭호를 초기화했습니다.")
+                        }
+                    }
+                }
             }
         }
     }

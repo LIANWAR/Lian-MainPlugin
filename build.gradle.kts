@@ -18,7 +18,7 @@ dependencies {
     compileOnly("io.github.monun:tap-api:4.1.10")
     compileOnly("io.github.monun:kommand-api:2.6.6")
     implementation("org.reflections:reflections:0.10.1")
-    //compileOnly("com.github.Jannyboy11.GuiLib:GuiLib-Plugin:v1.11.7")
+    implementation("com.github.stefvanschie.inventoryframework:IF:0.10.4")
 }
 
 val shade = configurations.create("shade")

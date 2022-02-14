@@ -29,8 +29,6 @@ import io.papermc.paper.event.player.AsyncChatEvent
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.sound.Sound
 import net.kyori.adventure.text.Component.text
-import net.kyori.adventure.text.TextReplacementConfig
-import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.Material
@@ -49,7 +47,6 @@ import java.io.File
 import java.lang.reflect.Method
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 /***
@@ -236,18 +233,14 @@ class LianPlugin : JavaPlugin(), Listener {
             return
         }
         else {
-            server.onlinePlayers.forEach {
-                if(e.player.isOp){
-                    it.sendMessage(text("[${SimpleDateFormat("HH:mm:ss").format(Date())}] ").append(text("${ChatColor.DARK_GREEN}[관리자] ${ChatColor.RED}").append(e.player.displayName()).append(text("${ChatColor.RESET}: "))).append(e.message()))
-                    e.isCancelled = true
-                }
-                else {
-                    it.sendMessage(text("[${SimpleDateFormat("HH:mm:ss").format(Date())}] ").append(e.player.displayName()).append(text(": ")).append(e.message()))
-                    e.isCancelled = true
-                }
+            if(e.player.isOp){
+                server.broadcast(text("[${SimpleDateFormat("HH:mm:ss").format(Date())}] ").append(text("${ChatColor.DARK_GREEN}[관리자] ${ChatColor.RED}").append(e.player.displayName()).append(text("${ChatColor.RESET}: "))).append(e.message()))
+                e.isCancelled = true
+            }
+            else {
+                server.broadcast(text("[${SimpleDateFormat("HH:mm:ss").format(Date())}] ").append(e.player.displayName()).append(text(": ")).append(e.message()))
+                e.isCancelled = true
             }
         }
     }
-
-
 }

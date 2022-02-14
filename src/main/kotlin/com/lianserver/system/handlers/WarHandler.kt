@@ -71,6 +71,7 @@ class WarHandler: HandlerInterface, PrefixedTextInterface {
                             }
 
                             getInstance().countries[w.countries.first.owner.player.uniqueId.toString()]!!.land = null
+                            getInstance().countries[w.countries.second.owner.player.uniqueId.toString()]!!.winCount++
                             getInstance().getFlagArmorStand(w.countries.second.owner.player.uniqueId.toString())?.isGlowing = false
                         }
                         else {
@@ -91,6 +92,7 @@ class WarHandler: HandlerInterface, PrefixedTextInterface {
                             }
 
                             getInstance().countries[w.countries.second.owner.player.uniqueId.toString()]!!.land = null
+                            getInstance().countries[w.countries.first.owner.player.uniqueId.toString()]!!.winCount++
                             getInstance().getFlagArmorStand(w.countries.first.owner.player.uniqueId.toString())?.isGlowing = false
                         }
                     }

@@ -1,5 +1,11 @@
 package com.lianserver.system.kommands
 
+import com.github.stefvanschie.inventoryframework.gui.GuiItem
+import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
+import com.github.stefvanschie.inventoryframework.pane.OutlinePane
+import com.github.stefvanschie.inventoryframework.pane.PaginatedPane
+import com.github.stefvanschie.inventoryframework.pane.Pane
+import com.github.stefvanschie.inventoryframework.pane.StaticPane
 import com.lianserver.system.common.Country
 import com.lianserver.system.common.LianPlayer
 import com.lianserver.system.common.War
@@ -7,11 +13,20 @@ import com.lianserver.system.interfaces.KommandInterface
 import io.github.monun.kommand.StringType
 import io.github.monun.kommand.getValue
 import io.github.monun.kommand.kommand
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.Component.text
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextColor
+import net.kyori.adventure.text.format.TextDecoration
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.ComponentBuilder
 import net.md_5.bungee.api.chat.HoverEvent
+import org.bukkit.Material
 import org.bukkit.entity.Player
+import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.SkullMeta
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -27,15 +42,17 @@ class CountryKommand: KommandInterface {
                     executes {
                         sender.sendMessage(
                                     "${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}- 국가 도움말 ${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-\n" +
-                                    "    ${countryTextS("${ChatColor.WHITE}/country info")}\n" +
-                                    "    ${countryTextS("${ChatColor.WHITE}/country invite <플레이어>")}\n" +
-                                    "    ${countryTextS("${ChatColor.WHITE}/country accept")}\n" +
-                                    "    ${countryTextS("${ChatColor.WHITE}/country all")}\n" +
-                                    "    ${countryTextS("${ChatColor.WHITE}/country chat")}\n" +
-                                    "    ${countryTextS("${ChatColor.WHITE}/country leave")}\n" +
-                                    "    ${countryTextS("${ChatColor.WHITE}/country kick <플레이어>")}\n" +
-                                    "    ${countryTextS("${ChatColor.WHITE}/country wardecl <국가 이름>")}\n" +
-                                    "    ${countryTextS("${ChatColor.WHITE}/country waraccept")}\n"
+                                    "${ChatColor.RESET} - ${countryTextS("${ChatColor.WHITE}/country info: 국가의 정보를 보여줍니다.")}\n" +
+                                    " - ${countryTextS("${ChatColor.WHITE}/country invite <플레이어>: <플레이어>를 국가에 초대합니다.")}\n" +
+                                    " - ${countryTextS("${ChatColor.WHITE}/country accept: 대기 중인 국가 가입 요청을 수락합니다.")}\n" +
+                                    " - ${countryTextS("${ChatColor.WHITE}/country all: 모든 국가를 보여줍니다.")}\n" +
+                                    " - ${countryTextS("${ChatColor.WHITE}/country chat: 국가 채팅 모드를 전환합니다.")}\n" +
+                                    " - ${countryTextS("${ChatColor.WHITE}/country leave: 국가를 나갑니다.")}\n" +
+                                    " - ${countryTextS("${ChatColor.WHITE}/country kick <플레이어>: <플레이어>를 추방합니다.")}\n" +
+                                    " - ${countryTextS("${ChatColor.WHITE}/country wardecl <국가 이름>: <국가 이름> 국가에 선전포고 입장을 보냅니다.")}\n" +
+                                    " - ${countryTextS("${ChatColor.WHITE}/country waraccept: 대기 중인 선전포고에 응합니다.")}\n" +
+                                    " - ${countryTextS("${ChatColor.WHITE}/country public: 공개된 국가 목록을 보여줍니다.")}\n" +
+                                    " - ${countryTextS("${ChatColor.WHITE}/country togglepublic: 국가의 공개 상태를 전환합니다.")}\n"
                         )
                     }
                 }
@@ -391,6 +408,170 @@ class CountryKommand: KommandInterface {
                                         }
                                     }
                                 }
+                            }
+                        }
+                    }
+                }
+                then("public"){
+                    executes {
+                        val gui = ChestGui(6, "공개 국가")
+
+                        val pages = PaginatedPane(0, 0, 9, 5)
+                        pages.populateWithItemStacks(
+                            getInstance().countries.values.filter {
+                                it.public && it.players.size < 8
+                            }.shuffled().map {
+                                val st = ItemStack(Material.PLAYER_HEAD)
+                                val meta = st.itemMeta as SkullMeta
+
+                                val c = it
+
+                                meta.owningPlayer = it.owner.player
+                                meta.displayName(text("${it.name} 국가").color(NamedTextColor.AQUA).decoration(TextDecoration.ITALIC, false))
+                                meta.lore(listOf(
+                                    text("수령: ").color(TextColor.color(0xE0, 0xE0, 0x66)).decoration(TextDecoration.ITALIC, false).append(
+                                        if(getInstance().server.onlinePlayers.any { it.uniqueId == meta.owningPlayer!!.uniqueId }){
+                                            getInstance().server.onlinePlayers.first { it.uniqueId == meta.owningPlayer!!.uniqueId }.displayName().decoration(TextDecoration.ITALIC, false)
+                                        }
+                                        else{
+                                            text(it.owner.player.name!!).color(NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false)
+                                        }
+                                    ),
+                                    text(
+                                        "현재 접속자 수: ${
+                                            getInstance().server.onlinePlayers.count {
+                                                c.players.map { it.player.uniqueId }.contains(it.uniqueId)
+                                            }
+                                        }명"
+                                    ).color(NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false),
+                                    text(
+                                        "승리 수: ${c.winCount}번"
+                                    ).color(NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false)
+                                ))
+
+                                st.itemMeta = meta
+
+                                st
+                            }
+                        )
+                        pages.setOnClick { e: InventoryClickEvent ->
+                            e.isCancelled = true
+
+                            if(e.currentItem != null) {
+                                val cc = (e.currentItem!!.itemMeta as SkullMeta).owningPlayer
+                                val p = getInstance().getPlayer(e.whoClicked)
+
+                                if(getInstance().countries[cc!!.uniqueId.toString()]!!.players.size < 8){
+                                    if(p.clan == null && p.country == null){
+                                        p.country = getInstance().countries[cc.uniqueId.toString()]
+                                        getInstance().onlinePlayers[p.player.uniqueId.toString()] = p
+                                        getInstance().countries[cc.uniqueId.toString()]!!.players =
+                                            getInstance().countries[cc.uniqueId.toString()]!!.players.plusElement(p) as MutableList<LianPlayer>
+                                        getInstance().countries[cc.uniqueId.toString()]!!.players.forEach { pl ->
+                                            if(pl.player.isOnline){
+                                                val p2 = getInstance().server.onlinePlayers.first { it.uniqueId == pl.player.uniqueId }
+                                                p2.sendMessage("${p.player.name}님이 국가에 가입했습니다. 환영 인사 한 번씩 해주세요!")
+                                            }
+                                        }
+                                        player.sendMessage("${getInstance().countries[cc.uniqueId.toString()]!!.name} 국가에 가입했습니다.")
+                                    }
+                                    else {
+                                        sender.sendMessage(countryText("이미 다른 클랜/국가에 속해있습니다."))
+                                    }
+                                }
+                                else {
+                                    player.sendMessage(countryText("국가 인원은 수령 포함 8명입니다."))
+                                }
+                            }
+                        }
+
+                        gui.addPane(pages)
+
+                        val background = OutlinePane(0, 5, 9, 1)
+                        background.addItem(GuiItem(ItemStack(Material.BLACK_STAINED_GLASS_PANE)))
+                        background.setRepeat(true)
+                        background.priority = Pane.Priority.LOWEST
+                        background.setOnClick { event: InventoryClickEvent ->
+                            event.isCancelled = true
+                        }
+
+                        gui.addPane(background)
+
+                        val navigation = StaticPane(0, 5, 9, 1)
+
+                        val rw = ItemStack(Material.RED_WOOL)
+                        var meta = rw.itemMeta
+                        meta.displayName(text("이전").color(NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false))
+                        rw.itemMeta = meta
+
+                        navigation.addItem(
+                            GuiItem(
+                                rw
+                            ) { event: InventoryClickEvent ->
+                                event.isCancelled = true
+
+                                if (pages.page > 0) {
+                                    pages.page = pages.page - 1
+                                    gui.update()
+                                }
+                            }, 0, 0
+                        )
+
+                        val gw = ItemStack(Material.GREEN_WOOL)
+                        meta = gw.itemMeta
+                        meta.displayName(text("다음").color(NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false))
+                        gw.itemMeta = meta
+
+                        navigation.addItem(
+                            GuiItem(
+                                gw
+                            ) { event: InventoryClickEvent ->
+                                event.isCancelled = true
+
+                                if (pages.page < pages.pages - 1) {
+                                    pages.page = pages.page + 1
+                                    gui.update()
+                                }
+                            }, 8, 0
+                        )
+
+                        val br = ItemStack(Material.BARRIER)
+                        meta = br.itemMeta
+                        meta.displayName(text("닫기").color(NamedTextColor.RED).decoration(TextDecoration.ITALIC, false))
+                        br.itemMeta = meta
+
+                        navigation.addItem(
+                            GuiItem(
+                                br
+                            ) { event: InventoryClickEvent ->
+                                event.isCancelled = true
+
+                                event.whoClicked.closeInventory()
+                            }, 4, 0
+                        )
+
+                        gui.addPane(navigation)
+
+                        gui.update()
+                        gui.show((sender as Player))
+                    }
+                }
+                then("togglepublic"){
+                    executes {
+                        if(getInstance().getPlayer(sender).country == null){
+                            sender.sendMessage(countryText("국가에 소속되어있지 않습니다!"))
+                        }
+                        else {
+                            val clan = getInstance().getPlayer(sender).country!!
+
+                            if(clan.owner.player.uniqueId != (sender as Player).uniqueId){
+                                sender.sendMessage(countryText("수령이 아닙니다."))
+                            }
+                            else {
+                                getInstance().countries[(sender as Player).uniqueId.toString()]!!.public = !getInstance().countries[(sender as Player).uniqueId.toString()]!!.public
+                                sender.sendMessage(countryText("공개 상태를 ${
+                                    if(getInstance().countries[(sender as Player).uniqueId.toString()]!!.public) "공개" else "비공개"
+                                }로 설정했습니다."))
                             }
                         }
                     }

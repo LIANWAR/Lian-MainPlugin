@@ -148,8 +148,13 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
     fun onPistonExtend(e: BlockPistonExtendEvent){
         if(e.block.world.name == "world"){
             var cond = true
+
+            fun l(x: Int, z: Int): Pair<Clan?, Country?> {
+                return getInstance().getLandOwned(Pair(x, z))
+            }
+
             e.blocks.forEach {
-                cond = cond && (e.block.chunk == it.chunk)
+                cond = cond && (l(e.block.chunk.x, e.block.chunk.z) == l(it.chunk.x, it.chunk.z))
             }
 
             e.isCancelled = !cond
@@ -160,8 +165,13 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
     fun onPistonReturn(e: BlockPistonRetractEvent){
         if(e.block.world.name == "world"){
             var cond = true
+
+            fun l(x: Int, z: Int): Pair<Clan?, Country?> {
+                return getInstance().getLandOwned(Pair(x, z))
+            }
+
             e.blocks.forEach {
-                cond = cond && (e.block.chunk == it.chunk)
+                cond = cond && (l(e.block.chunk.x, e.block.chunk.z) == l(it.chunk.x, it.chunk.z))
             }
 
             e.isCancelled = !cond

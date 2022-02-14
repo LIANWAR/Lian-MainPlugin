@@ -1,5 +1,11 @@
 package com.lianserver.system.kommands
 
+import com.github.stefvanschie.inventoryframework.gui.GuiItem
+import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
+import com.github.stefvanschie.inventoryframework.pane.OutlinePane
+import com.github.stefvanschie.inventoryframework.pane.PaginatedPane
+import com.github.stefvanschie.inventoryframework.pane.Pane
+import com.github.stefvanschie.inventoryframework.pane.StaticPane
 import com.lianserver.system.common.Clan
 import com.lianserver.system.common.Country
 import com.lianserver.system.common.LianPlayer
@@ -9,13 +15,19 @@ import io.github.monun.kommand.getValue
 import io.github.monun.kommand.kommand
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.ComponentBuilder
 import net.md_5.bungee.api.chat.HoverEvent
 import org.bukkit.Material
+import org.bukkit.block.Skull
 import org.bukkit.entity.Player
+import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.SkullMeta
+import kotlin.reflect.typeOf
 
 /***
  * @author AlphaGot
@@ -29,13 +41,16 @@ class ClanKommand: KommandInterface {
                     executes {
                         sender.sendMessage(
                                     "${ChatColor.RED}-${ChatColor.WHITE}-${ChatColor.RED}-${ChatColor.WHITE}-${ChatColor.RED}-${ChatColor.WHITE}-${ChatColor.RED}-${ChatColor.WHITE}-${ChatColor.RED}-${ChatColor.WHITE}- 클랜 도움말 ${ChatColor.WHITE}-${ChatColor.RED}-${ChatColor.WHITE}-${ChatColor.RED}-${ChatColor.WHITE}-${ChatColor.RED}-${ChatColor.WHITE}-${ChatColor.RED}-${ChatColor.WHITE}-${ChatColor.RED}-\n" +
-                                    "    ${clanTextS("${ChatColor.WHITE}/clan info")}\n" +
-                                    "    ${clanTextS("${ChatColor.WHITE}/clan create <클랜 이름>")}\n" +
-                                    "    ${clanTextS("${ChatColor.WHITE}/clan invite <플레이어>")}\n" +
-                                    "    ${clanTextS("${ChatColor.WHITE}/clan all")}\n" +
-                                    "    ${clanTextS("${ChatColor.WHITE}/clan chat")}\n" +
-                                    "    ${clanTextS("${ChatColor.WHITE}/clan leave")}\n" +
-                                    "    ${clanTextS("${ChatColor.WHITE}/clan kick <플레이어>")}\n"
+                                    "${ChatColor.RESET} - ${clanTextS("${ChatColor.WHITE}/clan info: 클랜 정보를 보여줍니다.")}\n" +
+                                    " - ${clanTextS("${ChatColor.WHITE}/clan create <클랜 이름>: <클랜 이름> 클랜을 생성합니다.")}\n" +
+                                    " - ${clanTextS("${ChatColor.WHITE}/clan invite <플레이어>: <플레이어>를 초대합니다.")}\n" +
+                                    " - ${clanTextS("${ChatColor.WHITE}/clan accept: 대기 중인 클랜 가입 요청을 수락합니다.")}\n" +
+                                    " - ${clanTextS("${ChatColor.WHITE}/clan all: 모든 클랜을 보여줍니다.")}\n" +
+                                    " - ${clanTextS("${ChatColor.WHITE}/clan chat: 클랜 채팅 모드를 전환합니다.")}\n" +
+                                    " - ${clanTextS("${ChatColor.WHITE}/clan leave: 클랜을 나갑니다.")}\n" +
+                                    " - ${clanTextS("${ChatColor.WHITE}/clan kick <플레이어>: <플레이어>를 추방합니다.")}\n" +
+                                    " - ${clanTextS("${ChatColor.WHITE}/clan public: 공개된 클랜 목록을 보여줍니다.")}\n" +
+                                    " - ${clanTextS("${ChatColor.WHITE}/clan togglepublic: 클랜의 공개 상태를 전환합니다.")}\n"
                         )
                     }
                 }
@@ -331,6 +346,161 @@ class ClanKommand: KommandInterface {
                                 else{
                                     sender.sendMessage(clanText("손에 국가 창설권을 들어주세요."))
                                 }
+                            }
+                        }
+                    }
+                }
+                then("public"){
+                    executes {
+                        val gui = ChestGui(6, "공개 클랜")
+
+                        val pages = PaginatedPane(0, 0, 9, 5)
+                        pages.populateWithItemStacks(
+                            getInstance().clans.values.filter {
+                                it.public && it.players.size < 4
+                            }.shuffled().map {
+                                val st = ItemStack(Material.PLAYER_HEAD)
+                                val meta = st.itemMeta as SkullMeta
+
+                                val c = it
+
+                                meta.owningPlayer = it.owner.player
+                                meta.displayName(text("${it.name} 클랜").color(NamedTextColor.AQUA).decoration(TextDecoration.ITALIC, false))
+                                meta.lore(listOf(
+                                    text("클랜장: ").color(TextColor.color(0xE0, 0xE0, 0x66)).decoration(TextDecoration.ITALIC, false).append(
+                                        if(getInstance().server.onlinePlayers.any { it.uniqueId == meta.owningPlayer!!.uniqueId }){
+                                            getInstance().server.onlinePlayers.first { it.uniqueId == meta.owningPlayer!!.uniqueId }.displayName().decoration(TextDecoration.ITALIC, false)
+                                        }
+                                        else{
+                                            text(it.owner.player.name!!).color(NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false)
+                                        }
+                                    ),
+                                    text("현재 접속자 수: ${getInstance().server.onlinePlayers.count { 
+                                        c.players.map { it.player.uniqueId }.contains(it.uniqueId)
+                                    }}명").color(NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false)
+                                ))
+
+                                st.itemMeta = meta
+
+                                st
+                            }
+                        )
+                        pages.setOnClick { e: InventoryClickEvent ->
+                            e.isCancelled = true
+
+                            if(e.currentItem != null) {
+                                val mm = e.currentItem!!.itemMeta
+                                getInstance().logger.info(e.currentItem!!.itemMeta::class.java.toString())
+                                val cc = (mm as SkullMeta).owningPlayer
+                                val p = getInstance().getPlayer(e.whoClicked)
+
+                                if(getInstance().clans[cc!!.uniqueId.toString()]!!.players.size < 4){
+                                    if(p.clan == null && p.country == null){
+                                        p.clan = getInstance().clans[cc.uniqueId.toString()]
+                                        getInstance().onlinePlayers[p.player.uniqueId.toString()] = p
+                                        getInstance().clans[cc.uniqueId.toString()]!!.players =
+                                            getInstance().clans[cc.uniqueId.toString()]!!.players.plusElement(p) as MutableList<LianPlayer>
+                                        getInstance().clans[cc.uniqueId.toString()]!!.players.forEach { pl ->
+                                            if(pl.player.isOnline){
+                                                val p2 = getInstance().server.onlinePlayers.first { it.uniqueId == pl.player.uniqueId }
+                                                p2.sendMessage("${p.player.name}님이 클랜에 가입했습니다. 환영 인사 한 번씩 해주세요!")
+                                            }
+                                        }
+                                        player.sendMessage("${getInstance().clans[cc.uniqueId.toString()]!!.name} 클랜에 가입했습니다.")
+                                    }
+                                    else {
+                                        sender.sendMessage(clanText("이미 다른 클랜/국가에 속해있습니다."))
+                                    }
+                                }
+                                else {
+                                    player.sendMessage(clanText("클랜 인원은 클랜장 포함 4명입니다."))
+                                }
+                            }
+                        }
+
+                        gui.addPane(pages)
+
+                        val background = OutlinePane(0, 5, 9, 1)
+                        background.addItem(GuiItem(ItemStack(Material.BLACK_STAINED_GLASS_PANE)))
+                        background.setRepeat(true)
+                        background.priority = Pane.Priority.LOWEST
+                        background.setOnClick { event: InventoryClickEvent ->
+                            event.isCancelled = true
+                        }
+
+                        gui.addPane(background)
+
+                        val rw = ItemStack(Material.RED_WOOL)
+                        var meta = rw.itemMeta
+                        meta.displayName(text("이전").color(NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false))
+                        rw.itemMeta = meta
+
+                        val navigation = StaticPane(0, 5, 9, 1)
+                        navigation.addItem(
+                            GuiItem(
+                            rw
+                        ) { event: InventoryClickEvent ->
+                            event.isCancelled = true
+                            if (pages.page > 0) {
+                                pages.page = pages.page - 1
+                                gui.update()
+                            }
+                        }, 0, 0
+                        )
+
+                        val gw = ItemStack(Material.GREEN_WOOL)
+                        meta = gw.itemMeta
+                        meta.displayName(text("다음").color(NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false))
+                        gw.itemMeta = meta
+
+                        navigation.addItem(
+                            GuiItem(
+                            gw
+                        ) { event: InventoryClickEvent ->
+                            event.isCancelled = true
+                            if (pages.page < pages.pages - 1) {
+                                pages.page = pages.page + 1
+                                gui.update()
+                            }
+                        }, 8, 0
+                        )
+
+                        val br = ItemStack(Material.BARRIER)
+                        meta = br.itemMeta
+                        meta.displayName(text("닫기").color(NamedTextColor.RED).decoration(TextDecoration.ITALIC, false))
+                        br.itemMeta = meta
+
+                        navigation.addItem(
+                            GuiItem(
+                            br
+                        ) { event: InventoryClickEvent ->
+                            event.isCancelled = true
+                            event.whoClicked.closeInventory()
+                        }, 4, 0
+                        )
+
+                        gui.addPane(navigation)
+
+                        gui.update()
+                        gui.show((sender as Player))
+                    }
+                }
+                then("togglepublic"){
+                    executes {
+                        if(getInstance().getPlayer(sender).clan == null){
+                            sender.sendMessage(clanText("클랜에 소속되어있지 않습니다!"))
+                        }
+                        else {
+                            val clan = getInstance().getPlayer(sender).clan!!
+
+                            if(clan.owner.player.uniqueId != (sender as Player).uniqueId){
+                                sender.sendMessage(clanText("클랜장이 아닙니다."))
+                            }
+                            else {
+                                getInstance().clans[(sender as Player).uniqueId.toString()]!!.public = !getInstance().clans[(sender as Player).uniqueId.toString()]!!.public
+                                sender.sendMessage(clanText("공개 상태를 ${
+                                    if(getInstance().clans[(sender as Player).uniqueId.toString()]!!.public) "공개" else "비공개"
+                                }로 설정했습니다."))
                             }
                         }
                     }

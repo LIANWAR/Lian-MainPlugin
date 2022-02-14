@@ -126,11 +126,12 @@ object DataHandler {
                         } else {
                                null
                         },
-                        p = c.subList(3, c.size).map { el ->
+                        p = c.subList(4, c.size).map { el ->
                             logger.info(el)
                             getInstance().onlinePlayers[el.trim()]!!
                         } as MutableList<LianPlayer>,
-                        n = c[1]
+                        n = c[2],
+                        ip = c[3] == "true"
                     )
                 }
             }
@@ -162,13 +163,15 @@ object DataHandler {
                         } else {
                             null
                         },
-                        players = c.subList(5, c.size).map { el ->
+                        players = c.subList(7, c.size).map { el ->
                             logger.info(el)
                             getInstance().onlinePlayers[el.trim()]!!
                         } as MutableList<LianPlayer>,
                         name = c[2],
-                        warDeclarationDenyCount = c[3].toInt(),
-                        lastWarDeclaratedTime = Date(c[4].toLong())
+                        warDeclarationDenyCount = c[5].toInt(),
+                        lastWarDeclaratedTime = Date(c[6].toLong()),
+                        public = c[3] == "true",
+                        winCount = c[4].toInt()
                     )
                 }
             }

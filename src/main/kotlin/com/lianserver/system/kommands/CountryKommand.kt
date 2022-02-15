@@ -171,7 +171,8 @@ class CountryKommand: KommandInterface {
                                 }
                                 getInstance().countries[getInstance().getPlayer(player).country!!.owner.player.uniqueId.toString()]!!.players.remove(getInstance().getPlayer(player))
                                 player.sendMessage(countryText("국가에서 나오셨습니다."))
-                                getInstance().onlinePlayers[getInstance().getPlayer(player).country!!.owner.player.uniqueId.toString()]!!.clanChatMode = false
+                                getInstance().onlinePlayers[player.uniqueId.toString()]!!.clanChatMode = false
+                                getInstance().onlinePlayers[player.uniqueId.toString()]!!.country = null
                             }
                         }
                     }

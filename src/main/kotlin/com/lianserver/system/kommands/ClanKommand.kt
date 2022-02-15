@@ -215,7 +215,8 @@ class ClanKommand: KommandInterface {
                                 }
                                 getInstance().clans[getInstance().getPlayer(player).clan!!.owner.player.uniqueId.toString()]!!.players.remove(getInstance().getPlayer(player))
                                 player.sendMessage(clanText("클랜에서 나오셨습니다."))
-                                getInstance().onlinePlayers[getInstance().getPlayer(player).clan!!.owner.player.uniqueId.toString()]!!.clanChatMode = false
+                                getInstance().onlinePlayers[player.uniqueId.toString()]!!.clanChatMode = false
+                                getInstance().onlinePlayers[player.uniqueId.toString()]!!.clan = null
                             }
                         }
                     }

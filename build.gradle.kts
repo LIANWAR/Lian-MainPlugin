@@ -10,6 +10,7 @@ repositories {
     maven("https://papermc.io/repo/repository/maven-public/")
     maven("https://jitpack.io")
     jcenter()
+    maven("https://repo.codemc.io/repository/maven-snapshots/")
 }
 
 dependencies {
@@ -19,6 +20,7 @@ dependencies {
     compileOnly("io.github.monun:kommand-api:2.6.6")
     implementation("org.reflections:reflections:0.10.1")
     implementation("com.github.stefvanschie.inventoryframework:IF:0.10.4")
+    implementation("net.wesjd:anvilgui:1.5.3-SNAPSHOT")
 }
 
 val shade = configurations.create("shade")

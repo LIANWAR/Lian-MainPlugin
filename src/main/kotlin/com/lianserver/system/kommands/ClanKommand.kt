@@ -23,6 +23,7 @@ import net.md_5.bungee.api.chat.ComponentBuilder
 import net.md_5.bungee.api.chat.HoverEvent
 import org.bukkit.Material
 import org.bukkit.block.Skull
+import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
@@ -224,6 +225,7 @@ class ClanKommand: KommandInterface {
                         executes {
                             if(getInstance().getPlayer(sender).clan != null){
                                 if(getInstance().getPlayer(sender).clan!!.owner.player.uniqueId.toString() == (sender as Player).uniqueId.toString()){
+                                    getInstance().server.getWorld("world")!!.entities.first { it.type == EntityType.ARMOR_STAND && it.scoreboardTags.contains("#lian_flag") && it.scoreboardTags.contains("${player.uniqueId}") }.remove()
                                     getInstance().clans.remove(getInstance().getPlayer(player).player.uniqueId.toString())
                                     getInstance().getPlayer(player).clan!!.players.forEach { pl ->
                                         getInstance().onlinePlayers[pl.player.uniqueId.toString()]!!.clanChatMode = false
@@ -276,27 +278,32 @@ class ClanKommand: KommandInterface {
                             if(getInstance().onlinePlayers.containsKey(victim.uniqueId.toString())){
 								if(getInstance().getPlayer(player).clan != null){
 									if(getInstance().getPlayer(player).clan!!.owner.player.uniqueId == player.uniqueId){
-										getInstance().getPlayer(player).clan!!.players.first {
-											it.player.uniqueId == victim.uniqueId
-										}.clan = null
-										getInstance().getPlayer(player).clan!!.players.first {
-											it.player.uniqueId == victim.uniqueId
-										}.clanChatMode = false
+										if(getInstance().getPlayer(player).clan!!.owner.player.uniqueId != victim.uniqueId){
+                                            getInstance().getPlayer(player).clan!!.players.first {
+                                                it.player.uniqueId == victim.uniqueId
+                                            }.clan = null
+                                            getInstance().getPlayer(player).clan!!.players.first {
+                                                it.player.uniqueId == victim.uniqueId
+                                            }.clanChatMode = false
 
-										victim.sendMessage(clanText("클랜에서 추방되었습니다."))
-										getInstance().getPlayer(player).clan!!.players.forEach {pl ->
-											if(pl.player.isOnline){
-												(getInstance().server.onlinePlayers.first { it.uniqueId == pl.player.uniqueId }).sendMessage(clanText("${victim.name}님이 클랜에서 추방되셨습니다."))
-											}
-										}
-										getInstance().getPlayer(player).clan!!.players.remove(getInstance().getPlayer(player).clan!!.players.first {
-											it.player.uniqueId == victim.uniqueId
-										})
-										getInstance().clans[player.uniqueId.toString()] = getInstance().getPlayer(player).clan!!
-	
-										player.sendMessage(clanText("${victim.name}님을 클랜에서 추방했습니다."))
+                                            victim.sendMessage(clanText("클랜에서 추방되었습니다."))
+                                            getInstance().getPlayer(player).clan!!.players.forEach {pl ->
+                                                if(pl.player.isOnline){
+                                                    (getInstance().server.onlinePlayers.first { it.uniqueId == pl.player.uniqueId }).sendMessage(clanText("${victim.name}님이 클랜에서 추방되셨습니다."))
+                                                }
+                                            }
+                                            getInstance().getPlayer(player).clan!!.players.remove(getInstance().getPlayer(player).clan!!.players.first {
+                                                it.player.uniqueId == victim.uniqueId
+                                            })
+                                            getInstance().clans[player.uniqueId.toString()] = getInstance().getPlayer(player).clan!!
+
+                                            player.sendMessage(clanText("${victim.name}님을 클랜에서 추방했습니다."))
+                                        }
+                                        else {
+                                            sender.sendMessage(clanText("현재 클랜의 클랜장입니다. 클랜을 삭제하려면 /clan leave delete 명령어를 써주세요."))
+                                        }
 									}
-									else{
+									else {
 										sender.sendMessage(clanText("클랜장만 추방할 수 있습니다."))
 									}
 								}

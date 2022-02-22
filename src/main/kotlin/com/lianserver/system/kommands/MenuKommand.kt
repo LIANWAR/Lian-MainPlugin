@@ -3,6 +3,8 @@ package com.lianserver.system.kommands
 import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.gui.type.AnvilGui
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
+import com.github.stefvanschie.inventoryframework.pane.OutlinePane
+import com.github.stefvanschie.inventoryframework.pane.Pane
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
 import com.lianserver.system.interfaces.KommandInterface
 import io.github.monun.kommand.Kommand.Companion.register
@@ -15,6 +17,7 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import kotlin.random.Random
 
@@ -27,6 +30,8 @@ class MenuKommand: KommandInterface {
         meta.displayName(t.decoration(TextDecoration.ITALIC, false))
         meta.lore(l.map { it.decoration(TextDecoration.ITALIC, false) })
 
+        ItemFlag.values().forEach { meta.addItemFlags(it) }
+
         st.itemMeta = meta
 
         return st
@@ -35,33 +40,33 @@ class MenuKommand: KommandInterface {
     override fun kommand() {
         register(getInstance(), "메뉴", "apsb", "menu", "gui", "매뉴", "aosb"){
             executes {
-                val gui = ChestGui(1, "리안서버 메뉴")
+                val gui = ChestGui(3, "리안서버 메뉴")
 
-                val spPanel = StaticPane(0, 0, 9, 1)
+                val spPanel = StaticPane(0, 0, 9, 3)
                 spPanel.addItem(
                     GuiItem(
-                        namedItemStack(Material.BEACON, text("스폰으로").color(NamedTextColor.GREEN))
+                        namedItemStack(Material.BEACON, text("스폰으로").color(NamedTextColor.AQUA))
                     ) { e: InventoryClickEvent ->
                         e.isCancelled = true
-                        e.whoClicked.teleport(Location(getInstance().server.getWorld("spawn"), 0.5, 57.0, 0.5))
+                        e.whoClicked.teleport(Location(getInstance().server.getWorld("spawn"), -12.5, 206.0, -2.5))
                     },
                     1,
-                    0
+                    1
                 )
 
                 spPanel.addItem(
                     GuiItem(
-                        namedItemStack(Material.GRASS_BLOCK, text("야생으로").color(NamedTextColor.GREEN))
+                        namedItemStack(Material.GRASS_BLOCK, text("야생으로").color(NamedTextColor.YELLOW))
                     ) { e: InventoryClickEvent ->
                         e.isCancelled = true
 
-                        val xzPos = Pair(Random.nextInt(-10000, 10001), Random.nextInt(-10000, 10001))
+                        val xzPos = Pair(Random.nextInt(-2000, 2001), Random.nextInt(-2000, 2001))
                         val yPos = getInstance().server.getWorld("world")!!.getHighestBlockYAt(xzPos.first, xzPos.second)
 
                         e.whoClicked.teleport(Location(getInstance().server.getWorld("world"), xzPos.first.toDouble(), yPos + 1.0, xzPos.second.toDouble()))
                     },
                     4,
-                    0
+                    1
                 )
 
                 spPanel.addItem(
@@ -71,8 +76,18 @@ class MenuKommand: KommandInterface {
                         e.isCancelled = true
 
                         if(getInstance().getPlayer(e.whoClicked as Player).clan == null && getInstance().getPlayer(e.whoClicked as Player).country == null){
-                            val guiNoClan = ChestGui(1, "클랜 메뉴 - 클랜 없음")
-                            val pane = StaticPane(0, 0, 9, 1)
+                            val guiNoClan = ChestGui(3, "클랜 메뉴 - 클랜 없음")
+                            val pane = StaticPane(0, 0, 9, 3)
+
+                            val background = OutlinePane(0, 0, 9, 3)
+                            background.addItem(GuiItem(namedItemStack(Material.BLACK_STAINED_GLASS_PANE, text(""))))
+                            background.setRepeat(true)
+                            background.priority = Pane.Priority.LOWEST
+                            background.setOnClick { event: InventoryClickEvent ->
+                                event.isCancelled = true
+                            }
+
+                            guiNoClan.addPane(background)
 
                             pane.addItem(
                                 GuiItem(
@@ -82,7 +97,7 @@ class MenuKommand: KommandInterface {
 
                                     AnvilGUI.Builder()
                                         .onComplete { player: Player, text: String ->
-                                            player.performCommand("clan create ${text}")
+                                            player.performCommand("clan create $text")
                                             return@onComplete AnvilGUI.Response.close()
                                         }
                                         .text("Running in the 20s") //sets the text the GUI should start with
@@ -92,7 +107,7 @@ class MenuKommand: KommandInterface {
                                         .open(e.whoClicked as Player)
                                 },
                                 1,
-                                0
+                                1
                             )
                             pane.addItem(
                                 GuiItem(
@@ -104,7 +119,7 @@ class MenuKommand: KommandInterface {
                                     (e.whoClicked as Player).performCommand("country accept")
                                 },
                                 3,
-                                0
+                                1
                             )
                             pane.addItem(
                                 GuiItem(
@@ -115,7 +130,7 @@ class MenuKommand: KommandInterface {
                                     (e.whoClicked as Player).performCommand("clan public")
                                 },
                                 5,
-                                0
+                                1
                             )
                             pane.addItem(
                                 GuiItem(
@@ -126,7 +141,7 @@ class MenuKommand: KommandInterface {
                                     (e.whoClicked as Player).performCommand("country public")
                                 },
                                 7,
-                                0
+                                1
                             )
 
                             guiNoClan.addPane(pane)
@@ -139,8 +154,19 @@ class MenuKommand: KommandInterface {
                                 val p = getInstance().getPlayer(e.whoClicked as Player)
 
                                 if(p.clan!!.owner.player.uniqueId == e.whoClicked.uniqueId){
-                                    val guiClanMenuAdv = ChestGui(1, "클랜 메뉴 - ${p.clan!!.name} (관리)")
-                                    val pCMA = StaticPane(0, 0, 9, 1)
+                                    val guiClanMenuAdv = ChestGui(3, "클랜 메뉴 - ${p.clan!!.name} (관리)")
+                                    val pCMA = StaticPane(0, 0, 9, 3)
+
+                                    val background = OutlinePane(0, 0, 9, 3)
+                                    background.addItem(GuiItem(namedItemStack(Material.BLACK_STAINED_GLASS_PANE, text(""))))
+                                    background.setRepeat(true)
+                                    background.priority = Pane.Priority.LOWEST
+                                    background.setOnClick { event: InventoryClickEvent ->
+                                        event.isCancelled = true
+                                    }
+
+                                    guiClanMenuAdv.addPane(background)
+
                                     pCMA.addItem(
                                         GuiItem(
                                             namedItemStack(
@@ -152,7 +178,7 @@ class MenuKommand: KommandInterface {
 
                                             (it.whoClicked as Player).performCommand("clan info")
                                         },
-                                        0, 0
+                                        0, 1
                                     )
                                     pCMA.addItem(
                                         GuiItem(
@@ -165,7 +191,7 @@ class MenuKommand: KommandInterface {
 
                                             (it.whoClicked as Player).performCommand("clan all")
                                         },
-                                        1, 0
+                                        1, 1
                                     )
                                     pCMA.addItem(
                                         GuiItem(
@@ -178,7 +204,7 @@ class MenuKommand: KommandInterface {
 
                                             (it.whoClicked as Player).performCommand("clan chat")
                                         },
-                                        2, 0
+                                        2, 1
                                     )
                                     pCMA.addItem(
                                         GuiItem(
@@ -194,7 +220,7 @@ class MenuKommand: KommandInterface {
 
                                             (it.whoClicked as Player).performCommand("clan leave delete")
                                         },
-                                        3, 0
+                                        3, 1
                                     )
                                     pCMA.addItem(
                                         GuiItem(
@@ -207,7 +233,14 @@ class MenuKommand: KommandInterface {
 
                                             AnvilGUI.Builder()
                                                 .onComplete { player: Player, text: String ->
-                                                    player.performCommand("clan kick $text")
+                                                    var pn = text
+                                                    getInstance().server.onlinePlayers.forEach {
+                                                        if(it.name.lowercase() == text.lowercase()){
+                                                            pn = it.name
+                                                        }
+                                                    }
+
+                                                    player.performCommand("clan kick $pn")
                                                     return@onComplete AnvilGUI.Response.close()
                                                 }
                                                 .text("Running in the 20s") //sets the text the GUI should start with
@@ -216,7 +249,7 @@ class MenuKommand: KommandInterface {
                                                 .plugin(getInstance()) //set the plugin instance
                                                 .open(e.whoClicked as Player)
                                         },
-                                        4, 0
+                                        4, 1
                                     )
                                     pCMA.addItem(
                                         GuiItem(
@@ -229,7 +262,14 @@ class MenuKommand: KommandInterface {
 
                                             AnvilGUI.Builder()
                                                 .onComplete { player: Player, text: String ->
-                                                    player.performCommand("clan invite ${text}")
+                                                    var pn = text
+                                                    getInstance().server.onlinePlayers.forEach {
+                                                        if(it.name.lowercase() == text.lowercase()){
+                                                            pn = it.name
+                                                        }
+                                                    }
+
+                                                    player.performCommand("clan invite $pn")
                                                     return@onComplete AnvilGUI.Response.close()
                                                 }
                                                 .text("Running in the 20s") //sets the text the GUI should start with
@@ -238,7 +278,7 @@ class MenuKommand: KommandInterface {
                                                 .plugin(getInstance()) //set the plugin instance
                                                 .open(e.whoClicked as Player)
                                         },
-                                        5, 0
+                                        5, 1
                                     )
                                     pCMA.addItem(
                                         GuiItem(
@@ -251,7 +291,35 @@ class MenuKommand: KommandInterface {
 
                                             (it.whoClicked as Player).performCommand("clan togglepublic")
                                         },
-                                        6, 0
+                                        6, 1
+                                    )
+                                    pCMA.addItem(
+                                        GuiItem(
+                                            namedItemStack(
+                                                Material.DIAMOND_SWORD,
+                                                text("국가로 업그레이드").color(NamedTextColor.GOLD).decoration(TextDecoration.BOLD, true)
+                                            )
+                                        ) {
+                                            it.isCancelled = true
+
+                                            (it.whoClicked as Player).performCommand("clan upgrade")
+                                        },
+                                        7, 1
+                                    )
+
+                                    pCMA.addItem(
+                                        GuiItem(
+                                            namedItemStack(
+                                                Material.BARRIER,
+                                                text("처음으로").color(NamedTextColor.LIGHT_PURPLE)
+                                            )
+                                        ) {
+                                            it.isCancelled = true
+
+                                            it.whoClicked.closeInventory()
+                                            (it.whoClicked as Player).performCommand("gui")
+                                        },
+                                        8, 2
                                     )
 
                                     guiClanMenuAdv.addPane(pCMA)
@@ -260,8 +328,19 @@ class MenuKommand: KommandInterface {
                                     guiClanMenuAdv.show(e.whoClicked)
                                 }
                                 else {
-                                    val guiClanMenu = ChestGui(1, "클랜 메뉴 - ${p.clan!!.name}")
-                                    val pCMA = StaticPane(0, 0, 9, 1)
+                                    val guiClanMenu = ChestGui(3, "클랜 메뉴 - ${p.clan!!.name}")
+                                    val pCMA = StaticPane(0, 0, 9, 3)
+
+                                    val background = OutlinePane(0, 0, 9, 3)
+                                    background.addItem(GuiItem(namedItemStack(Material.BLACK_STAINED_GLASS_PANE, text(""))))
+                                    background.setRepeat(true)
+                                    background.priority = Pane.Priority.LOWEST
+                                    background.setOnClick { event: InventoryClickEvent ->
+                                        event.isCancelled = true
+                                    }
+
+                                    guiClanMenu.addPane(background)
+
                                     pCMA.addItem(
                                         GuiItem(
                                             namedItemStack(
@@ -273,7 +352,7 @@ class MenuKommand: KommandInterface {
 
                                             (it.whoClicked as Player).performCommand("clan info")
                                         },
-                                        0, 0
+                                        0, 1
                                     )
                                     pCMA.addItem(
                                         GuiItem(
@@ -286,7 +365,7 @@ class MenuKommand: KommandInterface {
 
                                             (it.whoClicked as Player).performCommand("clan all")
                                         },
-                                        1, 0
+                                        1, 1
                                     )
                                     pCMA.addItem(
                                         GuiItem(
@@ -299,7 +378,7 @@ class MenuKommand: KommandInterface {
 
                                             (it.whoClicked as Player).performCommand("clan chat")
                                         },
-                                        2, 0
+                                        2, 1
                                     )
                                     pCMA.addItem(
                                         GuiItem(
@@ -316,7 +395,22 @@ class MenuKommand: KommandInterface {
 
                                             (it.whoClicked as Player).performCommand("clan leave")
                                         },
-                                        3, 0
+                                        3, 1
+                                    )
+
+                                    pCMA.addItem(
+                                        GuiItem(
+                                            namedItemStack(
+                                                Material.BARRIER,
+                                                text("처음으로").color(NamedTextColor.LIGHT_PURPLE)
+                                            )
+                                        ) {
+                                            it.isCancelled = true
+
+                                            it.whoClicked.closeInventory()
+                                            (it.whoClicked as Player).performCommand("gui")
+                                        },
+                                        8, 2
                                     )
 
                                     guiClanMenu.addPane(pCMA)
@@ -329,8 +423,19 @@ class MenuKommand: KommandInterface {
                                 val p = getInstance().getPlayer(e.whoClicked as Player)
 
                                 if(p.country!!.owner.player.uniqueId == e.whoClicked.uniqueId){
-                                    val guiClanMenuAdv = ChestGui(1, "국가 메뉴 - ${p.country!!.name} (관리)")
-                                    val pCMA = StaticPane(0, 0, 9, 1)
+                                    val guiClanMenuAdv = ChestGui(3, "국가 메뉴 - ${p.country!!.name} (관리)")
+                                    val pCMA = StaticPane(0, 0, 9, 3)
+
+                                    val background = OutlinePane(0, 0, 9, 3)
+                                    background.addItem(GuiItem(namedItemStack(Material.BLACK_STAINED_GLASS_PANE, text(""))))
+                                    background.setRepeat(true)
+                                    background.priority = Pane.Priority.LOWEST
+                                    background.setOnClick { event: InventoryClickEvent ->
+                                        event.isCancelled = true
+                                    }
+
+                                    guiClanMenuAdv.addPane(background)
+
                                     pCMA.addItem(
                                         GuiItem(
                                             namedItemStack(
@@ -342,7 +447,7 @@ class MenuKommand: KommandInterface {
 
                                             (it.whoClicked as Player).performCommand("country info")
                                         },
-                                        0, 0
+                                        0, 1
                                     )
                                     pCMA.addItem(
                                         GuiItem(
@@ -355,7 +460,7 @@ class MenuKommand: KommandInterface {
 
                                             (it.whoClicked as Player).performCommand("country all")
                                         },
-                                        1, 0
+                                        1, 1
                                     )
                                     pCMA.addItem(
                                         GuiItem(
@@ -368,7 +473,7 @@ class MenuKommand: KommandInterface {
 
                                             (it.whoClicked as Player).performCommand("country chat")
                                         },
-                                        2, 0
+                                        2, 1
                                     )
                                     pCMA.addItem(
                                         GuiItem(
@@ -384,7 +489,7 @@ class MenuKommand: KommandInterface {
 
                                             (it.whoClicked as Player).performCommand("country leave delete")
                                         },
-                                        3, 0
+                                        3, 1
                                     )
                                     pCMA.addItem(
                                         GuiItem(
@@ -397,7 +502,14 @@ class MenuKommand: KommandInterface {
 
                                             AnvilGUI.Builder()
                                                 .onComplete { player: Player, text: String ->
-                                                    player.performCommand("country kick $text")
+                                                    var pn = text
+                                                    getInstance().server.onlinePlayers.forEach {
+                                                        if(it.name.lowercase() == text.lowercase()){
+                                                            pn = it.name
+                                                        }
+                                                    }
+
+                                                    player.performCommand("country kick $pn")
                                                     return@onComplete AnvilGUI.Response.close()
                                                 }
                                                 .text("Running in the 20s") //sets the text the GUI should start with
@@ -406,7 +518,7 @@ class MenuKommand: KommandInterface {
                                                 .plugin(getInstance()) //set the plugin instance
                                                 .open(e.whoClicked as Player)
                                         },
-                                        4, 0
+                                        4, 1
                                     )
                                     pCMA.addItem(
                                         GuiItem(
@@ -419,7 +531,14 @@ class MenuKommand: KommandInterface {
 
                                             AnvilGUI.Builder()
                                                 .onComplete { player: Player, text: String ->
-                                                    player.performCommand("country invite $text")
+                                                    var pn = text
+                                                    getInstance().server.onlinePlayers.forEach {
+                                                        if(it.name.lowercase() == text.lowercase()){
+                                                            pn = it.name
+                                                        }
+                                                    }
+
+                                                    player.performCommand("country invite $pn")
                                                     return@onComplete AnvilGUI.Response.close()
                                                 }
                                                 .text("Running in the 20s") //sets the text the GUI should start with
@@ -428,7 +547,7 @@ class MenuKommand: KommandInterface {
                                                 .plugin(getInstance()) //set the plugin instance
                                                 .open(e.whoClicked as Player)
                                         },
-                                        5, 0
+                                        5, 1
                                     )
                                     pCMA.addItem(
                                         GuiItem(
@@ -441,7 +560,7 @@ class MenuKommand: KommandInterface {
 
                                             (it.whoClicked as Player).performCommand("country togglepublic")
                                         },
-                                        6, 0
+                                        6, 1
                                     )
                                     pCMA.addItem(
                                         GuiItem(
@@ -454,7 +573,7 @@ class MenuKommand: KommandInterface {
 
                                             AnvilGUI.Builder()
                                                 .onComplete { player: Player, text: String ->
-                                                    player.performCommand("country wardecl ${text}")
+                                                    player.performCommand("country wardecl $text")
                                                     return@onComplete AnvilGUI.Response.close()
                                                 }
                                                 .text("Running in the 20s") //sets the text the GUI should start with
@@ -463,7 +582,7 @@ class MenuKommand: KommandInterface {
                                                 .plugin(getInstance()) //set the plugin instance
                                                 .open(e.whoClicked as Player)
                                         },
-                                        7, 0
+                                        7, 1
                                     )
                                     pCMA.addItem(
                                         GuiItem(
@@ -476,7 +595,22 @@ class MenuKommand: KommandInterface {
 
                                             (it.whoClicked as Player).performCommand("country waraccept")
                                         },
-                                        8, 0
+                                        8, 1
+                                    )
+
+                                    pCMA.addItem(
+                                        GuiItem(
+                                            namedItemStack(
+                                                Material.BARRIER,
+                                                text("처음으로").color(NamedTextColor.LIGHT_PURPLE)
+                                            )
+                                        ) {
+                                            it.isCancelled = true
+
+                                            it.whoClicked.closeInventory()
+                                            (it.whoClicked as Player).performCommand("gui")
+                                        },
+                                        8, 2
                                     )
                                     
                                     guiClanMenuAdv.addPane(pCMA)
@@ -485,8 +619,19 @@ class MenuKommand: KommandInterface {
                                     guiClanMenuAdv.show(e.whoClicked)
                                 }
                                 else {
-                                    val guiClanMenu = ChestGui(1, "국가 메뉴 - ${p.country!!.name}")
-                                    val pCMA = StaticPane(0, 0, 9, 1)
+                                    val guiClanMenu = ChestGui(3, "국가 메뉴 - ${p.country!!.name}")
+                                    val pCMA = StaticPane(0, 0, 9, 3)
+
+                                    val background = OutlinePane(0, 0, 9, 3)
+                                    background.addItem(GuiItem(namedItemStack(Material.BLACK_STAINED_GLASS_PANE, text(""))))
+                                    background.setRepeat(true)
+                                    background.priority = Pane.Priority.LOWEST
+                                    background.setOnClick { event: InventoryClickEvent ->
+                                        event.isCancelled = true
+                                    }
+
+                                    guiClanMenu.addPane(background)
+
                                     pCMA.addItem(
                                         GuiItem(
                                             namedItemStack(
@@ -498,7 +643,7 @@ class MenuKommand: KommandInterface {
 
                                             (it.whoClicked as Player).performCommand("country info")
                                         },
-                                        0, 0
+                                        0, 1
                                     )
                                     pCMA.addItem(
                                         GuiItem(
@@ -511,7 +656,7 @@ class MenuKommand: KommandInterface {
 
                                             (it.whoClicked as Player).performCommand("country all")
                                         },
-                                        1, 0
+                                        1, 1
                                     )
                                     pCMA.addItem(
                                         GuiItem(
@@ -524,7 +669,7 @@ class MenuKommand: KommandInterface {
 
                                             (it.whoClicked as Player).performCommand("country chat")
                                         },
-                                        2, 0
+                                        2, 1
                                     )
                                     pCMA.addItem(
                                         GuiItem(
@@ -541,7 +686,22 @@ class MenuKommand: KommandInterface {
 
                                             (it.whoClicked as Player).performCommand("country leave")
                                         },
-                                        3, 0
+                                        3, 1
+                                    )
+
+                                    pCMA.addItem(
+                                        GuiItem(
+                                            namedItemStack(
+                                                Material.BARRIER,
+                                                text("처음으로").color(NamedTextColor.LIGHT_PURPLE)
+                                            )
+                                        ) {
+                                            it.isCancelled = true
+
+                                            it.whoClicked.closeInventory()
+                                            (it.whoClicked as Player).performCommand("gui")
+                                        },
+                                        8, 2
                                     )
 
                                     guiClanMenu.addPane(pCMA)
@@ -553,8 +713,18 @@ class MenuKommand: KommandInterface {
                         }
                     },
                     7,
-                    0
+                    1
                 )
+
+                val background = OutlinePane(0, 0, 9, 3)
+                background.addItem(GuiItem(namedItemStack(Material.BLACK_STAINED_GLASS_PANE, text(""))))
+                background.setRepeat(true)
+                background.priority = Pane.Priority.LOWEST
+                background.setOnClick { event: InventoryClickEvent ->
+                    event.isCancelled = true
+                }
+
+                gui.addPane(background)
 
                 gui.addPane(spPanel)
                 gui.update()

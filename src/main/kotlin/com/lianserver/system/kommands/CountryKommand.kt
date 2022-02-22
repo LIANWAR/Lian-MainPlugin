@@ -23,6 +23,7 @@ import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.ComponentBuilder
 import net.md_5.bungee.api.chat.HoverEvent
 import org.bukkit.Material
+import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
@@ -180,6 +181,7 @@ class CountryKommand: KommandInterface {
                         executes {
                             if(getInstance().getPlayer(sender).country != null){
                                 if(getInstance().getPlayer(sender).country!!.owner.player.uniqueId.toString() == (sender as Player).uniqueId.toString()){
+                                    getInstance().server.getWorld("world")!!.entities.first { it.type == EntityType.ARMOR_STAND && it.scoreboardTags.contains("#lian_flag") && it.scoreboardTags.contains("${player.uniqueId}") }.remove()
                                     getInstance().countries.remove(getInstance().getPlayer(player).player.uniqueId.toString())
                                     getInstance().getPlayer(player).country!!.players.forEach { pl ->
                                         getInstance().onlinePlayers[pl.player.uniqueId.toString()]!!.clanChatMode = false
@@ -229,25 +231,30 @@ class CountryKommand: KommandInterface {
                             if(getInstance().getPlayer(player).country != null){
                                 if(getInstance().onlinePlayers.containsKey(victim.uniqueId.toString())){
                                     if(getInstance().getPlayer(player).country!!.owner.player.uniqueId == player.uniqueId){
-                                        getInstance().getPlayer(player).country!!.players.first {
-                                            it.player.uniqueId == victim.uniqueId
-                                        }.country = null
-                                        getInstance().getPlayer(player).country!!.players.first {
-                                            it.player.uniqueId == victim.uniqueId
-                                        }.clanChatMode = false
+                                        if(getInstance().getPlayer(player).clan!!.owner.player.uniqueId != victim.uniqueId){
+                                            getInstance().getPlayer(player).country!!.players.first {
+                                                it.player.uniqueId == victim.uniqueId
+                                            }.country = null
+                                            getInstance().getPlayer(player).country!!.players.first {
+                                                it.player.uniqueId == victim.uniqueId
+                                            }.clanChatMode = false
 
-                                        victim.sendMessage(countryText("국가에서 추방되었습니다."))
-                                        getInstance().getPlayer(player).country!!.players.forEach {pl ->
-                                            if(pl.player.isOnline){
-                                                (getInstance().server.onlinePlayers.first { it.uniqueId == pl.player.uniqueId }).sendMessage(countryText("${victim.name}님이 국가에서 추방되셨습니다."))
+                                            victim.sendMessage(countryText("국가에서 추방되었습니다."))
+                                            getInstance().getPlayer(player).country!!.players.forEach {pl ->
+                                                if(pl.player.isOnline){
+                                                    (getInstance().server.onlinePlayers.first { it.uniqueId == pl.player.uniqueId }).sendMessage(countryText("${victim.name}님이 국가에서 추방되셨습니다."))
+                                                }
                                             }
-                                        }
-                                        getInstance().getPlayer(player).country!!.players.remove(getInstance().getPlayer(player).country!!.players.first {
-                                            it.player.uniqueId == victim.uniqueId
-                                        })
-                                        getInstance().countries[player.uniqueId.toString()] = getInstance().getPlayer(player).country!!
+                                            getInstance().getPlayer(player).country!!.players.remove(getInstance().getPlayer(player).country!!.players.first {
+                                                it.player.uniqueId == victim.uniqueId
+                                            })
+                                            getInstance().countries[player.uniqueId.toString()] = getInstance().getPlayer(player).country!!
 
-                                        player.sendMessage(countryText("${victim.name}님을 국가에서 추방했습니다."))
+                                            player.sendMessage(countryText("${victim.name}님을 국가에서 추방했습니다."))
+                                        }
+                                        else {
+                                            sender.sendMessage(countryText("현재 국가의 수령입니다. 국가를 삭제하려면 /country leave delete 명령어를 써주세요."))
+                                        }
                                     }
                                     else{
                                         sender.sendMessage(countryText("수령만 추방할 수 있습니다."))

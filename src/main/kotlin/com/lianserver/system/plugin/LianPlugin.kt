@@ -25,6 +25,7 @@ import com.lianserver.system.common.War
 import com.lianserver.system.handlers.DataHandler
 import com.lianserver.system.interfaces.HandlerInterface
 import com.lianserver.system.interfaces.KommandInterface
+import io.github.monun.kommand.Kommand.Companion.register
 import io.papermc.paper.event.player.AsyncChatEvent
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.sound.Sound
@@ -32,6 +33,7 @@ import net.kyori.adventure.text.Component.text
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.Material
+import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Player
@@ -124,6 +126,12 @@ class LianPlugin : JavaPlugin(), Listener {
     override fun onEnable() {
         instance = this
         logger.info("${this.config.getString("admin_prefix")}")
+
+        register(this, "plugins", "pl"){
+            executes {
+                sender.sendMessage("${ChatColor.WHITE}Gays (3): ${ChatColor.GREEN}Van Darkholmes${ChatColor.WHITE}, ${ChatColor.GREEN}Kane${ChatColor.WHITE}, ${ChatColor.GREEN}Tajiri Yoshihiro")
+            }
+        }
 
         var reflections = Reflections("com.lianserver.system.kommands")
 

@@ -124,6 +124,23 @@ object RecipeObject {
         return recipe
     }
 
+    fun enchant_bottle(): Recipe {
+        val key = NamespacedKey(getInstance(), "enchant_bottle")
+        val item = ItemStack(Material.EXPERIENCE_BOTTLE, 7)
+        val meta = item.itemMeta
+
+        item.itemMeta = meta
+        val recipe = ShapedRecipe(key, item)
+
+        recipe.shape("AOA", "GLG", "DGD")
+        recipe.setIngredient('O', Material.OBSIDIAN)
+        recipe.setIngredient('A', Material.AIR)
+        recipe.setIngredient('G', Material.GLASS)
+        recipe.setIngredient('D', Material.DIAMOND)
+
+        return recipe
+    }
+
     // 화살 간단 조합법 코드 (누가 최적화좀)
     fun potion_arrow(): ArrayList<Recipe>{
         val potionArrowList: ArrayList<Recipe> = arrayListOf()

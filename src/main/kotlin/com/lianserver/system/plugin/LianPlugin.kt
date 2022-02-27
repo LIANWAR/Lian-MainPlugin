@@ -105,8 +105,8 @@ class LianPlugin : JavaPlugin(), Listener {
             }
         }
         countries.forEach {
-            for (x in -1..1){
-                for (z in -1..1){
+            for (x in -2..2){
+                for (z in -2..2){
                     if(it.value.land == Pair<Int, Int>(p.first?.plus(x) ?: 2147483647, p.second?.plus(z) ?: 2147483647)){
                         ret = Pair(null, it.value)
                         return ret
@@ -127,9 +127,9 @@ class LianPlugin : JavaPlugin(), Listener {
         instance = this
         logger.info("${this.config.getString("admin_prefix")}")
 
-        register(this, "plugins", "pl"){
+        register(this, "LianaIsOhmoriShigeru"){
             executes {
-                sender.sendMessage("${ChatColor.WHITE}Gays (3): ${ChatColor.GREEN}Van Darkholmes${ChatColor.WHITE}, ${ChatColor.GREEN}Kane${ChatColor.WHITE}, ${ChatColor.GREEN}Tajiri Yoshihiro")
+                sender.sendMessage("${ChatColor.WHITE}Gays (4): ${ChatColor.GREEN}VanDarkholmes${ChatColor.WHITE}, ${ChatColor.GREEN}Kane${ChatColor.WHITE}, ${ChatColor.GREEN}TajiriYoshihiro${ChatColor.WHITE}, ${ChatColor.RED}liana0803")
             }
         }
 
@@ -208,7 +208,7 @@ class LianPlugin : JavaPlugin(), Listener {
     @EventHandler(priority = EventPriority.LOW)
     fun onMention(e: AsyncPlayerChatEvent){
         server.onlinePlayers.forEach {
-            if(e.message.contains(it.name)){
+            if(e.message.contains("@${it.name}")){
                 e.message.replace("@${it.name}", "${ChatColor.BLUE}@${it.name}${ChatColor.RESET}")
                 it.sendMessage(e.player.displayName().append(text("님이 당신을 ${SimpleDateFormat("H시 m분").format(Date())}에 언급했습니다.")))
                 it.playSound(Sound.sound(Key.key("minecraft", "entity.experience_orb.pickup"), Sound.Source.PLAYER, 1f, 1.625f))

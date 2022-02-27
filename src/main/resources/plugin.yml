@@ -4,5 +4,4 @@ api-version: "1.17"
 version: $version
 libraries:
   - io.github.monun:kommand:2.6.6
-  - io.github.monun:tap:4.1.10
   - com.github.stefvanschie.inventoryframework:IF:0.10.4

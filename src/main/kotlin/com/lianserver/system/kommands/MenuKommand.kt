@@ -1,7 +1,6 @@
 package com.lianserver.system.kommands
 
 import com.github.stefvanschie.inventoryframework.gui.GuiItem
-import com.github.stefvanschie.inventoryframework.gui.type.AnvilGui
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
 import com.github.stefvanschie.inventoryframework.pane.OutlinePane
 import com.github.stefvanschie.inventoryframework.pane.Pane
@@ -12,6 +11,10 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
+import net.md_5.bungee.api.ChatColor
+import net.md_5.bungee.api.chat.ClickEvent
+import net.md_5.bungee.api.chat.ComponentBuilder
+import net.md_5.bungee.api.chat.HoverEvent
 import net.wesjd.anvilgui.AnvilGUI
 import org.bukkit.Location
 import org.bukkit.Material
@@ -45,10 +48,13 @@ class MenuKommand: KommandInterface {
                 val spPanel = StaticPane(0, 0, 9, 3)
                 spPanel.addItem(
                     GuiItem(
-                        namedItemStack(Material.BEACON, text("스폰으로").color(NamedTextColor.AQUA))
+                        namedItemStack(Material.BEACON, text("국가전쟁 월드로").color(NamedTextColor.AQUA))
                     ) { e: InventoryClickEvent ->
                         e.isCancelled = true
-                        e.whoClicked.teleport(Location(getInstance().server.getWorld("spawn"), -12.5, 206.0, -2.5))
+                        val xzPos = Pair(Random.nextInt(-2000, 2001), Random.nextInt(-2000, 2001))
+                        val yPos = getInstance().server.getWorld("clanworld")!!.getHighestBlockYAt(xzPos.first, xzPos.second)
+
+                        e.whoClicked.teleport(Location(getInstance().server.getWorld("clanworld"), xzPos.first.toDouble(), yPos + 1.0, xzPos.second.toDouble()))
                     },
                     1,
                     1
@@ -65,7 +71,7 @@ class MenuKommand: KommandInterface {
 
                         e.whoClicked.teleport(Location(getInstance().server.getWorld("world"), xzPos.first.toDouble(), yPos + 1.0, xzPos.second.toDouble()))
                     },
-                    4,
+                    3,
                     1
                 )
 
@@ -711,6 +717,24 @@ class MenuKommand: KommandInterface {
                                 }
                             }
                         }
+                    },
+                    5,
+                    1
+                )
+
+                spPanel.addItem(
+                    GuiItem(
+                        namedItemStack(Material.SPYGLASS, text("디스코드 링크").color(NamedTextColor.BLUE))
+                    ) { e: InventoryClickEvent ->
+                        e.isCancelled = true
+
+                        e.whoClicked.closeInventory()
+                        e.whoClicked.sendMessage(userText("리안서버 디스코드 링크입니다."))
+                        val clickComp = net.md_5.bungee.api.chat.TextComponent("[ 디스코드 링크 ]")
+                        clickComp.color = ChatColor.GREEN
+                        clickComp.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentBuilder("디스코드 링크").create())
+                        clickComp.clickEvent = ClickEvent(ClickEvent.Action.OPEN_URL, "https://aztra.xyz/invite/7dUlCDDW")
+                        e.whoClicked.sendMessage(clickComp)
                     },
                     7,
                     1

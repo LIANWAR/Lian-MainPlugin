@@ -113,6 +113,9 @@ class ClanKommand: KommandInterface {
                             getInstance().getPlayer(sender).clan!!.players.forEach {
                                 sender.sendMessage(" - ${ChatColor.YELLOW}${it.player.name}")
                             }
+                            if(getInstance().getPlayer(sender).clan!!.land != null){
+                                sender.sendMessage(clanText("땅 좌표: ${getInstance().getPlayer(sender).clan!!.land}"))
+                            }
                         }
                         else {
                             sender.sendMessage(clanText("클랜에 소속되어있지 않습니다!"))
@@ -225,7 +228,7 @@ class ClanKommand: KommandInterface {
                         executes {
                             if(getInstance().getPlayer(sender).clan != null){
                                 if(getInstance().getPlayer(sender).clan!!.owner.player.uniqueId.toString() == (sender as Player).uniqueId.toString()){
-                                    getInstance().server.getWorld("world")!!.entities.first { it.type == EntityType.ARMOR_STAND && it.scoreboardTags.contains("#lian_flag") && it.scoreboardTags.contains("${player.uniqueId}") }.remove()
+                                    getInstance().server.getWorld("world")!!.entities.forEach { if(it.type == EntityType.ARMOR_STAND && it.scoreboardTags.contains("#lian_flag") && it.scoreboardTags.contains("${player.uniqueId}")) it.remove() }
                                     getInstance().clans.remove(getInstance().getPlayer(player).player.uniqueId.toString())
                                     getInstance().getPlayer(player).clan!!.players.forEach { pl ->
                                         getInstance().onlinePlayers[pl.player.uniqueId.toString()]!!.clanChatMode = false
@@ -344,6 +347,10 @@ class ClanKommand: KommandInterface {
                                                 getInstance().onlinePlayers[it.player.uniqueId.toString()]!!.country = country
                                             }
 
+                                            getInstance().invites.filterValues { it.owner.player.uniqueId == player.uniqueId }.forEach {
+                                                getInstance().invites.remove(it.key)
+                                                getInstance().invitesTaskId.remove(it.key)
+                                            }
                                             getInstance().clans.remove((sender as Player).uniqueId.toString())
 
                                             getInstance().server.broadcast(countryText("${sender.name}님이 ${ChatColor.GOLD}${country.name}${ChatColor.WHITE} 국가를 생성했습니다."))

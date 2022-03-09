@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.6.10"
+    kotlin("jvm") version "1.6.20-M1"
     id("com.github.johnrengelman.shadow") version "2.0.2"
 }
 
@@ -9,8 +9,10 @@ repositories {
     mavenCentral()
     maven("https://papermc.io/repo/repository/maven-public/")
     maven("https://jitpack.io")
-    jcenter()
     maven("https://repo.codemc.io/repository/maven-snapshots/")
+    maven("https://repo.mrivanplays.com/repository/maven-all/")
+    maven("https://repo.mrivanplays.com/repository/other-developers/")
+    jcenter()
 }
 
 dependencies {
@@ -19,7 +21,9 @@ dependencies {
     compileOnly("io.github.monun:kommand-api:2.6.6")
     implementation("org.reflections:reflections:0.10.2")
     implementation("com.github.stefvanschie.inventoryframework:IF:0.10.4")
-    implementation("net.wesjd:anvilgui:1.5.3-SNAPSHOT")
+    implementation("net.wesjd:anvilgui:1.5.3-20220302.153253-5")
+    compileOnly("me.lokka30:treasury-api:1.1.2-20220302.074712-3")
+    compileOnly("com.google.code.gson:gson:2.9.0")
 }
 
 val shade = configurations.create("shade")

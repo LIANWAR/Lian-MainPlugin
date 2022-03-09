@@ -77,7 +77,7 @@ object DataHandler {
             playerDir.listFiles()?.forEach { file ->
                 if(file.name.endsWith(".txt")){
                     if(getInstance().onlinePlayers.none { it.value.player.uniqueId.toString() == file.readText().split("\n")[0] }){
-                        val f = file.readText().split("\n")
+                        val f = file.readText().split("\n").map { it.trim() }
                         val c = LianPlayer(getInstance().server.getOfflinePlayer(UUID.fromString(f[0].split("=")[0])))
                         logger.info(file.readText())
 
@@ -92,6 +92,9 @@ object DataHandler {
                         else null
 
                         c.prefix = f[3]
+                        c.lastCCDay = f[4]
+                        c.cash = f[5].toInt()
+                        c.ccStreak = f[6].toInt()
 
                         getInstance().onlinePlayers[c.player.uniqueId.toString()] = c
                     }
@@ -114,7 +117,7 @@ object DataHandler {
             clanDir.listFiles()?.forEach { file ->
                 if(file.name.endsWith(".txt")){
                     logger.info(file.readText())
-                    val c = file.readText().split("\n").toMutableList()
+                    val c = file.readText().split("\n").map { it.trim() }.toMutableList()
 
                     logger.info(c.size.toString())
                     getInstance().clans[c[0].split("=")[0].trim()] = Clan(
@@ -151,7 +154,7 @@ object DataHandler {
             countryDir.listFiles()?.forEach { file ->
                 if(file.name.endsWith(".txt")){
                     logger.info(file.readText())
-                    val c = file.readText().split("\n").toMutableList()
+                    val c = file.readText().split("\n").map { it.trim() }.toMutableList()
 
                     logger.info(c.size.toString())
                     getInstance().countries[c[0].split("=")[0].trim()] = Country(
@@ -192,8 +195,8 @@ object DataHandler {
             playerDir.listFiles()?.forEach { file ->
                 if(file.name.endsWith(".txt")){
                     logger.info("postprocessing " + file.readText())
-                    if(getInstance().onlinePlayers.containsKey(file.readText().split("\n")[0].trim())){
-                        val f = file.readText().split("\n")
+                    if(getInstance().onlinePlayers.containsKey(file.readText().split("\n").map { it.trim() }[0].trim())){
+                        val f = file.readText().split("\n").map { it.trim() }
                         if(f[1] == "null"){
                             if(f[2] != "null"){
                                 getInstance().onlinePlayers[f[0].trim()]!!.country = getInstance().countries[f[2].trim()]

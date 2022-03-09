@@ -5,3 +5,4 @@ version: $version
 libraries:
   - io.github.monun:kommand:2.6.6
   - com.github.stefvanschie.inventoryframework:IF:0.10.4
+  - com.google.code.gson:gson:2.9.0

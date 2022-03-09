@@ -3,11 +3,32 @@ package com.lianserver.system.kommands
 import com.lianserver.system.interfaces.KommandInterface
 import com.lianserver.system.interfaces.PrefixedTextInterface
 import io.github.monun.kommand.Kommand.Companion.register
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.Component.text
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
+import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
+import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.random.Random
 
 class MiscKommand: KommandInterface, PrefixedTextInterface {
+    fun namedItemStack(m: Material, t: Component, l: List<Component> = listOf()): ItemStack {
+        val st = ItemStack(m)
+        val meta = st.itemMeta
+
+        meta.displayName(t.decoration(TextDecoration.ITALIC, false))
+        meta.lore(l.map { it.decoration(TextDecoration.ITALIC, false) })
+
+        ItemFlag.values().forEach { meta.addItemFlags(it) }
+
+        st.itemMeta = meta
+
+        return st
+    }
+
     override fun kommand() {
         register(getInstance(), "license") {
             executes {
@@ -60,6 +81,37 @@ class MiscKommand: KommandInterface, PrefixedTextInterface {
                 }
                 else {
                     player.sendMessage(userText("철괴가 모자랍니다."))
+                }
+            }
+        }
+        register(getInstance(), "출첵", "출석체크", "출석"){
+            executes {
+                if(getInstance().getPlayer(player).lastCCDay != SimpleDateFormat("yyyyMMdd").format(Date())){
+                    getInstance().onlinePlayers[player.uniqueId.toString()]!!.lastCCDay = SimpleDateFormat("yyyyMMdd").format(Date())
+                    player.sendMessage(userText("오늘도 리안서버를 플레이해주셔서 감사합니다!"))
+
+                    val ccs = getInstance().onlinePlayers[player.uniqueId.toString()]!!.ccStreak
+
+                    when(ccs){
+                        0 -> {
+                            player.inventory.addItem(namedItemStack(Material.PAPER, text("로또").color(NamedTextColor.AQUA)))
+                        }
+                        in 1..3 -> {
+                            player.inventory.addItem(ItemStack(Material.DIAMOND, ccs))
+                        }
+                        4 -> {
+                            player.inventory.addItem(ItemStack(Material.NETHERITE_SCRAP, 1))
+                        }
+                        in 5..6 -> {
+                            getInstance().onlinePlayers[player.uniqueId.toString()]!!.cash += 20 * (ccs - 4)
+                        }
+                    }
+                    if(ccs == 6){
+                        getInstance().onlinePlayers[player.uniqueId.toString()]!!.ccStreak = 0
+                    }
+                    else {
+                        getInstance().onlinePlayers[player.uniqueId.toString()]!!.ccStreak++
+                    }
                 }
             }
         }

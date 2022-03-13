@@ -18,9 +18,9 @@ class CashKommand: KommandInterface, PrefixedTextInterface {
                 executes {
                     player.sendMessage(
                         "${ChatColor.GOLD}-${ChatColor.WHITE}-${ChatColor.GOLD}-${ChatColor.WHITE}-${ChatColor.GOLD}-${ChatColor.WHITE}-${ChatColor.GOLD}-${ChatColor.WHITE}-${ChatColor.GOLD}-${ChatColor.WHITE}- 후원 관리 도움말 ${ChatColor.WHITE}-${ChatColor.GOLD}-${ChatColor.WHITE}-${ChatColor.GOLD}-${ChatColor.WHITE}-${ChatColor.GOLD}-${ChatColor.WHITE}-${ChatColor.GOLD}-${ChatColor.WHITE}-${ChatColor.GOLD}-\n" +
-                                "${ChatColor.RESET} - ${adminTextS("${ChatColor.WHITE}/cash show <플레이어>: <플레이어>가 소유한 캐시를 보여줍니다.")}\n" +
-                                " - ${adminTextS("${ChatColor.WHITE}/cash give <플레이어> <액수>: <플레이어>에게 <액수>만큼의 캐시를 지급합니다.")}\n" +
-                                " - ${adminTextS("${ChatColor.WHITE}/cash reset <플레이어>: <플레이어>의 캐시를 초기화합니다.")}\n"
+                                "${ChatColor.RESET} - ${adminTextS("${ChatColor.WHITE}/cash show <플레이어>\n -<플레이어>가 소유한 캐시를 보여줍니다.")}\n" +
+                                " - ${adminTextS("${ChatColor.WHITE}/cash give <플레이어> <액수>\n -<플레이어>에게 <액수>만큼의 캐시를 지급합니다.")}\n" +
+                                " - ${adminTextS("${ChatColor.WHITE}/cash reset <플레이어>\n -<플레이어>의 캐시를 초기화합니다.")}\n"
                     )
                 }
             }

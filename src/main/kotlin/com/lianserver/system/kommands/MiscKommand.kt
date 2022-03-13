@@ -30,6 +30,32 @@ class MiscKommand: KommandInterface, PrefixedTextInterface {
     }
 
     override fun kommand() {
+        register(getInstance(), "lianhelp", "명령어", "도움말"){
+            executes {
+                sender.sendMessage(userText("리안서버 버전 ${getInstance().description.version} 도움말"))
+                sender.sendMessage(userText(" * 클랜 도움말: /clan help"))
+                sender.sendMessage(userText(" * 국가 도움말: /country help"))
+                sender.sendMessage(userText(" * 상점 도움말: /help shop"))
+                sender.sendMessage(userText(" * 기타 도움말: /help etc"))
+            }
+            then("shop"){
+                executes {
+                    sender.sendMessage(userText("리안서버 버전 ${getInstance().description.version} 상점 도움말"))
+                    sender.sendMessage(userText(" * /cshop: 후원으로 구매할 수 있는 아이템을 보고 구매합니다."))
+                    sender.sendMessage(userText(" * /ushop: 유저들이 등록한 아이템을 보고 구매합니다."))
+                    sender.sendMessage(userText(" * /sell <가격>: 들고 있는 아이템을 상점에 등록합니다."))
+                }
+            }
+            then("etc"){
+                executes {
+                    sender.sendMessage(userText("리안서버 버전 ${getInstance().description.version} 기타 도움말"))
+                    sender.sendMessage(userText(" * /help: 도움말을 보여줍니다."))
+                    sender.sendMessage(userText(" * /license: 플러그인 및 리소스팩의 라이센스를 볼 수 있습니다."))
+                    sender.sendMessage(userText(" * /lotto: 철괴 8개로 다양한 아이템들을 얻을 수 있습니다."))
+                    sender.sendMessage(userText(" * /출석체크: 매일매일 출석 체크를 할 수 있습니다. 연속으로 출석 체크를 한 일수마다 보상이 달라집니다."))
+                }
+            }
+        }
         register(getInstance(), "license") {
             executes {
                 sender.sendMessage(adminText("Lian-Server/Lian-MainPlugin ${getInstance().description.version} - GNU 일반 공중 사용 허가서 3.0"))

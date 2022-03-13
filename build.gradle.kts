@@ -22,8 +22,6 @@ dependencies {
     implementation("org.reflections:reflections:0.10.2")
     implementation("com.github.stefvanschie.inventoryframework:IF:0.10.4")
     implementation("net.wesjd:anvilgui:1.5.3-20220302.153253-5")
-    compileOnly("me.lokka30:treasury-api:1.1.2-20220302.074712-3")
-    compileOnly("com.google.code.gson:gson:2.9.0")
 }
 
 val shade = configurations.create("shade")

@@ -11,10 +11,16 @@ import org.bukkit.entity.Player
 class CashKommand: KommandInterface, PrefixedTextInterface {
     override fun kommand() {
         register(getInstance(), "cash"){
-            requires { player.isOp }
-
-            executes { player.sendMessage(adminText("/cash help")) }
+            executes {
+                if(player.isOp){
+                    player.sendMessage(adminText("/cash help"))
+                }
+                else {
+                    player.sendMessage(userText("").append(player.displayName()).append(Component.text("님이 소유한 캐시: ${getInstance().getPlayer(player).cash}캐시")))
+                }
+            }
             then("help") {
+                requires { player.isOp }
                 executes {
                     player.sendMessage(
                         "${ChatColor.GOLD}-${ChatColor.WHITE}-${ChatColor.GOLD}-${ChatColor.WHITE}-${ChatColor.GOLD}-${ChatColor.WHITE}-${ChatColor.GOLD}-${ChatColor.WHITE}-${ChatColor.GOLD}-${ChatColor.WHITE}- 후원 관리 도움말 ${ChatColor.WHITE}-${ChatColor.GOLD}-${ChatColor.WHITE}-${ChatColor.GOLD}-${ChatColor.WHITE}-${ChatColor.GOLD}-${ChatColor.WHITE}-${ChatColor.GOLD}-${ChatColor.WHITE}-${ChatColor.GOLD}-\n" +
@@ -25,19 +31,23 @@ class CashKommand: KommandInterface, PrefixedTextInterface {
                 }
             }
             then("show"){
+                requires { player.isOp }
                 executes { player.sendMessage(adminText("/cash help")) }
                 then("play" to player()){
+                    requires { player.isOp }
                     executes {
                         val play: Player by it
                         val lP = getInstance().getPlayer(play)
 
-                        player.sendMessage(adminText("").append(play.displayName()).append(Component.text("님이 소유한 캐시: ${lP.cash}")))
+                        player.sendMessage(adminText("").append(play.displayName()).append(Component.text("님이 소유한 캐시: ${lP.cash}캐시")))
                     }
                 }
             }
             then("reset"){
+                requires { player.isOp }
                 executes { player.sendMessage(adminText("/cash help")) }
                 then("play" to player()){
+                    requires { player.isOp }
                     executes {
                         val play: Player by it
 
@@ -47,10 +57,13 @@ class CashKommand: KommandInterface, PrefixedTextInterface {
                 }
             }
             then("give"){
+                requires { player.isOp }
                 executes { player.sendMessage(adminText("/cash help")) }
                 then("play" to player()){
+                    requires { player.isOp }
                     executes { player.sendMessage(adminText("/cash help")) }
                     then("amt" to int(0, Integer.MAX_VALUE)){
+                        requires { player.isOp }
                         executes {
                             val play: Player by it
                             val amt: Int by it

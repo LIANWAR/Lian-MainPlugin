@@ -1,10 +1,10 @@
 package com.lianserver.system.handlers
 
-import com.lianserver.system.common.Clan
-import com.lianserver.system.common.Country
-import com.lianserver.system.common.LianPlayer
-import com.lianserver.system.common.War
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
+import com.lianserver.system.common.*
 import com.lianserver.system.plugin.LianPlugin
+import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -53,6 +53,23 @@ object DataHandler {
         getInstance().wars.forEach {
             getInstance().logger.info(it.toString())
             File("plugins/LianMain/wars/${it.countries.first.owner.player.uniqueId}.txt").writeText(it.toString())
+        }
+
+        File("plugins/LianMain/backups/${d}/shop").mkdir()
+
+        val shopc = File("plugins/LianMain/shop/cshop")
+        shopc.renameTo(File("plugins/LianMain/backups/${d}/shop/cshop"))
+        shopc.mkdir()
+
+        val shopu = File("plugins/LianMain/shop/ushop")
+        shopu.renameTo(File("plugins/LianMain/backups/${d}/shop/ushop"))
+        shopu.mkdir()
+
+        getInstance().cashShopItem.forEach {
+            it.save(File("plugins/LianMain/shop/cshop/${it.hashCode()}.yml"))
+        }
+        getInstance().userShopItem.forEach {
+            it.save(File("plugins/LianMain/shop/ushop/${it.hashCode()}.yml"))
         }
     }
     
@@ -240,6 +257,18 @@ object DataHandler {
                     )
                 }
             }
+        }
+        getInstance().cashShopItem = mutableListOf()
+        File("plugins/LianMain/shop/cshop").listFiles()?.forEach{
+            getInstance().cashShopItem.add(
+                YamlConfiguration.loadConfiguration(it)
+            )
+        }
+        getInstance().userShopItem = mutableListOf()
+        File("plugins/LianMain/shop/ushop").listFiles()?.forEach{
+            getInstance().userShopItem.add(
+                YamlConfiguration.loadConfiguration(it)
+            )
         }
     }
 }

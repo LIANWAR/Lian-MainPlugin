@@ -18,10 +18,7 @@ package com.lianserver.system.plugin
 
 import com.lianserver.system.Recipes.RecipeEvent
 import com.lianserver.system.Recipes.RecipeObject
-import com.lianserver.system.common.Clan
-import com.lianserver.system.common.Country
-import com.lianserver.system.common.LianPlayer
-import com.lianserver.system.common.War
+import com.lianserver.system.common.*
 import com.lianserver.system.handlers.DataHandler
 import com.lianserver.system.interfaces.HandlerInterface
 import com.lianserver.system.interfaces.KommandInterface
@@ -35,6 +32,7 @@ import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
+import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -76,6 +74,9 @@ class LianPlugin : JavaPlugin(), Listener {
     var wars: MutableList<War> = mutableListOf()
     var warDecl: MutableMap<String, Country> = mutableMapOf()
     var warDeclTaskId: MutableMap<String, Int> = mutableMapOf()
+
+    var cashShopItem: MutableList<YamlConfiguration> = mutableListOf()
+    var userShopItem: MutableList<YamlConfiguration> = mutableListOf()
 
     fun getPlayer(sender: CommandSender) = onlinePlayers[(sender as Player).uniqueId.toString()]!!
     fun getPlayer(sender: Player) = onlinePlayers[sender.uniqueId.toString()]!!

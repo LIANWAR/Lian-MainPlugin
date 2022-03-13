@@ -225,6 +225,8 @@ class MenuKommand: KommandInterface {
                                             it.isCancelled = true
 
                                             (it.whoClicked as Player).performCommand("clan leave delete")
+                                            it.inventory.close()
+                                            (it.whoClicked as Player).performCommand("gui")
                                         },
                                         3, 1
                                     )
@@ -400,6 +402,8 @@ class MenuKommand: KommandInterface {
                                             it.isCancelled = true
 
                                             (it.whoClicked as Player).performCommand("clan leave")
+                                            it.inventory.close()
+                                            (it.whoClicked as Player).performCommand("gui")
                                         },
                                         3, 1
                                     )
@@ -494,6 +498,8 @@ class MenuKommand: KommandInterface {
                                             it.isCancelled = true
 
                                             (it.whoClicked as Player).performCommand("country leave delete")
+                                            it.inventory.close()
+                                            (it.whoClicked as Player).performCommand("gui")
                                         },
                                         3, 1
                                     )
@@ -691,6 +697,8 @@ class MenuKommand: KommandInterface {
                                             it.isCancelled = true
 
                                             (it.whoClicked as Player).performCommand("country leave")
+                                            it.inventory.close()
+                                            (it.whoClicked as Player).performCommand("gui")
                                         },
                                         3, 1
                                     )

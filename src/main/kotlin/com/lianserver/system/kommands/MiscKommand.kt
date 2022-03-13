@@ -32,7 +32,7 @@ class MiscKommand: KommandInterface, PrefixedTextInterface {
     override fun kommand() {
         register(getInstance(), "license") {
             executes {
-                sender.sendMessage(adminText("Lian-Server/Lian-MainPlugin ${getInstance().description.version} - GNU 일반 공중 사용 허가서 3.0"))
+                sender.sendMessage(adminText("Lian-Server/Lian-MainPlugin ${getInstance().description.version} - GNU 일반 공중 사용 허가서 3.0 (GPLv3)"))
                 sender.sendMessage(adminText("의존 라이브러리: "))
                 sender.sendMessage(adminText(" * monun/kommand: 2.6.6"))
                 sender.sendMessage(adminText(" * org.reflections:reflections: 0.10.2 (GitHub에 없음)"))

@@ -28,7 +28,3 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew jar
-    - uses: actions/upload-artifact@v1
-      with:
-        name: uploadjar
-        path: ./build/libs/Lian-MainPlugin.jar

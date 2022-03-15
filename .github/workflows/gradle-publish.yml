@@ -32,8 +32,8 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/upload-artifact@v2
       - name: Upload jar
+        uses: actions/upload-artifact@v2
         with:
           name: ${{ env.artifact_name }}
           path: "./build/libs/Lian-MainPlugin.jar" 

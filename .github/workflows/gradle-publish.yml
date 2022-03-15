@@ -13,6 +13,8 @@ on:
       build_plugin:
         description: 'build a plugin'
         required: false
+  push:
+    branches: [ master ]
 jobs:
   build:
 

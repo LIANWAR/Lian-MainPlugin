@@ -12,7 +12,7 @@ on:
     inputs:
       build_plugin:
         description: 'build a plugin'
-        required: true
+        required: false
 jobs:
   build:
 

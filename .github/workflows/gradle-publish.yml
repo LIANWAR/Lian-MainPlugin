@@ -28,3 +28,12 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew jar
+  build_2:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Upload jar
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.artifact_name }}
+          path: "./build/libs/Lian-MainPlugin.jar" 

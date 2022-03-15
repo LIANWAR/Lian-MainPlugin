@@ -31,6 +31,6 @@ jobs:
     - name: Upload jar
       uses: actions/upload-artifact@v2
       with:
-        name: ${{ env.artifact_name }}
+        name: lian-mainplugin
         path: "./build/libs/Lian-MainPlugin.jar" 
       

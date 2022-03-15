@@ -8,9 +8,11 @@
 name: Gradle Package
 
 on:
-  push:
-    types: [created]
-
+  workflow_dispatch:
+    inputs:
+      build_plugin:
+        description: 'build a plugin'
+        required: true
 jobs:
   build:
 

@@ -34,5 +34,5 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: lian-mainplugin
-        path: "./build/libs/Lian-MainPlugin-1.0.jar" 
+        path: "./build/libs/Lian-MainPlugin--3000.jar" 
       

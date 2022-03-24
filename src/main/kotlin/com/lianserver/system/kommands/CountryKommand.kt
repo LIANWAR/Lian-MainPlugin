@@ -148,11 +148,11 @@ class CountryKommand: KommandInterface {
                                 }
                             }
                             else {
-                                player.sendMessage("국가 인원은 수령 포함 8명입니다.")
+                                player.sendMessage(countryText("국가 인원은 수령 포함 8명입니다."))
                             }
                         }
                         else {
-                            player.sendMessage("대기 중인 초대가 없습니다.")
+                            player.sendMessage(countryText("대기 중인 초대가 없습니다."))
                         }
                     }
                 }

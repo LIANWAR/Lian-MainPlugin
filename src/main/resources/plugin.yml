@@ -1,8 +1,7 @@
 name: $pluginName
 main: $pluginMain
-api-version: "1.17"
+api-version: "1.18"
 version: $version
 libraries:
-  - io.github.monun:kommand:2.6.6
+  - io.github.monun:kommand-core:2.10.0
   - com.github.stefvanschie.inventoryframework:IF:0.10.4
-  - com.google.code.gson:gson:2.9.0

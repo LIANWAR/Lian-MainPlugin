@@ -28,11 +28,11 @@ class ShopKommand: KommandInterface, PrefixedTextInterface {
     override fun kommand() {
         register(getInstance(), "cshop", "캐시상점"){
             executes {
-                val guiCashShop = ChestGui(6, "캐시 상점")
+                val guiCashShop = ChestGui(4, "캐시 상점")
                 guiCashShop.setOnGlobalClick { e: InventoryClickEvent ->
                     e.isCancelled = true
                 }
-                val paneItem = PaginatedPane(0, 0, 9, 5)
+                val paneItem = PaginatedPane(1, 1, 7, 2)
                 paneItem.populateWithGuiItems(
                     getInstance().cashShopItem.map {
                         val itemStack = (it.get("item") as ItemStack).clone()
@@ -64,7 +64,7 @@ class ShopKommand: KommandInterface, PrefixedTextInterface {
                         }
                     }
                 )
-                val navigation = StaticPane(0, 5, 9, 1)
+                val navigation = StaticPane(1, 3, 7, 1)
 
                 val rw = ItemStack(Material.RED_WOOL)
                 var meta = rw.itemMeta
@@ -99,7 +99,7 @@ class ShopKommand: KommandInterface, PrefixedTextInterface {
                             paneItem.page = paneItem.page + 1
                             guiCashShop.update()
                         }
-                    }, 8, 0
+                    }, 6, 0
                 )
 
                 val br = ItemStack(Material.BARRIER)
@@ -114,12 +114,17 @@ class ShopKommand: KommandInterface, PrefixedTextInterface {
                         event.isCancelled = true
 
                         event.whoClicked.closeInventory()
-                    }, 4, 0
+                    }, 3, 0
                 )
 
                 guiCashShop.addPane(navigation)
-                val background = OutlinePane(0, 5, 9, 1)
-                background.addItem(GuiItem(ItemStack(Material.BLACK_STAINED_GLASS_PANE)))
+                val background = OutlinePane(0, 0, 9, 4)
+                val stack = ItemStack(Material.BLACK_STAINED_GLASS_PANE)
+                meta = stack.itemMeta
+                meta.displayName(text(""))
+                stack.itemMeta = meta
+
+                background.addItem(GuiItem(stack))
                 background.setRepeat(true)
                 background.priority = Pane.Priority.LOWEST
                 background.setOnClick { event: InventoryClickEvent ->
@@ -134,11 +139,11 @@ class ShopKommand: KommandInterface, PrefixedTextInterface {
         }
         register(getInstance(), "ushop", "유저상점"){
             executes {
-                val guiCashShop = ChestGui(6, "유저 상점")
+                val guiCashShop = ChestGui(4, "유저 상점")
                 guiCashShop.setOnGlobalClick { e: InventoryClickEvent ->
                     e.isCancelled = true
                 }
-                val paneItem = PaginatedPane(0, 0, 9, 5)
+                val paneItem = PaginatedPane(1, 1, 7, 2)
                 paneItem.populateWithGuiItems(
                     getInstance().userShopItem.map {
                         val itemStack = (it.get("item") as ItemStack).clone()
@@ -177,9 +182,16 @@ class ShopKommand: KommandInterface, PrefixedTextInterface {
                             }
                             else {
                                 getInstance().onlinePlayers[e.whoClicked.uniqueId.toString()]!!.cash -= it.get("price") as Int
-                                e.whoClicked.sendMessage(
-                                    userText("").append(itemStack.displayName()).append(Component.text(" 아이템을 ${it.get("price") as Int}캐시에 구입했습니다."))
-                                )
+                                if(e.whoClicked.uniqueId.toString() == it.get("owner") as String){
+                                    e.whoClicked.sendMessage(
+                                        userText("").append(itemStack.displayName()).append(Component.text(" 아이템을 회수했습니다."))
+                                    )
+                                }
+                                else {
+                                    e.whoClicked.sendMessage(
+                                        userText("").append(itemStack.displayName()).append(Component.text(" 아이템을 ${it.get("price") as Int}캐시에 구입했습니다."))
+                                    )
+                                }
 
                                 getInstance().onlinePlayers[it.get("owner") as String]!!.cash += it.get("price") as Int
 
@@ -194,7 +206,7 @@ class ShopKommand: KommandInterface, PrefixedTextInterface {
                         }
                     }
                 )
-                val navigation = StaticPane(0, 5, 9, 1)
+                val navigation = StaticPane(1, 3, 7, 1)
 
                 val rw = ItemStack(Material.RED_WOOL)
                 var meta = rw.itemMeta
@@ -229,7 +241,7 @@ class ShopKommand: KommandInterface, PrefixedTextInterface {
                             paneItem.page = paneItem.page + 1
                             guiCashShop.update()
                         }
-                    }, 8, 0
+                    }, 6, 0
                 )
 
                 val br = ItemStack(Material.BARRIER)
@@ -244,12 +256,17 @@ class ShopKommand: KommandInterface, PrefixedTextInterface {
                         event.isCancelled = true
 
                         event.whoClicked.closeInventory()
-                    }, 4, 0
+                    }, 3, 0
                 )
 
                 guiCashShop.addPane(navigation)
-                val background = OutlinePane(0, 5, 9, 1)
-                background.addItem(GuiItem(ItemStack(Material.BLACK_STAINED_GLASS_PANE)))
+                val background = OutlinePane(0, 0, 9, 4)
+                val stack = ItemStack(Material.BLACK_STAINED_GLASS_PANE)
+                meta = stack.itemMeta
+                meta.displayName(text(""))
+                stack.itemMeta = meta
+
+                background.addItem(GuiItem(stack))
                 background.setRepeat(true)
                 background.priority = Pane.Priority.LOWEST
                 background.setOnClick { event: InventoryClickEvent ->

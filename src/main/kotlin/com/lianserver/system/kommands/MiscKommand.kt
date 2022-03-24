@@ -60,9 +60,9 @@ class MiscKommand: KommandInterface, PrefixedTextInterface {
             executes {
                 sender.sendMessage(adminText("Lian-Server/Lian-MainPlugin ${getInstance().description.version} - GNU 일반 공중 사용 허가서 3.0 (GPLv3)"))
                 sender.sendMessage(adminText("의존 라이브러리: "))
-                sender.sendMessage(adminText(" * monun/kommand: 2.6.6"))
+                sender.sendMessage(adminText(" * monun/kommand: 2.10.0"))
                 sender.sendMessage(adminText(" * org.reflections:reflections: 0.10.2 (GitHub에 없음)"))
-                sender.sendMessage(adminText(" * stefvanschie/IF: 0.10.4"))
+                sender.sendMessage(adminText(" * stefvanschie/IF: 0.10.5"))
                 sender.sendMessage(adminText(" * WesJD/AnvilGUI: 1.5.3"))
                 sender.sendMessage(adminText("리소스팩 - AlphaGot 제작"))
                 sender.sendMessage(adminText("폰트 라이센스: "))
@@ -72,7 +72,7 @@ class MiscKommand: KommandInterface, PrefixedTextInterface {
         register(getInstance(), "lotto"){
             executes {
                 var amount = 0
-                for (item in player.inventory.contents.filterNotNull()) {
+                for (item in player.inventory.contents?.filterNotNull() ?: listOf()) {
                     if (item.type == Material.IRON_INGOT) {
                         amount += item.amount
                     }

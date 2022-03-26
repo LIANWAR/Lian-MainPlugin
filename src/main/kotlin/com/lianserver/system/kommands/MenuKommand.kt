@@ -43,21 +43,21 @@ class MenuKommand: KommandInterface {
     override fun kommand() {
         register(getInstance(), "메뉴", "apsb", "menu", "gui", "매뉴", "aosb"){
             executes {
-                val gui = ChestGui(3, "리안서버 메뉴")
+                val gui = ChestGui(6, "리안서버 메뉴")
 
-                val spPanel = StaticPane(0, 0, 9, 3)
+                val spPanel = StaticPane(0, 0, 9, 6)
                 spPanel.addItem(
                     GuiItem(
-                        namedItemStack(Material.BEACON, text("국가전쟁 월드로").color(NamedTextColor.AQUA))
+                        namedItemStack(Material.BEACON, text("스폰으로").color(NamedTextColor.AQUA))
                     ) { e: InventoryClickEvent ->
                         e.isCancelled = true
                         val xzPos = Pair(Random.nextInt(-2000, 2001), Random.nextInt(-2000, 2001))
-                        val yPos = getInstance().server.getWorld("clanworld")!!.getHighestBlockYAt(xzPos.first, xzPos.second)
+                        val yPos = getInstance().server.getWorld("spawn")!!.getHighestBlockYAt(xzPos.first, xzPos.second)
 
-                        e.whoClicked.teleport(Location(getInstance().server.getWorld("clanworld"), xzPos.first.toDouble(), yPos + 1.0, xzPos.second.toDouble()))
+                        e.whoClicked.teleport(Location(getInstance().server.getWorld("spawn"), xzPos.first.toDouble(), yPos + 1.0, xzPos.second.toDouble()))
                     },
                     1,
-                    1
+                    3
                 )
 
                 spPanel.addItem(
@@ -71,8 +71,8 @@ class MenuKommand: KommandInterface {
 
                         e.whoClicked.teleport(Location(getInstance().server.getWorld("world"), xzPos.first.toDouble(), yPos + 1.0, xzPos.second.toDouble()))
                     },
-                    3,
-                    1
+                    4,
+                    3
                 )
 
                 spPanel.addItem(
@@ -726,8 +726,33 @@ class MenuKommand: KommandInterface {
                             }
                         }
                     },
-                    5,
-                    1
+                    7,
+                    3
+                )
+
+                spPanel.addItem(
+                    GuiItem(
+                        namedItemStack(Material.WRITABLE_BOOK, text("출석체크").color(NamedTextColor.YELLOW))
+                    ) { e: InventoryClickEvent ->
+                        e.isCancelled = true
+
+                        player.closeInventory()
+                        player.performCommand("출석체크")
+                    },
+                    4,
+                    5
+                )
+
+                spPanel.addItem(
+                    GuiItem(
+                        namedItemStack(Material.ENCHANTED_BOOK, text("사용 가능한 효과들").color(NamedTextColor.LIGHT_PURPLE))
+                    ) { e: InventoryClickEvent ->
+                        e.isCancelled = true
+
+                        player.performCommand("effects")
+                    },
+                    7,
+                    5
                 )
 
                 spPanel.addItem(
@@ -744,11 +769,35 @@ class MenuKommand: KommandInterface {
                         clickComp.clickEvent = ClickEvent(ClickEvent.Action.OPEN_URL, "https://aztra.xyz/invite/7dUlCDDW")
                         e.whoClicked.sendMessage(clickComp)
                     },
-                    7,
+                    1,
+                    5
+                )
+
+                spPanel.addItem(
+                    GuiItem(
+                        namedItemStack(Material.EMERALD, text("캐시 상점").color(NamedTextColor.GREEN))
+                    ) { e: InventoryClickEvent ->
+                        e.isCancelled = true
+
+                        player.performCommand("cshop")
+                    },
+                    2,
                     1
                 )
 
-                val background = OutlinePane(0, 0, 9, 3)
+                spPanel.addItem(
+                    GuiItem(
+                        namedItemStack(Material.DIAMOND, text("유저 상점").color(NamedTextColor.AQUA))
+                    ) { e: InventoryClickEvent ->
+                        e.isCancelled = true
+
+                        player.performCommand("ushop")
+                    },
+                    6,
+                    1
+                )
+
+                val background = OutlinePane(0, 0, 9, 6)
                 background.addItem(GuiItem(namedItemStack(Material.BLACK_STAINED_GLASS_PANE, text(""))))
                 background.setRepeat(true)
                 background.priority = Pane.Priority.LOWEST

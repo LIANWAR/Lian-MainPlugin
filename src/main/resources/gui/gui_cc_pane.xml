@@ -1,0 +1,8 @@
+<gui rows="3" title="출석 체크">
+    <staticpane x="1" y="0" length="7" height="3" />
+    <outlinepane x="0" y="0" length="9" height="3" repeat="true">
+        <item id="black_stained_glass_pane">
+            <displayname> </displayname>
+        </item>
+    </outlinepane>
+</gui>

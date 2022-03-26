@@ -27,6 +27,7 @@ import io.papermc.paper.event.player.AsyncChatEvent
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.sound.Sound
 import net.kyori.adventure.text.Component.text
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.Material
@@ -201,8 +202,8 @@ class LianPlugin : JavaPlugin(), Listener {
             onlinePlayers[e.player.uniqueId.toString()] = LianPlayer(e.player)
         }
 
-        if(onlinePlayers[e.player.uniqueId.toString()]!!.prefix != "**null**"){
-            e.player.displayName(text(onlinePlayers[e.player.uniqueId.toString()]!!.prefix).append(text(" ")).append(e.player.name()))
+        if(onlinePlayers[e.player.uniqueId.toString()]!!.prefix != ""){
+            e.player.displayName(GsonComponentSerializer.gson().deserialize(onlinePlayers[e.player.uniqueId.toString()]!!.prefix).append(text(" ")).append(e.player.name()))
         }
     }
 

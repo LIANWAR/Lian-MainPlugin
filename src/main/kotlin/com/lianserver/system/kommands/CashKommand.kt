@@ -5,7 +5,7 @@ import com.lianserver.system.interfaces.PrefixedTextInterface
 import io.github.monun.kommand.Kommand.Companion.register
 import io.github.monun.kommand.getValue
 import net.kyori.adventure.text.Component
-import net.md_5.bungee.api.ChatColor
+import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 
 class CashKommand: KommandInterface, PrefixedTextInterface {

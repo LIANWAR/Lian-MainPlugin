@@ -1,5 +1,8 @@
 package com.lianserver.system.kommands
 
+import com.github.stefvanschie.inventoryframework.gui.GuiItem
+import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
+import com.github.stefvanschie.inventoryframework.pane.StaticPane
 import com.lianserver.system.interfaces.KommandInterface
 import com.lianserver.system.interfaces.PrefixedTextInterface
 import io.github.monun.kommand.Kommand.Companion.register
@@ -7,9 +10,15 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
+import org.bukkit.ChatColor
 import org.bukkit.Material
+import org.bukkit.block.data.BlockData
+import org.bukkit.block.data.Levelled
+import org.bukkit.block.data.type.Light
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.BlockDataMeta
+import org.bukkit.inventory.meta.BlockStateMeta
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.random.Random
@@ -138,6 +147,88 @@ class MiscKommand: KommandInterface, PrefixedTextInterface {
                     else {
                         getInstance().onlinePlayers[player.uniqueId.toString()]!!.ccStreak++
                     }
+
+                    val guiCCPane: ChestGui = ChestGui.load(getInstance(), getInstance().getResource("gui/gui_cc_pane.xml")!!)!!
+                    val guiCCSP: StaticPane = guiCCPane.panes.first { it is StaticPane } as StaticPane
+
+                    intArrayOf(1, 2, 3, 4, 5, 6, 7).map {
+                        val item = namedItemStack(Material.LIGHT, text("${it}일"))
+
+                        val bDR = item.itemMeta as BlockDataMeta
+                        val bD = item.type.createBlockData() as Levelled
+                        bD.level = it
+                        bDR.setBlockData(bD)
+                        item.itemMeta = bDR
+
+                        guiCCSP.addItem(
+                            GuiItem(
+                                item
+                            ){
+                                it.isCancelled = true
+                            },
+                            it - 1,
+                            0
+                        )
+                    }
+                    intArrayOf(0, 1, 2, 3, 4, 5, 6).map {
+                        val item = namedItemStack(
+                            if(ccs < it) Material.RED_STAINED_GLASS_PANE
+                            else Material.LIME_STAINED_GLASS_PANE,
+                            text(
+                                if(ccs < it) "${ChatColor.RED}출석체크 안 함"
+                                else "${ChatColor.GREEN}출석체크 완료"
+                            )
+                        )
+
+                        guiCCSP.addItem(
+                            GuiItem(
+                                item
+                            ){
+                                it.isCancelled = true
+                            },
+                            it,
+                            1
+                        )
+                    }
+                    intArrayOf(0, 1, 2, 3, 4, 5, 6).map {
+                        val item = when(it){
+                            0 -> {
+                                namedItemStack(Material.PAPER, text("로또").color(NamedTextColor.AQUA))
+                            }
+                            in 1..3 -> {
+                                ItemStack(Material.DIAMOND, it)
+                            }
+                            4 -> {
+                                ItemStack(Material.NETHERITE_SCRAP, 1)
+                            }
+                            in 5..6 -> {
+                                namedItemStack(Material.GOLD_NUGGET, text("${20 * (it - 4)}캐시").color(NamedTextColor.LIGHT_PURPLE))
+                            }
+                            else -> {
+                                ItemStack(Material.AIR)
+                            }
+                        }
+
+                        guiCCSP.addItem(
+                            GuiItem(
+                                item
+                            ){
+                                it.isCancelled = true
+                            },
+                            it,
+                            2
+                        )
+                    }
+
+                    guiCCPane.update()
+                    guiCCPane.setOnGlobalClick {
+                        it.isCancelled = true
+                    }
+
+                    guiCCPane.show(player)
+                }
+                else {
+                    player.sendMessage(userText("이미 출석체크를 했습니다."))
                 }
             }
         }

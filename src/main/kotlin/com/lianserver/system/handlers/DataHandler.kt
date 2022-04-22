@@ -25,7 +25,7 @@ object DataHandler {
         clanDir.mkdir()
         getInstance().clans.forEach {
             getInstance().logger.info(it.value.toString())
-            File("plugins/LianMain/clans/${it.value.owner.player.uniqueId}.txt").writeText(it.toString())
+            it.value.serialize().save(File("plugins/LianMain/clans/${it.value.owner.player.uniqueId}.txt"))
         }
 
         val countryDir = File("plugins/LianMain/countries")
@@ -34,7 +34,7 @@ object DataHandler {
         countryDir.mkdir()
         getInstance().countries.forEach {
             getInstance().logger.info(it.value.toString())
-            File("plugins/LianMain/countries/${it.value.owner.player.uniqueId}.txt").writeText(it.toString())
+            it.value.serialize().save(File("plugins/LianMain/countries/${it.value.owner.player.uniqueId}.txt"))
         }
 
         val playerDir = File("plugins/LianMain/players")
@@ -43,7 +43,7 @@ object DataHandler {
         playerDir.mkdir()
         getInstance().onlinePlayers.forEach {
             getInstance().logger.info(it.value.toString())
-            File("plugins/LianMain/players/${it.value.player.uniqueId}.txt").writeText(it.value.toString())
+            it.value.serialize().save(File("plugins/LianMain/players/${it.value.player.uniqueId}.txt"))
         }
 
         val war = File("plugins/LianMain/wars")
@@ -52,7 +52,7 @@ object DataHandler {
         war.mkdir()
         getInstance().wars.forEach {
             getInstance().logger.info(it.toString())
-            File("plugins/LianMain/wars/${it.countries.first.owner.player.uniqueId}.txt").writeText(it.toString())
+            it.serialize().save(File("plugins/LianMain/wars/${it.countries.first.owner.player.uniqueId}.txt"))
         }
 
         File("plugins/LianMain/backups/${d}/shop").mkdir()

@@ -1,6 +1,9 @@
 package com.lianserver.system.common
 
+import com.lianserver.system.plugin.LianPlugin
 import org.bukkit.OfflinePlayer
+import org.bukkit.configuration.file.YamlConfiguration
+import java.util.*
 
 class LianPlayer(p: OfflinePlayer){
     var country: Country? = null
@@ -15,7 +18,25 @@ class LianPlayer(p: OfflinePlayer){
     var clanChatMode: Boolean = false // false = 전체채팅
     //endregion
 
-    override fun toString(): String {
-        return "${player.uniqueId}\n${clan?.owner?.player?.uniqueId}\n${country?.owner?.player?.uniqueId}\n$prefix\n$lastCCDay\n$cash\n$ccStreak".trim()
+    fun serialize(): YamlConfiguration {
+        val yc = YamlConfiguration()
+
+        yc.set("country", country?.owner?.player?.uniqueId)
+        yc.set("clan", clan?.owner?.player?.uniqueId)
+        yc.set("player", player.uniqueId)
+        yc.set("prefix", prefix)
+        yc.set("lcd", lastCCDay)
+        yc.set("cash", cash)
+        yc.set("ccs", ccStreak)
+
+        return yc
+    }
+
+    companion object {
+        fun deserialize(c: YamlConfiguration): LianPlayer {
+            fun inst() = LianPlugin.instance
+
+            return LianPlayer(inst().server.getOfflinePlayer(UUID.fromString(c.getString("player"))))
+        }
     }
 }

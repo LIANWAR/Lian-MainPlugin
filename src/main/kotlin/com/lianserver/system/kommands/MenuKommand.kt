@@ -51,10 +51,8 @@ class MenuKommand: KommandInterface {
                         namedItemStack(Material.BEACON, text("스폰으로").color(NamedTextColor.AQUA))
                     ) { e: InventoryClickEvent ->
                         e.isCancelled = true
-                        val xzPos = Pair(Random.nextInt(-2000, 2001), Random.nextInt(-2000, 2001))
-                        val yPos = getInstance().server.getWorld("spawn")!!.getHighestBlockYAt(xzPos.first, xzPos.second)
 
-                        e.whoClicked.teleport(Location(getInstance().server.getWorld("spawn"), xzPos.first.toDouble(), yPos + 1.0, xzPos.second.toDouble()))
+                        e.whoClicked.teleport(Location(getInstance().server.getWorld("spawn"), -12.5, 206.0, -2.5))
                     },
                     1,
                     3

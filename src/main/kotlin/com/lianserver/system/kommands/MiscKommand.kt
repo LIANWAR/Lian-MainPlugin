@@ -73,9 +73,14 @@ class MiscKommand: KommandInterface, PrefixedTextInterface {
                 sender.sendMessage(adminText(" * org.reflections:reflections: 0.10.2 (GitHub에 없음)"))
                 sender.sendMessage(adminText(" * stefvanschie/IF: 0.10.5"))
                 sender.sendMessage(adminText(" * WesJD/AnvilGUI: 1.5.3"))
+                sender.sendMessage(adminText("Lian-Server/effect-in-item 1.0 - GNU 일반 공중 사용 허가서 3.0 (GPLv3)"))
+                sender.sendMessage(adminText("의존 라이브러리: "))
+                sender.sendMessage(adminText(" * monun/kommand: 2.10.0"))
+                sender.sendMessage(adminText(" * org.reflections:reflections: 0.10.2 (GitHub에 없음)"))
+                sender.sendMessage(adminText(" * stefvanschie/IF: 0.10.5"))
                 sender.sendMessage(adminText("리소스팩 - AlphaGot 제작"))
                 sender.sendMessage(adminText("폰트 라이센스: "))
-                sender.sendMessage(adminText(" * 카페24 써라운드체 - SIL 자유 폰트 라이선스"))
+                sender.sendMessage(adminText(" * 카페24 써라운드체 - SIL 오픈 폰트 라이선스"))
             }
         }
         register(getInstance(), "lotto"){

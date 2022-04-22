@@ -322,6 +322,7 @@ class ShopKommand: KommandInterface, PrefixedTextInterface {
                     val price: Int by it
                     if(player.inventory.itemInMainHand.type != Material.AIR){
                         val item = player.inventory.itemInMainHand.clone()
+                        player.inventory.itemInMainHand.subtract(player.inventory.itemInMainHand.amount)
 
                         val yml = YamlConfiguration()
                         yml.set("item", item)

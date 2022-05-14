@@ -4,13 +4,13 @@ import com.lianserver.system.plugin.LianPlugin
 import org.bukkit.configuration.file.YamlConfiguration
 import java.util.*
 
-class Clan(o: LianPlayer, l: Pair<Int, Int>?, p: MutableList<LianPlayer> = mutableListOf(o), n: String, ip: Boolean = true){
-    var owner: LianPlayer = o
-    var land: Pair<Int, Int>? = l
-    var players: MutableList<LianPlayer> = p
-    val name: String = n
-    var public: Boolean = ip
-
+data class Clan(
+    override val owner: LianPlayer,
+    var land: Pair<Int, Int>?,
+    var players: MutableList<LianPlayer> = mutableListOf(owner),
+    val name: String,
+    var public: Boolean = true
+): ClanLike {
     fun serialize(): YamlConfiguration {
         val yc = YamlConfiguration()
 

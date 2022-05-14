@@ -31,7 +31,6 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.Material
-import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.ArmorStand
@@ -78,6 +77,12 @@ class LianPlugin : JavaPlugin(), Listener {
 
     var cashShopItem: MutableList<YamlConfiguration> = mutableListOf()
     var userShopItem: MutableList<YamlConfiguration> = mutableListOf()
+
+    var outpostData: MutableMap<String, Outpost> = mutableMapOf()
+
+    fun getClanOrCountry(uuid: String): ClanLike? {
+        return if(clans.any { it.key == uuid }) clans[uuid] else countries[uuid]
+    }
 
     fun getPlayer(sender: CommandSender) = onlinePlayers[(sender as Player).uniqueId.toString()]!!
     fun getPlayer(sender: Player) = onlinePlayers[sender.uniqueId.toString()]!!

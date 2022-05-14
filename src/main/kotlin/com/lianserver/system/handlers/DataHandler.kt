@@ -71,6 +71,15 @@ object DataHandler {
         getInstance().userShopItem.forEach {
             it.save(File("plugins/LianMain/shop/ushop/${it.hashCode()}.yml"))
         }
+
+        val outpost = File("plugins/LianMain/outposts")
+        outpost.renameTo(File("plugins/LianMain/backups/${d}/outposts"))
+
+        outpost.mkdir()
+        getInstance().outpostData.values.forEach {
+            getInstance().logger.info(it.toString())
+            it.serialize().save(File("plugins/LianMain/outposts/${it.pos.hashCode()}.txt"))
+        }
     }
     
     fun loadFromFile(){
@@ -92,29 +101,11 @@ object DataHandler {
         }
         else {
             playerDir.listFiles()?.forEach { file ->
-                if(file.name.endsWith(".txt")){
-                    if(getInstance().onlinePlayers.none { it.value.player.uniqueId.toString() == file.readText().split("\n")[0] }){
-                        val f = file.readText().split("\n").map { it.trim() }
-                        val c = LianPlayer(getInstance().server.getOfflinePlayer(UUID.fromString(f[0].split("=")[0])))
-                        logger.info(file.readText())
-
-                        c.clan = if (getInstance().clans.any { it.value.owner.player.uniqueId.toString() == f[1] }) {
-                            getInstance().clans[f[1]]
-                        }
-                        else null
-
-                        c.country = if (getInstance().countries.any { it.value.owner.player.uniqueId.toString() == f[2] }) {
-                            getInstance().countries[f[2]]
-                        }
-                        else null
-
-                        c.prefix = f[3]
-                        c.lastCCDay = f[4]
-                        c.cash = f[5].toInt()
-                        c.ccStreak = f[6].toInt()
-
-                        getInstance().onlinePlayers[c.player.uniqueId.toString()] = c
-                    }
+                if(file.name.endsWith(".yml")){
+                    logger.info(file.readText())
+                    val c = YamlConfiguration.loadConfiguration(file)
+                    val cl = LianPlayer.deserialize(c)
+                    getInstance().onlinePlayers[cl.player.uniqueId.toString()] = cl
                 }
             }
         }
@@ -132,26 +123,11 @@ object DataHandler {
         }
         else {
             clanDir.listFiles()?.forEach { file ->
-                if(file.name.endsWith(".txt")){
+                if(file.name.endsWith(".yml")){
                     logger.info(file.readText())
-                    val c = file.readText().split("\n").map { it.trim() }.toMutableList()
-
-                    logger.info(c.size.toString())
-                    getInstance().clans[c[0].split("=")[0].trim()] = Clan(
-                        o = getInstance().onlinePlayers[c[0].trim().split("=")[0]]!!,
-                        l = if (c[1] != "null"){
-                            c[1] = c[1].replace("(", "").replace(")", "")
-                            Pair(c[1].split(", ")[0].toInt(), c[1].split(", ")[1].toInt())
-                        } else {
-                               null
-                        },
-                        p = c.subList(4, c.size).map { el ->
-                            logger.info(el)
-                            getInstance().onlinePlayers[el.trim()]!!
-                        } as MutableList<LianPlayer>,
-                        n = c[2],
-                        ip = c[3] == "true"
-                    )
+                    val c = YamlConfiguration.loadConfiguration(file)
+                    val cl = Clan.deserialize(c)
+                    getInstance().clans[cl.owner.player.uniqueId.toString()] = cl
                 }
             }
         }
@@ -169,29 +145,11 @@ object DataHandler {
         }
         else {
             countryDir.listFiles()?.forEach { file ->
-                if(file.name.endsWith(".txt")){
+                if(file.name.endsWith(".yml")){
                     logger.info(file.readText())
-                    val c = file.readText().split("\n").map { it.trim() }.toMutableList()
-
-                    logger.info(c.size.toString())
-                    getInstance().countries[c[0].split("=")[0].trim()] = Country(
-                        getInstance().onlinePlayers[c[0].trim().split("=")[0]]!!,
-                        land = if (c[1] != "null"){
-                            c[1] = c[1].replace("(", "").replace(")", "")
-                            Pair(c[1].split(", ")[0].toInt(), c[1].split(", ")[1].toInt())
-                        } else {
-                            null
-                        },
-                        players = c.subList(7, c.size).map { el ->
-                            logger.info(el)
-                            getInstance().onlinePlayers[el.trim()]!!
-                        } as MutableList<LianPlayer>,
-                        name = c[2],
-                        warDeclarationDenyCount = c[5].toInt(),
-                        lastWarDeclaratedTime = Date(c[6].toLong()),
-                        public = c[3] == "true",
-                        winCount = c[4].toInt()
-                    )
+                    val c = YamlConfiguration.loadConfiguration(file)
+                    val cl = Country.deserialize(c)
+                    getInstance().countries[cl.owner.player.uniqueId.toString()] = cl
                 }
             }
         }
@@ -210,24 +168,27 @@ object DataHandler {
         }
         else {
             playerDir.listFiles()?.forEach { file ->
-                if(file.name.endsWith(".txt")){
+                if(file.name.endsWith(".yml")){
                     logger.info("postprocessing " + file.readText())
-                    if(getInstance().onlinePlayers.containsKey(file.readText().split("\n").map { it.trim() }[0].trim())){
-                        val f = file.readText().split("\n").map { it.trim() }
-                        if(f[1] == "null"){
-                            if(f[2] != "null"){
-                                getInstance().onlinePlayers[f[0].trim()]!!.country = getInstance().countries[f[2].trim()]
-                                getInstance().onlinePlayers[f[0].trim()]!!.clan = null
-                            }
-                            else {
-                                getInstance().onlinePlayers[f[0].trim()]!!.clan = getInstance().clans[f[1].trim()]
-                                getInstance().onlinePlayers[f[0].trim()]!!.country = null
-                            }
-                        }
-                        else {
-                            getInstance().onlinePlayers[f[0].trim()]!!.clan = getInstance().clans[f[1].trim()]
-                            getInstance().onlinePlayers[f[0].trim()]!!.country = null
-                        }
+                    val c = YamlConfiguration.loadConfiguration(file)
+                    if(c.getString("clan") != "null"){
+                        getInstance().onlinePlayers[getInstance().server.getOfflinePlayer(UUID.fromString(c.getString("player"))).uniqueId.toString()]!!.clan = getInstance().clans[c.getString("clan")]!!
+                    }
+                    if(c.getString("country") != "null"){
+                        getInstance().onlinePlayers[getInstance().server.getOfflinePlayer(UUID.fromString(c.getString("player"))).uniqueId.toString()]!!.country = getInstance().countries[c.getString("country")]!!
+                    }
+
+                    getInstance().onlinePlayers[
+                            getInstance().server.getOfflinePlayer(
+                                UUID.fromString(
+                                    c.getString("player")
+                                )
+                            ).uniqueId.toString()
+                    ]!!.let {
+                        it.cash = c.getInt("cash")
+                        it.lastCCDay = c.getString("lcd") ?: "19890604"
+                        it.ccStreak = c.getInt("ccs")
+                        it.prefix = c.getString("prefix") ?: "**null**"
                     }
                 }
             }
@@ -246,15 +207,10 @@ object DataHandler {
         }
         else {
             warDir.listFiles()?.forEach { file ->
-                if(file.name.endsWith(".txt")){
-                    val c = file.readText().split("\n")
-                    
-                    getInstance().wars.add(
-                        War(
-                            Date(c[0].toLong()),
-                            Pair(getInstance().countries[c[1].split(" ")[0]]!!, getInstance().countries[c[1].split(" ")[1]]!!)
-                        )
-                    )
+                if(file.name.endsWith(".yml")){
+                    logger.info(file.readText())
+                    val c = YamlConfiguration.loadConfiguration(file)
+                    getInstance().wars.add(War.deserialize(c))
                 }
             }
         }
@@ -269,6 +225,28 @@ object DataHandler {
             getInstance().userShopItem.add(
                 YamlConfiguration.loadConfiguration(it)
             )
+        }
+
+        val outpostDir = File("plugins/LianMain/outposts")
+        if(!(outpostDir.exists() && outpostDir.isDirectory)){
+            logger.warning("전쟁 저장 경로가 없거나 폴더가 아닙니다.")
+
+            if(!outpostDir.isDirectory){
+                logger.log(Level.OFF, "전쟁 저장 경로와 같은 이름의 파일이 있습니다.")
+            }
+            else {
+                outpostDir.mkdir()
+            }
+        }
+        else {
+            outpostDir.listFiles()?.forEach { file ->
+                if(file.name.endsWith(".yml")){
+                    logger.info(file.readText())
+                    val c = YamlConfiguration.loadConfiguration(file)
+                    val cl = Outpost.deserialize(c)
+                    getInstance().outpostData[cl.pos.hashCode().toString()] = cl
+                }
+            }
         }
     }
 }

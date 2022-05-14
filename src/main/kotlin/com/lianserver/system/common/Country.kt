@@ -6,7 +6,7 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import org.bukkit.configuration.file.YamlConfiguration
 import java.util.*
 
-data class Country(val owner: LianPlayer, var land: Pair<Int, Int>?, var players: MutableList<LianPlayer> = mutableListOf(owner), val name: String, var warDeclarationDenyCount: Int = 0, var lastWarDeclaratedTime: Date = Date(0L), var public: Boolean = true, var winCount: Int = 0){
+data class Country(override val owner: LianPlayer, var land: Pair<Int, Int>?, var players: MutableList<LianPlayer> = mutableListOf(owner), val name: String, var warDeclarationDenyCount: Int = 0, var lastWarDeclaratedTime: Date = Date(0L), var public: Boolean = true, var winCount: Int = 0): ClanLike{
     fun serialize(): YamlConfiguration {
         val yc = YamlConfiguration()
 

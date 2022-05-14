@@ -84,7 +84,7 @@ class ClanKommand: KommandInterface {
                                         }
                                         else {
                                             if(getInstance().clans.none { it.value.name == clanNameTemp }) {
-                                                val clan = Clan(getInstance().onlinePlayers[(sender as Player).uniqueId.toString()]!!, null, n = clanNameTemp)
+                                                val clan = Clan(getInstance().onlinePlayers[(sender as Player).uniqueId.toString()]!!, null, name = clanNameTemp)
                                                 getInstance().onlinePlayers[(sender as Player).uniqueId.toString()]!!.clan = clan
                                                 getInstance().clans[(sender as Player).uniqueId.toString()] = clan
                                                 hand.subtract(1)

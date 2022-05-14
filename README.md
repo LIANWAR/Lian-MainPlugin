@@ -3,4 +3,3 @@
 ## 개발자
  - [@underconnor](https://github.com/underconnor)
  - [@shs3182ym](https://github.com/shs3182ym)
- - [@bluecard873](https://github.com/bluecard873)

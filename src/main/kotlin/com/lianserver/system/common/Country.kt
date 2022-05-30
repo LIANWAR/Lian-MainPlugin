@@ -10,7 +10,7 @@ data class Country(override val owner: LianPlayer, var land: Pair<Int, Int>?, va
     fun serialize(): YamlConfiguration {
         val yc = YamlConfiguration()
 
-        yc.set("owner", owner.player.uniqueId)
+        yc.set("owner", owner.player.uniqueId.toString())
         yc.set("land", if(land != null) "${land!!.first} ${land!!.second}" else "none")
         yc.set("players", players.map { it.player.uniqueId.toString() })
         yc.set("name", name)
@@ -29,7 +29,7 @@ data class Country(override val owner: LianPlayer, var land: Pair<Int, Int>?, va
 
             return Country(
                 inst().onlinePlayers[c.getString("owner")]!!,
-                Pair(c.getString("land")!!.split(" ")[0].toInt(), c.getString("land")!!.split(" ")[1].toInt()),
+                if(c.getString("land") != "none") Pair(c.getString("land")!!.split(" ")[0].toInt(), c.getString("land")!!.split(" ")[1].toInt()) else null,
                 ls.map { inst().onlinePlayers[it]!! } as MutableList<LianPlayer>,
                 c.getString("name")!!,
                 c.getInt("wdc"),

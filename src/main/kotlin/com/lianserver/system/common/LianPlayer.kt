@@ -9,7 +9,7 @@ class LianPlayer(p: OfflinePlayer){
     var country: Country? = null
     val player: OfflinePlayer = p
     var clan: Clan? = null
-    var prefix: String = "**null**"
+    var prefix: String = ""
     var lastCCDay: String = "19890604" // yyyymmdd
     var cash: Int = 0
     var ccStreak: Int = 0
@@ -21,9 +21,9 @@ class LianPlayer(p: OfflinePlayer){
     fun serialize(): YamlConfiguration {
         val yc = YamlConfiguration()
 
-        yc.set("country", country?.owner?.player?.uniqueId)
-        yc.set("clan", clan?.owner?.player?.uniqueId)
-        yc.set("player", player.uniqueId)
+        yc.set("country", country?.owner?.player?.uniqueId.toString())
+        yc.set("clan", clan?.owner?.player?.uniqueId.toString())
+        yc.set("player", player.uniqueId.toString())
         yc.set("prefix", prefix)
         yc.set("lcd", lastCCDay)
         yc.set("cash", cash)

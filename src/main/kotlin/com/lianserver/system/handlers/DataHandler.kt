@@ -25,7 +25,7 @@ object DataHandler {
         clanDir.mkdir()
         getInstance().clans.forEach {
             getInstance().logger.info(it.value.toString())
-            it.value.serialize().save(File("plugins/LianMain/clans/${it.value.owner.player.uniqueId}.txt"))
+            it.value.serialize().save(File("plugins/LianMain/clans/${it.value.owner.player.uniqueId}.yml"))
         }
 
         val countryDir = File("plugins/LianMain/countries")
@@ -34,7 +34,7 @@ object DataHandler {
         countryDir.mkdir()
         getInstance().countries.forEach {
             getInstance().logger.info(it.value.toString())
-            it.value.serialize().save(File("plugins/LianMain/countries/${it.value.owner.player.uniqueId}.txt"))
+            it.value.serialize().save(File("plugins/LianMain/countries/${it.value.owner.player.uniqueId}.yml"))
         }
 
         val playerDir = File("plugins/LianMain/players")
@@ -43,7 +43,7 @@ object DataHandler {
         playerDir.mkdir()
         getInstance().onlinePlayers.forEach {
             getInstance().logger.info(it.value.toString())
-            it.value.serialize().save(File("plugins/LianMain/players/${it.value.player.uniqueId}.txt"))
+            it.value.serialize().save(File("plugins/LianMain/players/${it.value.player.uniqueId}.yml"))
         }
 
         val war = File("plugins/LianMain/wars")
@@ -52,7 +52,7 @@ object DataHandler {
         war.mkdir()
         getInstance().wars.forEach {
             getInstance().logger.info(it.toString())
-            it.serialize().save(File("plugins/LianMain/wars/${it.countries.first.owner.player.uniqueId}.txt"))
+            it.serialize().save(File("plugins/LianMain/wars/${it.countries.first.owner.player.uniqueId}.yml"))
         }
 
         File("plugins/LianMain/backups/${d}/shop").mkdir()
@@ -78,7 +78,16 @@ object DataHandler {
         outpost.mkdir()
         getInstance().outpostData.values.forEach {
             getInstance().logger.info(it.toString())
-            it.serialize().save(File("plugins/LianMain/outposts/${it.pos.hashCode()}.txt"))
+            it.serialize().save(File("plugins/LianMain/outposts/${it.pos.hashCode()}.yml"))
+        }
+
+        val ancient = File("plugins/LianMain/ancients")
+        ancient.renameTo(File("plugins/LianMain/backups/${d}/ancients"))
+
+        ancient.mkdir()
+        getInstance().ancientsData.values.forEach {
+            getInstance().logger.info(it.toString())
+            it.serialize().save(File("plugins/LianMain/ancients/${it.pos.hashCode()}.yml"))
         }
     }
     
@@ -188,7 +197,7 @@ object DataHandler {
                         it.cash = c.getInt("cash")
                         it.lastCCDay = c.getString("lcd") ?: "19890604"
                         it.ccStreak = c.getInt("ccs")
-                        it.prefix = c.getString("prefix") ?: "**null**"
+                        it.prefix = c.getString("prefix") ?: ""
                     }
                 }
             }
@@ -245,6 +254,28 @@ object DataHandler {
                     val c = YamlConfiguration.loadConfiguration(file)
                     val cl = Outpost.deserialize(c)
                     getInstance().outpostData[cl.pos.hashCode().toString()] = cl
+                }
+            }
+        }
+
+        val ancientDir = File("plugins/LianMain/ancients")
+        if(!(ancientDir.exists() && ancientDir.isDirectory)){
+            logger.warning("전쟁 저장 경로가 없거나 폴더가 아닙니다.")
+
+            if(!ancientDir.isDirectory){
+                logger.log(Level.OFF, "전쟁 저장 경로와 같은 이름의 파일이 있습니다.")
+            }
+            else {
+                ancientDir.mkdir()
+            }
+        }
+        else {
+            ancientDir.listFiles()?.forEach { file ->
+                if(file.name.endsWith(".yml")){
+                    logger.info(file.readText())
+                    val c = YamlConfiguration.loadConfiguration(file)
+                    val cl = Ancients.deserialize(c)
+                    getInstance().ancientsData[cl.pos.hashCode().toString()] = cl
                 }
             }
         }

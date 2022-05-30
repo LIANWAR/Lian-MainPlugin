@@ -42,6 +42,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.inventory.Recipe
 import org.bukkit.plugin.java.JavaPlugin
+import org.bukkit.scheduler.BukkitRunnable
 import org.reflections.Reflections
 import java.io.File
 import java.lang.reflect.Method
@@ -79,6 +80,7 @@ class LianPlugin : JavaPlugin(), Listener {
     var userShopItem: MutableList<YamlConfiguration> = mutableListOf()
 
     var outpostData: MutableMap<String, Outpost> = mutableMapOf()
+    var ancientsData: MutableMap<String, Ancients> = mutableMapOf()
 
     fun getClanOrCountry(uuid: String): ClanLike? {
         return if(clans.any { it.key == uuid }) clans[uuid] else countries[uuid]
@@ -212,50 +214,56 @@ class LianPlugin : JavaPlugin(), Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOW)
+    @EventHandler
     fun onMention(e: AsyncPlayerChatEvent){
         server.onlinePlayers.forEach {
             if(e.message.contains("@${it.name}")){
-                e.message.replace("@${it.name}", "${ChatColor.BLUE}@${it.name}${ChatColor.RESET}")
+                e.message = e.message.replace("@${it.name}", "${ChatColor.BLUE}@${it.name}${ChatColor.RESET}")
                 it.sendMessage(e.player.displayName().append(text("님이 당신을 ${SimpleDateFormat("H시 m분").format(Date())}에 언급했습니다.")))
                 it.playSound(Sound.sound(Key.key("minecraft", "entity.experience_orb.pickup"), Sound.Source.PLAYER, 1f, 1.625f))
             }
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler
     fun onChat(e: AsyncChatEvent){
-        if(getPlayer(e.player).clanChatMode && getPlayer(e.player).clan != null){
-            getPlayer(e.player).clan!!.players.forEach { lianPlayer ->
-                if(lianPlayer.player.isOnline){
-                    server.onlinePlayers.first { it.uniqueId == lianPlayer.player.uniqueId }.sendMessage(text("${ChatColor.AQUA}[클랜] ${ChatColor.LIGHT_PURPLE}").append(e.player.displayName()).append(text("${ChatColor.RESET}: ")).append(e.message()))
-                }
+		e.isCancelled = true
+	
+        object: BukkitRunnable() {
+            override fun run(){
+                object: BukkitRunnable() {
+                    override fun run(){
+                        if(getPlayer(e.player).clanChatMode && getPlayer(e.player).clan != null){
+                            getPlayer(e.player).clan!!.players.forEach { lianPlayer ->
+                                if(lianPlayer.player.isOnline){
+                                    server.onlinePlayers.first { it.uniqueId == lianPlayer.player.uniqueId }.sendMessage(text("${ChatColor.AQUA}[클랜] ${ChatColor.LIGHT_PURPLE}").append(e.player.displayName()).append(text("${ChatColor.RESET}: ")).append(e.message()))
+                                }
+                            }
+                            return
+                        }
+                        else if(getPlayer(e.player).clanChatMode && getPlayer(e.player).country != null){
+                            getPlayer(e.player).country!!.players.forEach { lianPlayer ->
+                                if(lianPlayer.player.isOnline){
+                                    server.onlinePlayers.first { it.uniqueId == lianPlayer.player.uniqueId }.sendMessage(text("${ChatColor.GOLD}[국가]").append(
+                                        text(" ${ChatColor.LIGHT_PURPLE}").append(e.player.displayName()).append(text("${ChatColor.RESET}: "))
+                                    ).append(
+                                        e.message()
+                                    ))
+                                }
+                            }
+                            return
+                        }
+                        else {
+                            if(e.player.isOp){
+                                server.broadcast(text("[${SimpleDateFormat("HH:mm:ss").format(Date())}] ").append(text("${ChatColor.DARK_GREEN}[관리자] ${ChatColor.RED}").append(e.player.displayName()).append(text("${ChatColor.RESET}: "))).append(e.message()), "bukkit.command.version")
+                            }
+                            else {
+                                server.broadcast(text("[${SimpleDateFormat("HH:mm:ss").format(Date())}] ").append(e.player.displayName()).append(text(": ")).append(e.message()), "bukkit.command.version")
+                            }
+                        }
+                    }
+                }.runTask(instance)
             }
-            e.isCancelled = true
-            return
-        }
-        else if(getPlayer(e.player).clanChatMode && getPlayer(e.player).country != null){
-            getPlayer(e.player).country!!.players.forEach { lianPlayer ->
-                if(lianPlayer.player.isOnline){
-                    server.onlinePlayers.first { it.uniqueId == lianPlayer.player.uniqueId }.sendMessage(text("${ChatColor.GOLD}[국가]").append(
-                        text(" ${ChatColor.LIGHT_PURPLE}").append(e.player.displayName()).append(text("${ChatColor.RESET}: "))
-                    ).append(
-                        e.message()
-                    ))
-                }
-            }
-            e.isCancelled = true
-            return
-        }
-        else {
-            if(e.player.isOp){
-                server.broadcast(text("[${SimpleDateFormat("HH:mm:ss").format(Date())}] ").append(text("${ChatColor.DARK_GREEN}[관리자] ${ChatColor.RED}").append(e.player.displayName()).append(text("${ChatColor.RESET}: "))).append(e.message()))
-                e.isCancelled = true
-            }
-            else {
-                server.broadcast(text("[${SimpleDateFormat("HH:mm:ss").format(Date())}] ").append(e.player.displayName()).append(text(": ")).append(e.message()))
-                e.isCancelled = true
-            }
-        }
+        }.runTaskAsynchronously(instance)
     }
 }

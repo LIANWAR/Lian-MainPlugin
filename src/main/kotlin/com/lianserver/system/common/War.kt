@@ -9,7 +9,7 @@ data class War(val started: Date, val countries: Pair<Country, Country>){
         val yc = YamlConfiguration()
 
         yc.set("started", started)
-        yc.set("countries", countries.toList().map { it.serialize() })
+        yc.set("countries", countries.toList().map { it.owner.player.uniqueId.toString() })
 
         return yc
     }

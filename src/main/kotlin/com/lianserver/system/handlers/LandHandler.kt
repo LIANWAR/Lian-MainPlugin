@@ -30,7 +30,7 @@ import org.bukkit.inventory.ItemStack
 class LandHandler: HandlerInterface, PrefixedTextInterface {
     @EventHandler
     fun onPlace(e: BlockPlaceEvent){
-        if(e.blockPlaced.world.name == "clanworld"){
+        if(e.blockPlaced.world.name == "world"){
             if(getInstance().getLandOwned(Pair(e.blockPlaced.chunk.x, e.blockPlaced.chunk.z)) != Pair<Clan?, Country?>(null, null)){
                 val c = getInstance().getLandOwned(Pair(e.blockPlaced.chunk.x, e.blockPlaced.chunk.z))
                 if(c.first != null){
@@ -53,7 +53,7 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
 
     @EventHandler
     fun onPlaceM(e: BlockMultiPlaceEvent){
-        if(e.blockPlaced.world.name == "clanworld"){
+        if(e.blockPlaced.world.name == "world"){
             if(getInstance().getLandOwned(Pair(e.blockPlaced.chunk.x, e.blockPlaced.chunk.z)) != Pair<Clan?, Country?>(null, null)){
                 val c = getInstance().getLandOwned(Pair(e.blockPlaced.chunk.x, e.blockPlaced.chunk.z))
                 if(c.first != null){
@@ -82,7 +82,7 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
 
     @EventHandler
     fun onBreak(e: BlockBreakEvent){
-        if(e.block.world.name == "clanworld"){
+        if(e.block.world.name == "world"){
             if(getInstance().getLandOwned(Pair(e.block.chunk.x, e.block.chunk.z)) != Pair<Clan?, Country?>(null, null)){
                 val c = getInstance().getLandOwned(Pair(e.block.chunk.x, e.block.chunk.z))
                 if(c.first != null){
@@ -115,7 +115,7 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
 
     @EventHandler
     fun onBucketFill(e: PlayerBucketFillEvent){
-        if(e.block.world.name == "clanworld"){
+        if(e.block.world.name == "world"){
             if(getInstance().getLandOwned(Pair(e.block.chunk.x, e.block.chunk.z)) != Pair<Clan?, Country?>(null, null)){
                 val c = getInstance().getLandOwned(Pair(e.block.chunk.x, e.block.chunk.z))
                 if(c.first != null){
@@ -144,7 +144,7 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
 
     @EventHandler
     fun onPistonExtend(e: BlockPistonExtendEvent){
-        if(e.block.world.name == "clanworld"){
+        if(e.block.world.name == "world"){
             var cond = true
 
             fun l(x: Int, z: Int): Pair<Clan?, Country?> {
@@ -161,7 +161,7 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
 
     @EventHandler
     fun onPistonReturn(e: BlockPistonRetractEvent){
-        if(e.block.world.name == "clanworld"){
+        if(e.block.world.name == "world"){
             var cond = true
 
             fun l(x: Int, z: Int): Pair<Clan?, Country?> {
@@ -178,7 +178,7 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
 
     @EventHandler
     fun onInteract(e: PlayerInteractEvent){
-        if((e.clickedBlock?.world?.name ?: "") == "clanworld"){
+        if((e.clickedBlock?.world?.name ?: "") == "world"){
             if(getInstance().getLandOwned(Pair(e.clickedBlock?.chunk?.x, e.clickedBlock?.chunk?.z)) != Pair<Clan?, Country?>(null, null)){
                 val c = getInstance().getLandOwned(Pair(e.clickedBlock?.chunk?.x, e.clickedBlock?.chunk?.z))
                 if(c.first != null){
@@ -242,7 +242,7 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
 
                         if(cond){
                             if(getInstance().getPlayer(e.player).clan != null || getInstance().getPlayer(e.player).country != null){
-                                if(e.clickedBlock!!.location.world.name != "clanworld"){
+                                if(e.clickedBlock!!.location.world.name != "world"){
                                     e.player.sendMessage(countryText("오버월드에서만 사용 가능합니다."))
                                 }
                                 else {
@@ -352,7 +352,7 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
 
     @EventHandler
     fun onLavaPlace(e: PlayerBucketEmptyEvent){
-        if(e.block.world.name == "clanworld"){
+        if(e.block.world.name == "world"){
             if(getInstance().getPlayer(e.player).country != null){
                 val ld = getInstance().getLandOwned(Pair(e.block.chunk.x, e.block.chunk.z))
 
@@ -432,7 +432,7 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     fun onHangingPlace(e: HangingPlaceEvent) {
-        if(e.player != null && e.block.world.name == "clanworld"){
+        if(e.player != null && e.block.world.name == "world"){
             if(getInstance().getLandOwned(Pair(e.block.chunk.x, e.block.chunk.z)) != Pair<Clan?, Country?>(null, null)){
                 val c = getInstance().getLandOwned(Pair(e.block.chunk.x, e.block.chunk.z))
                 if(c.first != null){
@@ -465,7 +465,7 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     fun onHangingBreakByEntity(e: HangingBreakByEntityEvent) {
-        if(e.remover is Player && e.entity.world.name == "clanworld"){
+        if(e.remover is Player && e.entity.world.name == "world"){
             if(getInstance().getLandOwned(Pair(e.entity.chunk.x, e.entity.chunk.z)) != Pair<Clan?, Country?>(null, null)){
                 val c = getInstance().getLandOwned(Pair(e.entity.chunk.x, e.entity.chunk.z))
                 if(c.first != null){
@@ -498,7 +498,7 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     fun onPlayerInteractEntity(e: PlayerInteractAtEntityEvent) {
-        if(e.rightClicked.world.name == "clanworld"){
+        if(e.rightClicked.world.name == "world"){
             if(getInstance().getLandOwned(Pair(e.rightClicked.chunk.x, e.rightClicked.chunk.z)) != Pair<Clan?, Country?>(null, null)){
                 val c = getInstance().getLandOwned(Pair(e.rightClicked.chunk.x, e.rightClicked.chunk.z))
                 if(c.first != null){
@@ -531,7 +531,7 @@ class LandHandler: HandlerInterface, PrefixedTextInterface {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     fun onEntityDamageByEntity(e: EntityDamageByEntityEvent) {
-        if(e.entity !is Player && e.damager is Player && e.entity.world.name == "clanworld"){
+        if(e.entity !is Player && e.damager is Player && e.entity.world.name == "world"){
             if(getInstance().getLandOwned(Pair(e.entity.chunk.x, e.entity.chunk.z)) != Pair<Clan?, Country?>(null, null)){
                 val c = getInstance().getLandOwned(Pair(e.entity.chunk.x, e.entity.chunk.z))
                 if(c.first != null){

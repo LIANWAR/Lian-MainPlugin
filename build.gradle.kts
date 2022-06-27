@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.6.20-M1"
+    kotlin("jvm") version "1.6.21"
     id("com.github.johnrengelman.shadow") version "2.0.2"
 }
 
@@ -23,11 +23,17 @@ java {
 
 dependencies {
     compileOnly(kotlin("stdlib"))
-    compileOnly("io.papermc.paper:paper-api:1.18.2-R0.1-SNAPSHOT")
-    compileOnly("io.github.monun:kommand-api:2.10.0")
+    compileOnly("io.papermc.paper:paper-api:1.19-R0.1-SNAPSHOT")
+    compileOnly("io.github.monun:kommand-api:2.12.0")
     implementation("org.reflections:reflections:0.10.2")
-    implementation("com.github.stefvanschie.inventoryframework:IF:0.10.5")
-    implementation("net.wesjd:anvilgui:1.5.3-20220302.153253-5")
+    implementation("com.github.stefvanschie.inventoryframework:IF:0.10.6")
+
+    implementation(fileTree("src/main/resources/libs"){
+        this.exclude {
+            !it.name.endsWith(".jar")
+        }
+    })
+    //implementation("net.wesjd:anvilgui:1.5.3-20220302.153253-5")
 }
 
 val shade = configurations.create("shade")

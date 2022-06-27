@@ -37,14 +37,14 @@ class WarHandler: HandlerInterface, PrefixedTextInterface {
                         (e.rightClicked as ArmorStand).remove()
                         
                         val w = getInstance().getWar(getInstance().getPlayer(e.player).country!!.owner.player.uniqueId.toString())
-                        val t = e.rightClicked.scoreboardTags.elementAt(1)
+                        val t = e.rightClicked.scoreboardTags.filter { it != "#lian_flag" }[0]
                         
                         if(w == null){
                             return
                         }
                         
                         if(w.countries.first.owner.player.uniqueId.toString() == t){
-                            w.countries.first.players.forEach { 
+                            w.countries.second.players.forEach {
                                 if(it.player.isOnline){
                                     val i = it
                                     
@@ -52,7 +52,7 @@ class WarHandler: HandlerInterface, PrefixedTextInterface {
                                 }
                             }
 
-                            w.countries.second.players.forEach {
+                            w.countries.first.players.forEach {
                                 if(it.player.isOnline){
                                     val i = it
 
@@ -65,7 +65,7 @@ class WarHandler: HandlerInterface, PrefixedTextInterface {
                             getInstance().getFlagArmorStand(w.countries.second.owner.player.uniqueId.toString())?.isGlowing = false
                         }
                         else {
-                            w.countries.second.players.forEach {
+                            w.countries.first.players.forEach {
                                 if(it.player.isOnline){
                                     val i = it
 
@@ -73,7 +73,7 @@ class WarHandler: HandlerInterface, PrefixedTextInterface {
                                 }
                             }
 
-                            w.countries.first.players.forEach {
+                            w.countries.second.players.forEach {
                                 if(it.player.isOnline){
                                     val i = it
 

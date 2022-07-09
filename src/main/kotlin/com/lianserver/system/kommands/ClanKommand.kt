@@ -42,16 +42,16 @@ class ClanKommand: KommandInterface {
                     executes {
                         sender.sendMessage(
                                     "${ChatColor.RED}-${ChatColor.WHITE}-${ChatColor.RED}-${ChatColor.WHITE}-${ChatColor.RED}-${ChatColor.WHITE}-${ChatColor.RED}-${ChatColor.WHITE}-${ChatColor.RED}-${ChatColor.WHITE}- 클랜 도움말 ${ChatColor.WHITE}-${ChatColor.RED}-${ChatColor.WHITE}-${ChatColor.RED}-${ChatColor.WHITE}-${ChatColor.RED}-${ChatColor.WHITE}-${ChatColor.RED}-${ChatColor.WHITE}-${ChatColor.RED}-\n" +
-                                    "${ChatColor.RESET} - ${clanTextS("${ChatColor.WHITE}/clan info: 클랜 정보를 보여줍니다.")}\n" +
-                                    " - ${clanTextS("${ChatColor.WHITE}/clan create <클랜 이름>: <클랜 이름> 클랜을 생성합니다.")}\n" +
-                                    " - ${clanTextS("${ChatColor.WHITE}/clan invite <플레이어>: <플레이어>를 초대합니다.")}\n" +
-                                    " - ${clanTextS("${ChatColor.WHITE}/clan accept: 대기 중인 클랜 가입 요청을 수락합니다.")}\n" +
-                                    " - ${clanTextS("${ChatColor.WHITE}/clan all: 모든 클랜을 보여줍니다.")}\n" +
-                                    " - ${clanTextS("${ChatColor.WHITE}/clan chat: 클랜 채팅 모드를 전환합니다.")}\n" +
-                                    " - ${clanTextS("${ChatColor.WHITE}/clan leave: 클랜을 나갑니다.")}\n" +
-                                    " - ${clanTextS("${ChatColor.WHITE}/clan kick <플레이어>: <플레이어>를 추방합니다.")}\n" +
-                                    " - ${clanTextS("${ChatColor.WHITE}/clan public: 공개된 클랜 목록을 보여줍니다.")}\n" +
-                                    " - ${clanTextS("${ChatColor.WHITE}/clan togglepublic: 클랜의 공개 상태를 전환합니다.")}\n"
+                                    "${ChatColor.RESET}${clanTextS("${ChatColor.WHITE} * /clan info: 클랜 정보를 보여줍니다.")}\n" +
+                                    "${clanTextS("${ChatColor.WHITE} * /clan create <클랜 이름>: <클랜 이름> 클랜을 생성합니다.")}\n" +
+                                    "${clanTextS("${ChatColor.WHITE} * /clan invite <플레이어>: <플레이어>를 초대합니다.")}\n" +
+                                    "${clanTextS("${ChatColor.WHITE} * /clan accept: 대기 중인 클랜 가입 요청을 수락합니다.")}\n" +
+                                    "${clanTextS("${ChatColor.WHITE} * /clan all: 모든 클랜을 보여줍니다.")}\n" +
+                                    "${clanTextS("${ChatColor.WHITE} * /clan chat: 클랜 채팅 모드를 전환합니다.")}\n" +
+                                    "${clanTextS("${ChatColor.WHITE} * /clan leave: 클랜을 나갑니다.")}\n" +
+                                    "${clanTextS("${ChatColor.WHITE} * /clan kick <플레이어>: <플레이어>를 추방합니다.")}\n" +
+                                    "${clanTextS("${ChatColor.WHITE} * /clan public: 공개된 클랜 목록을 보여줍니다.")}\n" +
+                                    "${clanTextS("${ChatColor.WHITE} * /clan togglepublic: 클랜의 공개 상태를 전환합니다.")}\n"
                         )
                     }
                 }
@@ -106,12 +106,30 @@ class ClanKommand: KommandInterface {
                 }
                 executes { sender.sendMessage(clanText("/clan help")) }
                 then("info") {
+                    then("clanName" to string(StringType.GREEDY_PHRASE)){
+                        executes {
+                            val clanName: String by it
+
+                            if(getInstance().clans.any { it.value.name == clanName }){
+                                val clan = getInstance().clans.values.first { it.name == clanName }
+
+                                sender.sendMessage(clanText("클랜 정보"))
+                                sender.sendMessage("${ChatColor.WHITE}<${ChatColor.YELLOW}${clan.name} 클랜${ChatColor.WHITE}>")
+                                clan.players.forEach {
+                                    sender.sendMessage("${ChatColor.YELLOW}${it.player.name}")
+                                }
+                            }
+                            else {
+                                sender.sendMessage(clanText("해당 이름을 가진 클랜이 없습니다."))
+                            }
+                        }
+                    }
                     executes {
                         if(getInstance().getPlayer(sender).clan != null){
                             sender.sendMessage(clanText("클랜 정보"))
                             sender.sendMessage("${ChatColor.WHITE}<${ChatColor.YELLOW}${getInstance().getPlayer(sender).clan!!.name} 클랜${ChatColor.WHITE}>")
                             getInstance().getPlayer(sender).clan!!.players.forEach {
-                                sender.sendMessage(" - ${ChatColor.YELLOW}${it.player.name}")
+                                sender.sendMessage("${ChatColor.YELLOW}${it.player.name}")
                             }
                             if(getInstance().getPlayer(sender).clan!!.land != null){
                                 sender.sendMessage(clanText("땅 좌표: ${getInstance().getPlayer(sender).clan!!.land}"))
@@ -252,7 +270,7 @@ class ClanKommand: KommandInterface {
                     executes {
                         sender.sendMessage(clanText("모든 클랜: "))
                         getInstance().clans.forEach {
-                            sender.sendMessage(" - ${ChatColor.YELLOW}${it.value.name} 클랜")
+                            sender.sendMessage("${ChatColor.YELLOW}${it.value.name} 클랜")
                         }
                     }
                 }
@@ -272,7 +290,7 @@ class ClanKommand: KommandInterface {
                 }
                 then("kick"){
                     executes {
-                        sender.sendMessage("누구를 추방할 지 입력해주세요.")
+                        sender.sendMessage("누구를 추방할 것인지 입력해주세요.")
                     }
                     then("victim" to player()){
                         executes {
@@ -457,7 +475,7 @@ class ClanKommand: KommandInterface {
                         ) { event: InventoryClickEvent ->
                             event.isCancelled = true
                             if (pages.page > 0) {
-                                pages.page = pages.page - 1
+                                pages.page = pages.page
                                 gui.update()
                             }
                         }, 0, 0
@@ -473,7 +491,7 @@ class ClanKommand: KommandInterface {
                             gw
                         ) { event: InventoryClickEvent ->
                             event.isCancelled = true
-                            if (pages.page < pages.pages - 1) {
+                            if (pages.page < pages.pages) {
                                 pages.page = pages.page + 1
                                 gui.update()
                             }

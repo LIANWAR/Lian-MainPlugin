@@ -40,13 +40,6 @@ class MiscKommand: KommandInterface, PrefixedTextInterface {
 
     override fun kommand() {
         register(getInstance(), "lianhelp", "명령어", "도움말"){
-            executes {
-                sender.sendMessage(userText("리안서버 버전 ${getInstance().description.version} 도움말"))
-                sender.sendMessage(userText(" * 클랜 도움말: /clan help"))
-                sender.sendMessage(userText(" * 국가 도움말: /country help"))
-                sender.sendMessage(userText(" * 상점 도움말: /help shop"))
-                sender.sendMessage(userText(" * 기타 도움말: /help etc"))
-            }
             then("shop"){
                 executes {
                     sender.sendMessage(userText("리안서버 버전 ${getInstance().description.version} 상점 도움말"))
@@ -64,6 +57,13 @@ class MiscKommand: KommandInterface, PrefixedTextInterface {
                     sender.sendMessage(userText(" * /출석체크: 매일매일 출석 체크를 할 수 있습니다. 연속으로 출석 체크를 한 일수마다 보상이 달라집니다."))
                 }
             }
+            executes {
+                sender.sendMessage(userText("리안서버 버전 ${getInstance().description.version} 도움말"))
+                sender.sendMessage(userText(" * 클랜 도움말: /clan help"))
+                sender.sendMessage(userText(" * 국가 도움말: /country help"))
+                sender.sendMessage(userText(" * 상점 도움말: /help shop"))
+                sender.sendMessage(userText(" * 기타 도움말: /help etc"))
+            }
         }
         register(getInstance(), "license") {
             executes {
@@ -80,7 +80,7 @@ class MiscKommand: KommandInterface, PrefixedTextInterface {
                 sender.sendMessage(adminText(" * stefvanschie/IF: 0.10.6"))
                 sender.sendMessage(adminText("리소스팩 - AlphaGot 제작"))
                 sender.sendMessage(adminText("폰트 라이센스: "))
-                sender.sendMessage(adminText(" * 카페24 써라운드체 - SIL 오픈 폰트 라이선스"))
+                sender.sendMessage(adminText(" * IBM Plex Sans - SIL 오픈 폰트 라이선스 (v1.1)"))
             }
         }
         register(getInstance(), "lotto"){

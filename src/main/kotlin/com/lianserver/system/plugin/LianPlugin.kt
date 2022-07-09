@@ -210,7 +210,10 @@ class LianPlugin : JavaPlugin(), Listener {
         }
 
         if(onlinePlayers[e.player.uniqueId.toString()]!!.prefix != ""){
-            e.player.displayName(GsonComponentSerializer.gson().deserialize(onlinePlayers[e.player.uniqueId.toString()]!!.prefix).append(text(" ")).append(e.player.name()))
+            val name = GsonComponentSerializer.gson().deserialize(onlinePlayers[e.player.uniqueId.toString()]!!.prefix).append(text(" ")).append(e.player.name())
+
+            e.player.displayName(name)
+            e.player.playerListName(name)
         }
     }
 

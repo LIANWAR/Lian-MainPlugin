@@ -41,22 +41,41 @@ class CountryKommand: KommandInterface {
                     executes {
                         sender.sendMessage(
                                     "${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}- 국가 도움말 ${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-${ChatColor.WHITE}-${ChatColor.AQUA}-\n" +
-                                    "${ChatColor.RESET} - ${countryTextS("${ChatColor.WHITE}/country info: 국가의 정보를 보여줍니다.")}\n" +
-                                    " - ${countryTextS("${ChatColor.WHITE}/country invite <플레이어>: <플레이어>를 국가에 초대합니다.")}\n" +
-                                    " - ${countryTextS("${ChatColor.WHITE}/country accept: 대기 중인 국가 가입 요청을 수락합니다.")}\n" +
-                                    " - ${countryTextS("${ChatColor.WHITE}/country all: 모든 국가를 보여줍니다.")}\n" +
-                                    " - ${countryTextS("${ChatColor.WHITE}/country chat: 국가 채팅 모드를 전환합니다.")}\n" +
-                                    " - ${countryTextS("${ChatColor.WHITE}/country leave: 국가를 나갑니다.")}\n" +
-                                    " - ${countryTextS("${ChatColor.WHITE}/country kick <플레이어>: <플레이어>를 추방합니다.")}\n" +
-                                    " - ${countryTextS("${ChatColor.WHITE}/country wardecl <국가 이름>: <국가 이름> 국가에 선전포고 입장을 보냅니다.")}\n" +
-                                    " - ${countryTextS("${ChatColor.WHITE}/country waraccept: 대기 중인 선전포고에 응합니다.")}\n" +
-                                    " - ${countryTextS("${ChatColor.WHITE}/country public: 공개된 국가 목록을 보여줍니다.")}\n" +
-                                    " - ${countryTextS("${ChatColor.WHITE}/country togglepublic: 국가의 공개 상태를 전환합니다.")}\n"
+                                    "${ChatColor.RESET}${countryTextS("${ChatColor.WHITE} * /country info: 국가의 정보를 보여줍니다.")}\n" +
+                                    "${countryTextS("${ChatColor.WHITE} * /country invite <플레이어>: <플레이어>를 국가에 초대합니다.")}\n" +
+                                    "${countryTextS("${ChatColor.WHITE} * /country accept: 대기 중인 국가 가입 요청을 수락합니다.")}\n" +
+                                    "${countryTextS("${ChatColor.WHITE} * /country all: 모든 국가를 보여줍니다.")}\n" +
+                                    "${countryTextS("${ChatColor.WHITE} * /country chat: 국가 채팅 모드를 전환합니다.")}\n" +
+                                    "${countryTextS("${ChatColor.WHITE} * /country leave: 국가를 나갑니다.")}\n" +
+                                    "${countryTextS("${ChatColor.WHITE} * /country kick <플레이어>: <플레이어>를 추방합니다.")}\n" +
+                                    "${countryTextS("${ChatColor.WHITE} * /country wardecl <국가 이름>: <국가 이름> 국가에 선전포고 입장을 보냅니다.")}\n" +
+                                    "${countryTextS("${ChatColor.WHITE} * /country waraccept: 대기 중인 선전포고에 응합니다.")}\n" +
+                                    "${countryTextS("${ChatColor.WHITE} * /country public: 공개된 국가 목록을 보여줍니다.")}\n" +
+                                    "${countryTextS("${ChatColor.WHITE} * /country togglepublic: 국가의 공개 상태를 전환합니다.")}\n"
                         )
                     }
                 }
                 executes { sender.sendMessage(countryText("/country help")) }
                 then("info") {
+                    then("clanName" to string(StringType.GREEDY_PHRASE)){
+                        executes {
+                            val clanName: String by it
+
+                            if(getInstance().countries.any { it.value.name == clanName }){
+                                val clan = getInstance().countries.values.first { it.name == clanName }
+
+                                sender.sendMessage(countryText("국가 정보"))
+                                sender.sendMessage("${ChatColor.WHITE}<${ChatColor.YELLOW}${clan.name} 국가${ChatColor.WHITE}>")
+                                clan.players.forEach {
+                                    sender.sendMessage(" - ${ChatColor.YELLOW}${it.player.name}")
+                                }
+                                sender.sendMessage(countryText("승전 수: ${clan.winCount}회"))
+                            }
+                            else {
+                                sender.sendMessage(countryText("해당 이름을 가진 국가가 없습니다."))
+                            }
+                        }
+                    }
                     executes {
                         if(getInstance().getPlayer(sender).country != null){
                             sender.sendMessage(countryText("국가 정보"))
@@ -67,6 +86,7 @@ class CountryKommand: KommandInterface {
                             if(getInstance().getPlayer(sender).country!!.land != null){
                                 sender.sendMessage(countryText("땅 좌표: ${getInstance().getPlayer(sender).country!!.land}"))
                             }
+                            sender.sendMessage(countryText("승전 수: ${getInstance().getPlayer(sender).country!!.winCount}회"))
                         }
                         else {
                             sender.sendMessage(countryText("국가에 소속되어있지 않습니다!"))
@@ -223,7 +243,7 @@ class CountryKommand: KommandInterface {
                 }
                 then("kick"){
                     executes {
-                        sender.sendMessage(countryText("누구를 추방할 지 입력해주세요."))
+                        sender.sendMessage(countryText("누구를 추방할 것인지 입력해주세요."))
                     }
                     then("victim" to player()){
                         executes {

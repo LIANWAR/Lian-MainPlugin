@@ -143,10 +143,10 @@ object DataHandler {
 
         val countryDir = File("plugins/LianMain/countries")
         if(!(countryDir.exists() && countryDir.isDirectory)){
-            logger.warning("클랜 저장 경로가 없거나 폴더가 아닙니다.")
+            logger.warning("국가 저장 경로가 없거나 폴더가 아닙니다.")
 
             if(!countryDir.isDirectory){
-                logger.log(Level.OFF, "클랜 저장 경로와 같은 이름의 파일이 있습니다.")
+                logger.log(Level.OFF, "국가 저장 경로와 같은 이름의 파일이 있습니다.")
             }
             else {
                 clanDir.mkdir()

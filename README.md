@@ -6,4 +6,4 @@ paper 1.19을 기반으로 하고 있으며, 서버 오픈이 무산됨에 따�
 
 ## 개발자
  - [@underconnor](https://github.com/underconnor)
- - [@shs3182ym](https://github.com/shs3182ym)
+ - [@AlphaGot](https://github.com/dev-alphagot)
